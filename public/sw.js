@@ -1,4 +1,4 @@
-const CACHE_NAME = 'huquq-sertifikat-v9';
+const CACHE_NAME = 'huquq-sertifikat-v10';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -15,22 +15,27 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('SW: Statik resurslar keshlanmoqda');
+      console.log('SW: Yangi versiya keshlanmoqda (v10)');
       return cache.addAll(STATIC_ASSETS).catch(err => {
         console.warn('SW keshida ayrim tashqi fayllar olinmadi:', err);
       });
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log('SW: Eski kesh o\'chirildi:', key);
+            return caches.delete(key);
+          }
+        })
       );
     })
   );
@@ -38,10 +43,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Faqat GET so'rovlarni keshdan izlaymiz
+  // Faqat GET so'rovlar
   if (event.request.method !== 'GET') return;
 
-  // API va dinamik so'rovlarni tarmoqqa yo'naltirish
+  // API so'rovlari tarmoqqa
   if (event.request.url.includes('/api/')) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -53,25 +58,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Network-First: Avval tarmoqdan eng yangisini olish, faqat oflayn bo'lsa keshdan berish
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then(networkResponse => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+    fetch(event.request)
+      .then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, clone);
+          });
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+        });
+      })
   );
 });
