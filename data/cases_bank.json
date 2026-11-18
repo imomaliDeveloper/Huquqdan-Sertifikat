@@ -1,0 +1,1902 @@
+[
+  {
+    "id": "KEYS-1",
+    "title": "Meros taqsimoti va majburiy ulush keysi",
+    "scenario": "Fuqaro Sobirov vafot etdi. Uning ortidan xotini, 15 yoshli o‘g‘li va keksaygan nafaqaxo‘r onasi qoldi. Sobirov hayotlik chog‘ida barcha mol-mulkini (qiymati 600 million so‘mlik uy-joy) do‘sti Alimovga vasiyat qilib qoldirganligi aniqlandi. Sobirovning xotini va onasi bu vasiyatnomadan norozi bo‘lib, sudga merosdagi o‘z ulushlarini talab qilib da’vo arizasi kiritdilar.",
+    "bookSource": "10-sinf darsligi (Meros huquqi mavzusi)",
+    "lawSource": "Fuqarolik kodeksi, 1142 va 1146-moddalar (8-qonun)",
+    "q33": {
+      "text": "Fuqarolik kodeksining 1142-moddasiga ko‘ra vasiyatnoma mavjud bo‘lganda ham qaramog‘idagi voyaga yetmagan bola va mehnatga layoqatsiz onaning merosdagi majburiy ulushi qonun bo‘yicha tegishli ulushning kamida qancha qismini tashkil etadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "uchdan bir qismini"
+        },
+        {
+          "key": "B",
+          "text": "kamida yarmini (1/2)"
+        },
+        {
+          "key": "C",
+          "text": "to‘rtdan bir qismini"
+        },
+        {
+          "key": "D",
+          "text": "to‘liq ulushni"
+        }
+      ],
+      "correct": "B",
+      "explanation": "FK 1142-moddasiga binoan voyaga yetmagan yoki mehnatga layoqatsiz merosxo‘rlar qonun bo‘yicha ularga tegishi kerak bo‘lgan ulushning kamida yarmini (majburiy ulush) oladilar."
+    },
+    "q34": {
+      "text": "Agar vasiyatnoma bo‘lmaganda Sobirovning mol-mulki xotini, o‘g‘li va onasi o‘rtasida qanday taqsimlangan bo‘lar edi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat o‘g‘liga tegardi"
+        },
+        {
+          "key": "B",
+          "text": "Uchala merosxo‘r o‘rtasida teng ulushlarda (1/3 dan)"
+        },
+        {
+          "key": "C",
+          "text": "Faqat xotiniga tegardi"
+        },
+        {
+          "key": "D",
+          "text": "Davlat hisobiga o‘tardi"
+        }
+      ],
+      "correct": "B",
+      "explanation": "FK 1135-moddasiga ko‘ra bolalari, xotini (eri) va ota-onasi birinchi navbatdagi qonuniy merosxo‘rlar bo‘lib, teng ulushlarda meros oladilar."
+    },
+    "q35": {
+      "text": "Merosxo'rlar merosni qabul qilish to'g'risidagi arizani meros ochilgan kundan e'tiboran necha oy ichida notariusga topshirishlari lozim?",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 oy ichida"
+        },
+        {
+          "key": "B",
+          "text": "3 oy ichida"
+        },
+        {
+          "key": "C",
+          "text": "6 oy ichida"
+        },
+        {
+          "key": "D",
+          "text": "1 yil ichida"
+        }
+      ],
+      "correct": "C",
+      "explanation": "FK 1146-moddasiga binoan meros ochilgan kundan e'tiboran 6 oy ichida qabul qilinishi shart."
+    }
+  },
+  {
+    "id": "KEYS-2",
+    "title": "Mehnat shartnomasini bekor qilish va nafaqa keysi",
+    "scenario": "'Texno-Line' MChJ rahbariyati korxona qayta tashkil etilganligi sababli dasturchi Nazarov bilan mehnat shartnomasini bekor qildi. Nazarov ushbu korxonada 6 yil uzluksiz ish stajiga ega. Unga atigi 10 kun oldin xabar berilgan va 1 oylik kompensatsiya to'langan.",
+    "bookSource": "10-sinf darsligi (Mehnat shartnomasini bekor qilish asoslari)",
+    "lawSource": "Yangi Mehnat kodeksi, 165 va 173-moddalar (14-qonun)",
+    "q33": {
+      "text": "Mehnat kodeksining 165-moddasiga ko‘ra shtat o‘zgarishi sababli shartnoma bekor qilinganda xodim necha oy oldin yozma ogohlantirilishi kerak?",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 oy"
+        },
+        {
+          "key": "B",
+          "text": "2 oy"
+        },
+        {
+          "key": "C",
+          "text": "2 hafta"
+        },
+        {
+          "key": "D",
+          "text": "3 kun"
+        }
+      ],
+      "correct": "B",
+      "explanation": "MK 165-moddasi 1-qismi 1-bandiga ko‘ra kamida 2 oy oldin yozma ogohlantirish shart."
+    },
+    "q34": {
+      "text": "6 yillik ish staji bo‘lgan Nazarovga to‘lanishi kerak bo‘lgan ishdan bo‘shatish nafaqasi o‘rtacha oylik ish haqining necha foizidan kam bo‘lmasligi lozim?",
+      "options": [
+        {
+          "key": "A",
+          "text": "100 foizi"
+        },
+        {
+          "key": "B",
+          "text": "150 foizi"
+        },
+        {
+          "key": "C",
+          "text": "200 foizi"
+        },
+        {
+          "key": "D",
+          "text": "50 foizi"
+        }
+      ],
+      "correct": "B",
+      "explanation": "MK 173-moddasiga binoan 5 yildan 10 yilgacha staj uchun 150 foiz to‘lanadi."
+    },
+    "q35": {
+      "text": "Agar xodim ogohlantirish muddatini pul kompensatsiyasiga almashtirishga rozi bo‘lsa, bunga qanday yo‘l qo‘yiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat xodim va ish beruvchining o'zaro yozma kelishuviga ko‘ra"
+        },
+        {
+          "key": "B",
+          "text": "Ish beruvchining bir tomonlama buyrug‘i bilan"
+        },
+        {
+          "key": "C",
+          "text": "Bunga qonunchilikda yo‘l qo‘yilmaydi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat sud ruxsati bilan"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 165-moddasiga muvofiq ogohlantirish muddatini pullik kompensatsiya bilan almashtirish taraflarning kelishuvi bilan hal qilinadi."
+    }
+  },
+  {
+    "id": "KEYS-3",
+    "title": "Iste'molchi huquqlari va kafolat muddati keysi",
+    "scenario": "Fuqaro Karimova maishiy texnika do'konidan 12 million so'mga televizor sotib oldi. Xarid qilinganidan 8 kun o'tgach, televizorning ekrani o'z-o'zidan o'chib qoldi va ishlamay qoldi. Karimova do'konga murojaat qilib, televizorni yangisiga almashtirib berishni yoki pulini qaytarishni talab qildi. Do'kon ma'muriyati esa tovar sotilgach qaytarib olinmasligini bildirib, rad javobini berdi.",
+    "bookSource": "10-sinf darsligi (Iste'molchilar huquqlarini himoya qilish)",
+    "lawSource": "Iste'molchilarning huquqlarini himoya qilish to'g'risidagi Qonun (25-qonun)",
+    "q33": {
+      "text": "Qonunchilikka binoan iste'molchiga nuqsonli tovar sotilganda u qanday huquqlarga ega bo'ladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Tovarni xuddi shunday markali maqbul sifatli tovarga almashtirish yoki xarid summasini qaytarib olish"
+        },
+        {
+          "key": "B",
+          "text": "Faqat o'z hisobidan ta'mirlash huquqiga ega"
+        },
+        {
+          "key": "C",
+          "text": "Hech qanday talab qo'yish huquqiga ega emas"
+        },
+        {
+          "key": "D",
+          "text": "Faqat ishlab chiqaruvchi davlatga borib da'vo qilish"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 13-moddasiga ko'ra nuqsonli tovar sotilganda iste'molchi tovarni almashtirish, bepul tuzatish yoki pulini to'liq qaytarib olishni talab qilishga haqli."
+    },
+    "q34": {
+      "text": "Do'kon ma'muriyati iste'molchining talabi tushgan kundan e'tiboran uzog'i bilan necha kun ichida nuqsonli tovarni almashtirib berishi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "3 kun ichida"
+        },
+        {
+          "key": "B",
+          "text": "7 kun ichida (qo'shimcha tekshirish zarur bo'lsa 20 kun)"
+        },
+        {
+          "key": "C",
+          "text": "1 oy ichida"
+        },
+        {
+          "key": "D",
+          "text": "2 oy ichida"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Qonunning 14-moddasiga ko'ra tovar 7 kun ichida, zarurat bo'lsa 20 kun ichida almashtiriladi."
+    },
+    "q35": {
+      "text": "Iste'molchining huquqini buzgan sotuvchiga nisbatan da'vo qo'zg'atilganda iste'molchi davlat bojini to'lashdan ozod qilinadimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ha, iste'molchilar o'z huquqlari buzilishi bo'yicha sudga da'vo arizasi berishda davlat bojidan to'liq ozod qilinadi"
+        },
+        {
+          "key": "B",
+          "text": "Yo'q, umumiy asoslarda 4% boj to'laydi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat nafaqaxo'rlar ozod qilinadi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat da'vo summasi 1 milliondan kam bo'lsa ozod qilinadi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Davlat boji to'g'risidagi qonunning 8-moddasiga ko'ra iste'molchilar o'z huquqlari himoyasi yuzasidan davlat bojidan ozod qilinadi."
+    }
+  },
+  {
+    "id": "KEYS-4",
+    "title": "Nikohdan ajralish va aliment undirish keysi",
+    "scenario": "Farhod va Nilufar 4 yil oldin qonuniy nikohdan o'tishgan. Ularning 2 yoshli farzandi bor. Farhod oilaviy kelishmovchiliklar sababli xotinining roziligisiz fuqarolik sudiga nikohni bekor qilish va farzandiga aliment tayinlash to'g'risida da'vo arizasi kiritdi. Nilufar esa bola hali 2 yoshda ekanligini aytib, da'voni rad etishni so'radi.",
+    "bookSource": "10-sinf darsligi (Oila huquqi)",
+    "lawSource": "Oila kodeksi, 39 va 99-moddalar (19-qonun)",
+    "q33": {
+      "text": "Oila kodeksining 39-moddasiga ko'ra qaysi holatda er xotinining roziligisiz nikohni bekor qilish to'g'risida da'vo qo'zg'ata olmaydi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Xotinining homiladorlik vaqtida va bola bir yoshga to'lguniga qadar"
+        },
+        {
+          "key": "B",
+          "text": "Bola uch yoshga to'lguniga qadar"
+        },
+        {
+          "key": "C",
+          "text": "Bola maktabni bitirguniga qadar"
+        },
+        {
+          "key": "D",
+          "text": "Har doim erning da'vo berishi cheklanmagan"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 39-moddasiga binoan xotinining homiladorlik davrida va bola bir yoshga to'lguniga qadar er xotinining roziligisiz ajralish da'vosi berolmaydi."
+    },
+    "q34": {
+      "text": "Agar sud nikohni bekor qilsa, ushbu 1 nafar voyaga yetmagan bola uchun Farhodning oylik daromadidan qancha miqdorda aliment undiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Daromadining to'rtdan bir qismi (1/4)"
+        },
+        {
+          "key": "B",
+          "text": "Daromadining uchdan bir qismi (1/3)"
+        },
+        {
+          "key": "C",
+          "text": "Daromadining yarmi (1/2)"
+        },
+        {
+          "key": "D",
+          "text": "Qat'iy 1 million so'm"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 99-moddasiga binoan 1 bola uchun — oylik maosh va daromadining to'rtdan bir (1/4) qismi undiriladi."
+    },
+    "q35": {
+      "text": "Nilufar bola 3 yoshga to'lguniga qadar o'z ta'minoti uchun ham sobiq eridan moddiy ta'minot talab qilishga haqlimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ha, umumiy bolani parvarishlayotgan ona bola uch yoshga to'lgunga qadar eridan ta'minot olish huquqiga ega"
+        },
+        {
+          "key": "B",
+          "text": "Yo'q, faqat bolaning o'ziga aliment to'lanadi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat ona nogiron bo'lsa mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Faqat nikoh 10 yildan ortiq davom etgan bo'lsa mumkin"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 118-moddasiga ko'ra sobiq xotin homiladorlik davrida va umumiy bolani parvarishlayotgan davrda (bola 3 yoshga to'lgunga qadar) sobiq eridan sud tartibida ta'minot olishga haqlidir."
+    }
+  },
+  {
+    "id": "KEYS-5",
+    "title": "17 yoshli xodimning mehnat huquqlari keysi",
+    "scenario": "17 yoshli Rustam kollejni tamomlab, 'Nur-Tekstil' fabrikasiga operator lavozimiga ishga kirdi. Fabrika direktori u bilan tuzilgan mehnat shartnomasida 3 oylik dastlabki sinov muddatini hamda haftasiga 40 soatlik normal ish vaqtini belgiladi. Shuningdek, tungi smenada ishlashga rozilik talab qilindi.",
+    "bookSource": "10-sinf darsligi (Yoshlar mehnati kafolatlari)",
+    "lawSource": "Mehnat kodeksi, 129, 414, 416-moddalar (14-qonun)",
+    "q33": {
+      "text": "Direktorning 17 yoshli Rustamga 3 oylik dastlabki sinov muddati belgilashi qonuniymi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Noqonuniy, 18 yoshga to'lmagan shaxslar ishga qabul qilinganda dastlabki sinov belgilanmaydi"
+        },
+        {
+          "key": "B",
+          "text": "Qonuniy, barcha xodimlarga 3 oy sinov qo'yiladi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat kasaba uyushmasi ruxsat bersa qonuniy"
+        },
+        {
+          "key": "D",
+          "text": "Agar ota-onasi rozi bo'lsa qonuniy"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 129-moddasiga asosan o‘n sakkiz yoshga to‘lmagan shaxslar ishga qabul qilinganda dastlabki sinov belgilanmaydi."
+    },
+    "q34": {
+      "text": "16 yoshdan 18 yoshgacha bo'lgan Rustam uchun qonun bo'yicha haftalik ish vaqtining eng yuqori chegarasi qancha?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Haftasiga 36 soat"
+        },
+        {
+          "key": "B",
+          "text": "Haftasiga 40 soat"
+        },
+        {
+          "key": "C",
+          "text": "Haftasiga 24 soat"
+        },
+        {
+          "key": "D",
+          "text": "Haftasiga 30 soat"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 414-moddasiga ko'ra 16 dan 18 yoshgacha bo'lgan xodimlar uchun ish vaqti haftasiga 36 soatdan oshmasligi kerak."
+    },
+    "q35": {
+      "text": "18 yoshga to'lmagan xodimlarni tungi ishlarga (22:00 dan 06:00 gacha) jalb qilishga yo'l qo'yiladimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qat'iyan taqiqlanadi (madaniy-tomosha tashkilotlari istisno)"
+        },
+        {
+          "key": "B",
+          "text": "Xodimning yozma roziligi bilan yo'l qo'yiladi"
+        },
+        {
+          "key": "C",
+          "text": "Ikki hissa haq to'lansa ruxsat etiladi"
+        },
+        {
+          "key": "D",
+          "text": "Ota-onasi ariza bersa ruxsat etiladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 416-moddasiga ko'ra 18 yoshga to'lmagan shaxslarni tungi ishlarga, ish vaqtidan tashqari ishlarga va dam olish kunlaridagi ishlarga jalb qilish taqiqlanadi."
+    }
+  },
+  {
+    "id": "KEYS-6",
+    "title": "Yo'l harakati qoidabuzarligi va ma'muriy jazo keysi",
+    "scenario": "Haydovchi Aliyev svetoforning qizil chirog'ida harakatlanganligi uchun YPX inspektori tomonidan to'xtatildi. Inspektor joyida bayonnoma rasmiylashtirib, Aliyevga jarima tayinladi. Aliyev esa o'zining shoshilinch tez tibbiy yordam ko'rsatish zarurati (oxirgi zarurat) tufayli harakatlanganini ta'kidlab, qaror ustidan shikoyat qilmoqchi bo'ldi.",
+    "bookSource": "11-sinf darsligi (Ma'muriy huquqbuzarlik)",
+    "lawSource": "Ma'muriy javobgarlik to'g'risidagi kodeks, 271, 315, 332-1-moddalar (12-qonun)",
+    "q33": {
+      "text": "MJtK 315-moddasiga binoan Aliyev ma'muriy jazo qo'llash to'g'risidagi qaror ustidan necha kun ichida yuqori organga yoki sudga shikoyat qilishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "10 kun ichida"
+        },
+        {
+          "key": "B",
+          "text": "1 oy ichida"
+        },
+        {
+          "key": "C",
+          "text": "3 kun ichida"
+        },
+        {
+          "key": "D",
+          "text": "15 kun ichida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MJtK 315-moddasiga ko'ra ma'muriy jazo qo'llash to'g'risidagi qaror ustidan qaror nusxasi topshirilgan kundan boshlab o'n kun ichida shikoyat berilishi mumkin."
+    },
+    "q34": {
+      "text": "Agar Aliyev jarimani 15 kun ichida ixtiyoriy to'lashni ma'qul ko'rsa, jarima miqdorining necha foizini to'lashi kifoya qiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "50 foizini"
+        },
+        {
+          "key": "B",
+          "text": "70 foizini"
+        },
+        {
+          "key": "C",
+          "text": "30 foizini"
+        },
+        {
+          "key": "D",
+          "text": "To'liq 100 foizini"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MJtK 332-1-moddasiga binoan jarima solish to'g'risidagi qaror topshirilgan kundan boshlab 15 kun ichida 50 foizi to'lansa, qolgan qismidan ozod qilinadi."
+    },
+    "q35": {
+      "text": "Agar Aliyevning qilmishida haqiqatdan ham oxirgi zarurat holati (inson hayotini qutqarish) isbotlansa, ish qanday hal etiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "MJtK 271-moddasiga ko'ra ma'muriy ish yuritish tugatiladi va u javobgarlikdan ozod qilinadi"
+        },
+        {
+          "key": "B",
+          "text": "Faqat jarimaning yarmi undiriladi"
+        },
+        {
+          "key": "C",
+          "text": "Haydovchilik guvohnomasidan mahrum qilinadi"
+        },
+        {
+          "key": "D",
+          "text": "Ishga ta'sir qilmaydi, baribir to'laydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MJtK 271-moddasi 4-bandiga ko'ra oxirgi zarurat yoki zaruriy mudofaa holatida harakat qilingan bo'lsa, ma'muriy huquqbuzarlik ishi yuritilishi mumkin emas va tugatiladi."
+    }
+  },
+  {
+    "id": "KEYS-7",
+    "title": "Mualliflik huquqi va intellektual mulk himoyasi keysi",
+    "scenario": "Shoir va bastakor Ergashev yangi musiqiy asar yaratdi. Bir oydan so'ng ushbu qo'shiq muallifning roziligisiz va shartnoma tuzilmasdan 'Mega-Music' kompaniyasi tomonidan tijorat maqsadida klip qilib ommaga tarqatildi va katta daromad olindi. Ergashev kompaniyaga e'tiroz bildirdi, kompaniya esa asar davlat ro'yxatidan o'tkazilmaganligini vaj qilib, da'voni rad etdi.",
+    "bookSource": "10-sinf darsligi (Intellektual mulk huquqi)",
+    "lawSource": "Mualliflik huquqi va turdosh huquqlar to'g'risidagi Qonun (27-qonun), FK 1041-modda",
+    "q33": {
+      "text": "Asarga nisbatan mualliflik huquqi qachon vujudga keladi va uni davlat ro'yxatidan o'tkazish shartmi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Asar yaratilgan faktning o'zi bilan vujudga keladi, ro'yxatdan o'tkazish talab etilmaydi"
+        },
+        {
+          "key": "B",
+          "text": "Faqat adliya organidan patent olingach vujudga keladi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat notarial tasdiqlangach vujudga keladi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat rasmiy matbuotda e'lon qilingach vujudga keladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 6-moddasiga ko'ra mualliflik huquqi asarning yaratilishi faktiga ko'ra yuzaga keladi. Mualliflik huquqining yuzaga kelishi va amalga oshirilishi uchun biron-bir rasmiylatchilikka rioya etish talab qilinmaydi."
+    },
+    "q34": {
+      "text": "Muallif o'z huquqlari buzilgan taqdirda huquqbuzardan yetkazilgan zararni qoplash o'rniga qanday kompensatsiya (tovon) talab qilishga haqli?",
+      "options": [
+        {
+          "key": "A",
+          "text": "BHMning 20 baravaridan 1000 baravarigacha miqdorda tovon"
+        },
+        {
+          "key": "B",
+          "text": "Faqat 1 million so'm jarima"
+        },
+        {
+          "key": "C",
+          "text": "Faqat matbuotda uzr so'rashni"
+        },
+        {
+          "key": "D",
+          "text": "BHMning 5 baravari miqdorida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 65-moddasiga binoan muallif zararning o'rniga BHMning 20 baravaridan 1000 baravarigacha miqdorda tovon to'lanishini talab qilishga haqli."
+    },
+    "q35": {
+      "text": "Mualliflik mulkiy huquqlari muallifning butun hayoti davomida va vafotidan so'ng necha yil amal qiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "70 yil amal qiladi"
+        },
+        {
+          "key": "B",
+          "text": "50 yil amal qiladi"
+        },
+        {
+          "key": "C",
+          "text": "25 yil amal qiladi"
+        },
+        {
+          "key": "D",
+          "text": "10 yil amal qiladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 35-moddasiga ko'ra mualliflik huquqi muallifning butun hayoti davomida va uning vafotidan keyin 70 yil davomida amal qiladi."
+    }
+  },
+  {
+    "id": "KEYS-8",
+    "title": "Garov va ipoteka shartnomasi keysi",
+    "scenario": "Tadbirkor Vohidov bankdan 500 million so'm kredit olish uchun o'ziga tegishli savdo do'konini garovga (ipotekaga) qo'ydi. Shartnoma yozma shaklda tuzilib, notarius orqali tasdiqlandi va davlat ro'yxatidan o'tkazildi. Kredit to'lash muddati kelganda Vohidov mablag'i yetarli emasligini aytib, kreditni to'lashdan bosh tortdi. Bank garovdagi do'kon hisobidan o'z talablarini qondirmoqchi bo'ldi.",
+    "bookSource": "10-sinf darsligi (Majburiyatlar bajarilishini ta'minlash usullari)",
+    "lawSource": "Fuqarolik kodeksi 279-modda, 'Ipoteka to'g'risida'gi Qonun (7-qonun)",
+    "q33": {
+      "text": "Fuqarolik kodeksiga ko'ra ipoteka deganda qanday garov turi tushuniladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ko'chmas mulk (bino, inshoot, turar joy, yer) garovi"
+        },
+        {
+          "key": "B",
+          "text": "Faqat avtotransport vositalari garovi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat qimmatbaho qog'ozlar garovi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat naqd pul mablag'lari garovi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Ipoteka — ko'chmas mulk garovidir (yer uchastkalari, binolar, inshootlar, ko'p yillik dov-daraxtlar va boshqa ko'chmas mulklar)."
+    },
+    "q34": {
+      "text": "Garovga qo'yilgan ko'chmas mulkdan bank talablarini qondirish qanday tartibda amalga oshiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Sud qarori yoki qonunda belgilangan notarius ijro xati asosida ochiq auksion orqali"
+        },
+        {
+          "key": "B",
+          "text": "Bank xodimlarining to'g'ridan-to'g'ri mulkni egallab olishi bilan"
+        },
+        {
+          "key": "C",
+          "text": "Faqat tuman hokimining qarori bilan"
+        },
+        {
+          "key": "D",
+          "text": "Bankka tekinga o'tkazish orqali"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 280-moddasiga ko'ra garovga qo'yilgan mol-mulk sudning qaroriga asosan (yoki kelishuv/ijro xati asosida) ommaviy savdoda (auksionda) realizatsiya qilinadi."
+    },
+    "q35": {
+      "text": "Garovdagi mulk auksionda sotilgandan so'ng tushgan summa kredit qarzidan ortiq bo'lsa, qolgan pul qanday tasarruf etiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qolgan summa garov qo'yuvchiga (Vohidovga) qaytariladi"
+        },
+        {
+          "key": "B",
+          "text": "Bank foydasiga mukofot sifatida qoldiriladi"
+        },
+        {
+          "key": "C",
+          "text": "Davlat hisobiga musodara qilinadi"
+        },
+        {
+          "key": "D",
+          "text": "Notarius depozitida umrbod saqlanadi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 281-moddasiga binoan agar garovdagi mol-mulkni sotishdan tushgan summa garov bilan ta'minlangan talabdan oshib ketsa, farqi garov qo'yuvchiga qaytariladi."
+    }
+  },
+  {
+    "id": "KEYS-9",
+    "title": "15 yoshli o'smir tomonidan yetkazilgan zararni qoplash keysi",
+    "scenario": "15 yoshli maktab o'quvchisi Jasur ko'chada velosiped haydab ketayotib, yo'l chetida to'xtab turgan fuqaro Ilhomovga tegishli 'Cobalt' avtomashinasining eshik qismini chizib yubordi va jami 4 million so'm moddiy zarar yetkazdi. Jasurning o'z nomida hech qanday mulki va daromadi yo'q. Avtomobil egasi Ilhomov zararni qoplashni talab qilib sudga da'vo berdi.",
+    "bookSource": "10-sinf darsligi (Zarar yetkazishdan kelib chiqadigan majburiyatlar)",
+    "lawSource": "Fuqarolik kodeksi, 993 va 994-moddalar (8-qonun)",
+    "q33": {
+      "text": "Fuqarolik kodeksining 994-moddasiga ko'ra 14 yoshdan 18 yoshgacha bo'lgan voyaga yetmaganlar yetkazilgan zarar uchun qanday tartibda javob beradilar?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Umumiy asoslarda mustaqil ravishda o'z mol-mulki yoki daromadi hisobidan javob beradilar"
+        },
+        {
+          "key": "B",
+          "text": "Ular mutlaqo javobgar bo'lmaydilar"
+        },
+        {
+          "key": "C",
+          "text": "Birinchi navbatda har doim faqat o'qituvchisi to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Davlat sug'urtasi to'laydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 994-moddasining 1-qismiga binoan 14 yoshdan 18 yoshgacha bo'lgan voyaga yetmaganlar o'zlari yetkazgan zarar uchun umumiy asoslarda mustaqil javob beradilar."
+    },
+    "q34": {
+      "text": "Agar 15 yoshli Jasurning zararni qoplash uchun yetarli mol-mulki yoki daromadi bo'lmasa, zarar kim tomonidan to'lanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Uning ota-onasi (vasiylari) tomonidan subsidiar (qo'shimcha) tartibda"
+        },
+        {
+          "key": "B",
+          "text": "Zarar qoplanmasdan qoladi"
+        },
+        {
+          "key": "C",
+          "text": "Mahalla jamg'armasi to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Maktab direktori o'z oyligidan to'laydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 994-moddasi 2-qismiga binoan agar 14 yoshdan 18 yoshgacha bo'lgan voyaga yetmaganning mol-mulki bo'lmasa, zarar uning ota-onasi yoki vasiylari tomonidan to'lanadi."
+    },
+    "q35": {
+      "text": "Jasur 18 yoshga to'lsa yoki o'z daromadiga ega bo'lsa, ota-onasining zararni to'lash majburiyati qanday bo'ladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ota-onasining majburiyati bekor bo'ladi va qolgan zarar Jasurning o'zidan undiriladi"
+        },
+        {
+          "key": "B",
+          "text": "Ota-onasi baribir umrbod to'laydi"
+        },
+        {
+          "key": "C",
+          "text": "Ikki barobar jarima qo'shiladi"
+        },
+        {
+          "key": "D",
+          "text": "Sud qayta jinoiy jazo tayinlaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 994-moddasiga ko'ra zarar yetkazuvchi voyaga yetgach yoki yetarli mol-mulk yoki daromadga ega bo'lgach ota-onaning subsidiar majburiyati tugaydi."
+    }
+  },
+  {
+    "id": "KEYS-10",
+    "title": "Xodimga intizomiy jazo qo'llash va muddatlar keysi",
+    "scenario": "'Avto-Service' MChJ ustasi Boboyev uzrli sabablarsiz 20-may kuni ketma-ket 4 soat davomida ishda bo'lmadi. Korxona rahbari bundan 25-may kuni xabar topdi va darhol unga hayfsan e'lon qilish hamda oylik maoshining 30 foizi miqdorida jarima solish haqida yagona buyruq chiqardi. Xodimdan tushuntirish xati talab qilinmadi.",
+    "bookSource": "10-sinf darsligi (Mehnat intizomi va intizomiy javobgarlik)",
+    "lawSource": "Mehnat kodeksi, 312, 313, 314-moddalar (14-qonun)",
+    "q33": {
+      "text": "Yangi Mehnat kodeksining 312-moddasiga ko'ra bitta intizomiy nojo'ya xatti-harakat uchun birdaniga ikkita intizomiy jazo (ham hayfsan, ham jarima) qo'llash mumkinmi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yo'q, har bir intizomiy nojo'ya harakat uchun faqat bitta intizomiy jazo qo'llanilishi mumkin"
+        },
+        {
+          "key": "B",
+          "text": "Ha, rahbar xohlaganicha jazo qo'llay oladi"
+        },
+        {
+          "key": "C",
+          "text": "Kasaba uyushmasi ruxsat bersa mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Faqat moddiy zarar yetkazilganda mumkin"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 312-moddasiga ko'ra har bir intizomiy nojo'ya harakat uchun faqat bitta intizomiy jazo qo'llanilishi mumkin."
+    },
+    "q34": {
+      "text": "Intizomiy jazo qo'llashdan oldin ish beruvchi qanday majburiy protsessual harakatni bajarishi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Xodimdan yozma ravishda tushuntirish xati talab qilishi shart"
+        },
+        {
+          "key": "B",
+          "text": "Mahalladan tavsifnoma olishi shart"
+        },
+        {
+          "key": "C",
+          "text": "IIBga ariza yozishi shart"
+        },
+        {
+          "key": "D",
+          "text": "Mehnat inspeksiyasidan ruxsat olishi shart"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 313-moddasiga ko'ra intizomiy jazo qo'llanilishidan avval xodimdan yozma tushuntirish talab qilinishi shart."
+    },
+    "q35": {
+      "text": "Intizomiy jazo nojo'ya harakat aniqlangan kundan boshlab ko'pi bilan qancha muddat ichida qo'llanilishi kerak?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Bir oydan kechiktirmay"
+        },
+        {
+          "key": "B",
+          "text": "Olti oy ichida"
+        },
+        {
+          "key": "C",
+          "text": "Bir yil ichida"
+        },
+        {
+          "key": "D",
+          "text": "Uch oy ichida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 314-moddasiga binoan intizomiy jazo nojo'ya harakat aniqlangan kundan e'tiboran bir oydan kechiktirmay qo'llaniladi."
+    }
+  },
+  {
+    "id": "KEYS-11",
+    "title": "Uy-joy ijara shartnomasi va yashash huquqini yo'qotgan deb topish keysi",
+    "scenario": "Fuqaro Soliyev o'ziga tegishli 3 xonali kvartirani fuqaro Odilovga 1 yil muddatga yozma shartnoma asosida ijaraga berdi va soliq organlarida hisobga qo'ydi. Oradan 3 oy o'tgach, Odilov xorijga ketib qoldi, kvartirada esa umuman notanish fuqarolarni qoldirdi hamda 4 oy davomida ijara haqini to'lamadi. Soliyev shartnomani bekor qilish va fuqarolarni chiqarish bo'yicha da'vo kiritdi.",
+    "bookSource": "10-sinf darsligi (Turar joydan foydalanish huquqi)",
+    "lawSource": "Fuqarolik kodeksi 600, 615-moddalar, Uy-joy kodeksi 52-modda (9-qonun)",
+    "q33": {
+      "text": "Uy-joy kodeksining 52-moddasiga ko'ra mulkdorning oila a'zolari yoki yashovchilar turar joyda uzrsiz sabablarga ko'ra ketma-ket necha oy yashamasalar, foydalanish huquqini yo'qotgan deb topilishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Olti oy mobaynida"
+        },
+        {
+          "key": "B",
+          "text": "Bir yil mobaynida"
+        },
+        {
+          "key": "C",
+          "text": "Uch oy mobaynida"
+        },
+        {
+          "key": "D",
+          "text": "Ikki yil mobaynida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "UJK 52-moddasiga ko'ra turar joyda doimiy yashovchilar uzrsiz sabablarga ko'ra surunkasiga 6 oydan ortiq yashamasalar, sudda turar joydan foydalanish huquqini yo'qotgan deb topilishi mumkin."
+    },
+    "q34": {
+      "text": "Agar ijarachi ijara haqini shartnomada belgilangan muddatda to'lamasa, ko'pi bilan necha muddat to'lanmaganda ijara beruvchi sud orqali shartnomani bekor qilishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qisqa muddatli ijarada (1 yilgacha) ketma-ket ikki martadan ortiq to'lanmaganda"
+        },
+        {
+          "key": "B",
+          "text": "Faqat 1 yil to'lanmaganda"
+        },
+        {
+          "key": "C",
+          "text": "Har qanday bitta kechikish bo'lganda darhol"
+        },
+        {
+          "key": "D",
+          "text": "Faqat ijarachi vafot etganda"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 615-moddasiga binoan qisqa muddatli ijarada shartnomada belgilangan haq to'lash muddati ketma-ket ikki martadan ortiq o'tkazib yuborilganda bekor qilinishi mumkin."
+    },
+    "q35": {
+      "text": "Ijarachining uy-joyni uchinchi shaxslarga ikkilamchi ijaraga (podnaym) berishi qanday tartibda amalga oshiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat mulkdorning (ijaraga beruvchining) yozma roziligi bilan"
+        },
+        {
+          "key": "B",
+          "text": "Ijarachi xohlagan paytida mustaqil amalga oshira oladi"
+        },
+        {
+          "key": "C",
+          "text": "Mahalla raisining ruxsati bilan"
+        },
+        {
+          "key": "D",
+          "text": "Bunga mutlaqo yo'l qo'yilmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 610-moddasiga binoan ijarachi faqat ijaraga beruvchining yozma roziligi bilan turar joyni ikkilamchi ijaraga berishga haqlidir."
+    }
+  },
+  {
+    "id": "KEYS-12",
+    "title": "Jinoyat protsessida ushlab turish va ehtiyot choralari keysi",
+    "scenario": "O'g'rilik sodir etishda gumon qilinib fuqaro Mansurov tergovchi tomonidan ushlab turildi. Ushlangan vaqtdan boshlab unga yaqin qarindoshlariga qo'ng'iroq qilishga va advokat chaqirishga ruxsat berilmadi. Mansurov ushlab turilgan paytdan boshlab 60 soat o'tgachgina sudga qamoqqa olish ehtiyot chorasini qo'llash uchun olib kelindi.",
+    "bookSource": "11-sinf darsligi (Jinoyat-protsessual huquq)",
+    "lawSource": "Jinoyat-protsessual kodeksi 221, 226, 242-moddalar, Yangi Konstitutsiya 27-modda (2-qonun)",
+    "q33": {
+      "text": "Yangi Konstitutsiyaning 27-moddasi va JPKga ko'ra shaxs sudning qarorisiz ko'pi bilan necha soatdan ortiq muddat ushlab turilishi mumkin emas?",
+      "options": [
+        {
+          "key": "A",
+          "text": "48 soatdan ortiq"
+        },
+        {
+          "key": "B",
+          "text": "72 soat"
+        },
+        {
+          "key": "C",
+          "text": "24 soat"
+        },
+        {
+          "key": "D",
+          "text": "3 sutka (72 soat)"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Yangi Konstitutsiyaning 27-moddasiga binoan shaxs sudning qarorisiz 48 soatdan ko'p bo'lmagan muddatga ushlab turilishi mumkin."
+    },
+    "q34": {
+      "text": "Ushlangan shaxsga advokat (himoyachi) bilan ta'minlanish huquqi qaysi paytdan e'tiboran beriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "U amalda ushlangan (erkin harakati cheklangan) paytdan e'tiboran darhol"
+        },
+        {
+          "key": "B",
+          "text": "Faqat ayblov e'lon qilingandan so'ng"
+        },
+        {
+          "key": "C",
+          "text": "Faqat sud majlisi boshlanganda"
+        },
+        {
+          "key": "D",
+          "text": "Faqat dastlabki tergov yakunlangach"
+        }
+      ],
+      "correct": "A",
+      "explanation": "JPK 48-moddasiga binoan gumon qilinuvchi ushlab turilgan yoki hibsga olingan paytdan boshlab darhol himoyachiga ega bo'lish huquqiga ega."
+    },
+    "q35": {
+      "text": "Ushlangan shaxsga telefon orqali o'zining ushlab turilganligi va turgan joyi haqida yaqinlariga xabar berish huquqi qachon ta'minlanishi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "U tegishli organga keltirilgan paytdan e'tiboran kechiktirmasdan"
+        },
+        {
+          "key": "B",
+          "text": "3 kundan so'ng"
+        },
+        {
+          "key": "C",
+          "text": "Faqat prokuror ruxsat bersa"
+        },
+        {
+          "key": "D",
+          "text": "Faqat sud zalida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "JPK 224-moddasiga ko'ra ushlab turilgan shaxsga yaqinlariga qo'ng'iroq qilish yoki xabar berish imkoniyati darhol berilishi shart."
+    }
+  },
+  {
+    "id": "KEYS-13",
+    "title": "MChJ ishtirokchisining ulushini begonalashtirish keysi",
+    "scenario": "'Progress' MChJda 3 nafar ta'sischi bor: Aliyev (40%), Valiyev (30%) va G'aniyev (30%). Aliyev o'zining 40 foizlik ulushini jamiyatga begona bo'lgan uchinchi shaxs — Qodirovga 200 million so'mga sotmoqchi bo'ldi. Valiyev va G'aniyev bundan xabar topib, o'zlarining imtiyozli huquqlari buzilayotganini bildirishdi.",
+    "bookSource": "10-sinf darsligi (Tadbirkorlik va xo'jalik huquqi)",
+    "lawSource": "'Mas'uliyati cheklangan jamiyatlar to'g'risida'gi Qonun, 20-modda (22-qonun)",
+    "q33": {
+      "text": "MChJ to'g'risidagi qonunning 20-moddasiga ko'ra ishtirokchilar o'z ulushini sotishda boshqa ishtirokchilar qanday huquqqa ega bo'ladilar?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Uchinchi shaxsga taklif qilingan narxda imtiyozli sotib olish huquqiga"
+        },
+        {
+          "key": "B",
+          "text": "Ulushni tekinga talab qilish huquqiga"
+        },
+        {
+          "key": "C",
+          "text": "Sotishni butunlay taqiqlash huquqiga"
+        },
+        {
+          "key": "D",
+          "text": "Faqat sud orqali narxni pasaytirish huquqiga"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Jamiyat ishtirokchilari uchinchi shaxsga taklif qilingan narxda ushbu ulushni imtiyozli sotib olish huquqidan foydalanadilar."
+    },
+    "q34": {
+      "text": "Ishtirokchilar imtiyozli sotib olish huquqidan xabardor qilingan kundan boshlab ko'pi bilan necha kun ichida foydalanishlari mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Bir oy ichida (agar ustavda boshqa muddat belgilanmagan bo'lsa)"
+        },
+        {
+          "key": "B",
+          "text": "Uch oy ichida"
+        },
+        {
+          "key": "C",
+          "text": "10 kun ichida"
+        },
+        {
+          "key": "D",
+          "text": "Bir yil ichida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 20-moddasiga ko'ra ishtirokchilar bildirishnoma olgan kundan boshlab 1 oy ichida imtiyozli huquqini amalga oshirishlari mumkin."
+    },
+    "q35": {
+      "text": "Agar Aliyev qonun talabini buzib, ulushini boshqalarga bildirmasdan uchinchi shaxsga sotib yuborsa, qolgan ishtirokchilar qanday chora ko'rishga haqli?",
+      "options": [
+        {
+          "key": "A",
+          "text": "3 oy ichida sud orqali xaridorning huquq va majburiyatlarini o'zlariga o'tkazishni talab qilishga"
+        },
+        {
+          "key": "B",
+          "text": "MChJni majburiy tugatishga"
+        },
+        {
+          "key": "C",
+          "text": "Xaridordan ikki barobar jarima undirishga"
+        },
+        {
+          "key": "D",
+          "text": "Hech qanday chora ko'ra olmaydilar"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Imtiyozli sotib olish huquqi buzilganda har qanday ishtirokchi 3 oy ichida sud orqali sotib oluvchining huquqlarini o'ziga o'tkazishni talab qilishga haqli."
+    }
+  },
+  {
+    "id": "KEYS-14",
+    "title": "Homilador ayol va bolali onalarning mehnat kafolatlari keysi",
+    "scenario": "'Ziyo' xususiy maktabida o'qituvchi bo'lib ishlayotgan Umidova homiladorligining 5-oyida edi. Maktab rahbariyati o'quv dasturi o'zgarganligini vaj qilib, uni ishdan bo'shatish to'g'risida ogohlantirish xati berdi. Umidova homiladorlik ma'lumotnomasini taqdim etgan bo'lsa-da, direktor buyruq chiqarib, shartnomani bekor qildi.",
+    "bookSource": "10-sinf darsligi (Ayollar mehnati kafolatlari)",
+    "lawSource": "Mehnat kodeksi, 408 va 409-moddalar (14-qonun)",
+    "q33": {
+      "text": "Mehnat kodeksining 408-moddasiga ko'ra homilador ayollar bilan mehnat shartnomasini ish beruvchi tashabbusi bilan bekor qilishga qaysi yagona holatda yo'l qo'yiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Tashkilot (korxona) butunlay tugatilgan hollarda"
+        },
+        {
+          "key": "B",
+          "text": "Xodim ishga kech qolganda"
+        },
+        {
+          "key": "C",
+          "text": "Shtat qisqarganda"
+        },
+        {
+          "key": "D",
+          "text": "Malakasi yetarli bo'lmaganda"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 408-moddasiga binoan homilador ayollar bilan mehnat shartnomasini bekor qilishga faqat tashkilot tugatilgan hollardagina yo'l qo'yiladi."
+    },
+    "q34": {
+      "text": "Homilador ayollarni ularning roziligisiz tungi ishlarga yoki xizmat safarlariga jalb qilish mumkinmi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qat'iyan taqiqlanadi"
+        },
+        {
+          "key": "B",
+          "text": "Qo'shimcha haq to'lansa mumkin"
+        },
+        {
+          "key": "C",
+          "text": "Rahbarning buyrug'i bilan mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Kasaba uyushmasi ruxsat bersa mumkin"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 409-moddasiga ko'ra homilador ayollarni tungi ishlarga, ish vaqtidan tashqari ishlarga va xizmat safarlariga jalb qilish qat'iyan taqiqlanadi."
+    },
+    "q35": {
+      "text": "Sud Umidovani ishga tiklash to'g'risida qaror chiqarganda, ish beruvchi unga qanday to'lovlarni to'lashi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Majburiy progulning butun vaqti uchun o'rtacha ish haqini to'liq to'lashi shart"
+        },
+        {
+          "key": "B",
+          "text": "Faqat 1 oylik maosh to'laydi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat sud xarajatlarini to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Hech qanday haq to'lamaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 569-moddasiga ko'ra g'ayriqonuniy ravishda bo'shatilgan xodimga majburiy progul vaqti uchun o'rtacha ish haqi to'liq undiriladi."
+    }
+  },
+  {
+    "id": "KEYS-15",
+    "title": "Sudya mustaqilligi va sud hokimiyatiga aralashish keysi",
+    "scenario": "Fuqarolik ishlari bo'yicha tuman sudida yirik mulk nizosi ko'rilayotgan edi. Sud majlisidan oldin tuman hokimi o'rinbosari sudyaning qabuliga kirib, qarorni muayyan tadbirkor foydasiga chiqarishni, aks holda sudyaga nisbatan bosim o'tkazish bilan tahdid qildi. Sudya bu noqonuniy aralashuv yuzasidan dalolatnoma tuzdi.",
+    "bookSource": "9-sinf darsligi (Sud hokimiyati)",
+    "lawSource": "Yangi Konstitutsiya 136-138-moddalar, 'Sudlar to'g'risida'gi Qonun (4-qonun)",
+    "q33": {
+      "text": "Yangi Konstitutsiyaning 136-moddasiga ko'ra sudyalar odil sudlovni amalga oshirishda kimga bo'ysunadilar?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat qonunga bo'ysunadilar va mustaqildirlar"
+        },
+        {
+          "key": "B",
+          "text": "Tuman hokimiga va prokuroriga"
+        },
+        {
+          "key": "C",
+          "text": "Adliya vazirligiga"
+        },
+        {
+          "key": "D",
+          "text": "Yuqori mansabdor shaxslarga"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Konstitutsiyaning 136-moddasiga muvofiq sudyalar mustaqildirlar, faqat qonunga bo'ysunadilar."
+    },
+    "q34": {
+      "text": "Sudyaning odil sudlovni amalga oshirish bilan bog'liq faoliyatiga har qanday tarzda aralashish qanday oqibatga olib keladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qonunga binoan to'g'ridan-to'g'ri jinoiy javobgarlikka olib keladi"
+        },
+        {
+          "key": "B",
+          "text": "Faqat intizomiy ogohlantirishga"
+        },
+        {
+          "key": "C",
+          "text": "Ma'muriy jarimaga"
+        },
+        {
+          "key": "D",
+          "text": "Hech qanday javobgarlik keltirib chiqarmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Konstitutsiyaning 136-moddasi 2-qismiga binoan sudning odil sudlovni amalga oshirish bo'yicha faoliyatiga aralashishga yo'l qo'yilmaydi va bunday aralashuv qonun bilan javobgarlikka sabab bo'ladi (JK 236-modda)."
+    },
+    "q35": {
+      "text": "O'zbekiston Respublikasida sudyaning daxlsizligi nimani anglatadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Sudya Sudyalar oliy kengashining xulosasisiz jinoiy javobgarlikka tortilishi va qamoqqa olinishi mumkin emasligini"
+        },
+        {
+          "key": "B",
+          "text": "Sudya hech qachon jarima to'lamasligini"
+        },
+        {
+          "key": "C",
+          "text": "Sudya umrbod lavozimdan olinmasligini"
+        },
+        {
+          "key": "D",
+          "text": "Sudya soliq to'lamasligini"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Sudyalar daxlsizdir. Sudya Sudyalar oliy kengashining xulosasisiz va Bosh prokurorning roziligisiz jinoiy javobgarlikka tortilishi mumkin emas."
+    }
+  },
+  {
+    "id": "KEYS-16",
+    "title": "Topilma ashyo va xazina topib olish tartibi keysi",
+    "scenario": "Fuqaro Bozorov istirohat bog'ida o'rindiqda unutilgan, ichida 30 million so'm pul va qimmatbaho buyumlar bo'lgan erkaklar sumkasini topib oldi. U darhol bu haqda tuman IIBga xabar berdi hamda sumkani saqlash uchun topshirdi. Oradan 7 oy o'tdi, biroq sumkaning egasi topilmadi. Bozorov sumkani o'ziga berishni va unga egalik huquqini tan olishni talab qildi.",
+    "bookSource": "10-sinf darsligi (Mulk huquqining vujudga kelish asoslari)",
+    "lawSource": "Fuqarolik kodeksi, 191, 192, 193-moddalar (8-qonun)",
+    "q33": {
+      "text": "Fuqarolik kodeksining 192-moddasiga ko'ra topilma haqida xabar berilgan paytdan boshlab necha oy mobaynida egasi aniqlanmasa, topib olgan shaxs unga mulk huquqini oladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Olti oy mobaynida"
+        },
+        {
+          "key": "B",
+          "text": "Bir yil mobaynida"
+        },
+        {
+          "key": "C",
+          "text": "Uch oy mobaynida"
+        },
+        {
+          "key": "D",
+          "text": "Bir oy mobaynida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 192-moddasiga ko'ra topilma to'g'risida militsiyaga xabar qilingan paytdan boshlab 6 oy mobaynida egasi aniqlanmasa, topib olgan shaxs buyumga egalik huquqini oladi."
+    },
+    "q34": {
+      "text": "Agar sumkaning egasi 6 oy ichida topilgan taqdirda, topib olgan Bozorov egasidan qancha miqdorda mukofot talab qilishga haqli bo'lar edi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Buyum qiymatining yigirma foizigacha (20%) miqdorida"
+        },
+        {
+          "key": "B",
+          "text": "Buyum qiymatining ellik foizi (50%)"
+        },
+        {
+          "key": "C",
+          "text": "Hech qanday mukofot talab qila olmaydi"
+        },
+        {
+          "key": "D",
+          "text": "BHMning 1 baravari"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 193-moddasiga binoan topib olgan shaxs buyumni olishga huquqli bo'lgan shaxsdan buyum qiymatining 20 foizigacha miqdorda mukofot talab qilishga haqlidir."
+    },
+    "q35": {
+      "text": "Agar topilma tarixiy yoki madaniy yodgorlik hisoblangan xazina bo'lsa va tasodifan topilsa, topgan shaxsga qancha haq to'lanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Xazina qiymatining 50 foizi teng ulushda topgan shaxs va yer egasiga"
+        },
+        {
+          "key": "B",
+          "text": "100 foizi davlatga o'tadi, haq to'lanmaydi"
+        },
+        {
+          "key": "C",
+          "text": "10 foizi to'lanadi"
+        },
+        {
+          "key": "D",
+          "text": "BHMning 100 baravari"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 194-moddasiga ko'ra tarixiy/madaniy boylik bo'lgan xazina davlat mulkiga o'tadi, biroq xazina qiymatining 50 foizi miqdoridagi haq topgan shaxs va yer egasiga teng beriladi."
+    }
+  },
+  {
+    "id": "KEYS-17",
+    "title": "Zaruriy mudofaa va uning chegarasidan chetga chiqish keysi",
+    "scenario": "Kechqurun ko'chada fuqaro Saidovga qurollangan bosqinchi pichoq o'qtalib, uning telefon va hamyonini berishni talab qildi hamda ko'kragiga pichoq sanchmoqchi bo'ldi. Saidov o'z hayotini himoya qilish maqsadida yerda yotgan temir bo'lagi bilan bosqinchining qo'liga va yelkasiga zarba berdi, natijada tajovuzkorning qo'li sindi va u qurolini tashlab qochdi. Tergovchi Saidovga og'ir tan jarohati yetkazganlik bo'yicha jinoiy ish ochmoqchi bo'ldi.",
+    "bookSource": "11-sinf darsligi (Qilmishning jinoiyligini istisno qiluvchi holatlar)",
+    "lawSource": "Jinoyat kodeksi, 37 va 38-moddalar (11-qonun)",
+    "q33": {
+      "text": "Jinoyat kodeksining 37-moddasiga binoan zaruriy mudofaa holatida yetkazilgan zarar jinoiy javobgarlikka sabab bo'ladimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yo'q, qonun bilan qo'riqlanadigan manfaatlarga zaruriy mudofaa holatida zarar yetkazish jinoyat hisoblanmaydi"
+        },
+        {
+          "key": "B",
+          "text": "Ha, har qanday tan jarohati yetkazish jinoyat hisoblanadi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat tajovuzkor rozi bo'lsa javobgarlik bo'lmaydi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat ma'muriy jarima undiriladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "JK 37-moddasiga ko'ra zaruriy mudofaa holatida, ya'ni tajovuzchiga zarar yetkazish yo'li bilan mudofaalanish jinoyat deb topilmaydi."
+    },
+    "q34": {
+      "text": "Qaysi holatda zaruriy mudofaa chegarasidan chetga chiqilgan deb hisoblanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Mudofaaning tajovuzning xususiyati va xavflilik darajasiga mutlaqo nomutanosib bo'lishi"
+        },
+        {
+          "key": "B",
+          "text": "Agar bosqinchi qochib ketsa"
+        },
+        {
+          "key": "C",
+          "text": "Agar mudofaa qiluvchi qurolsiz bo'lsa"
+        },
+        {
+          "key": "D",
+          "text": "Agar voqea kunduzi sodir bo'lsa"
+        }
+      ],
+      "correct": "A",
+      "explanation": "JK 37-moddasi 3-qismiga binoan zaruriy mudofaa chegarasidan chetga chiqish — mudofaaning tajovuz xususiyatiga aniq nomutanosib bo'lishidir."
+    },
+    "q35": {
+      "text": "Mazkur holatda Saidovning harakati qanday baholanishi lozim?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Hayotiga bevosita real xavf bo'lganligi sababli mutanosib zaruriy mudofaa deb topilib, jinoiy ish tugatilishi lozim"
+        },
+        {
+          "key": "B",
+          "text": "Qasddan badanga shikast yetkazish deb baholanishi lozim"
+        },
+        {
+          "key": "C",
+          "text": "Bezorilik deb baholanishi lozim"
+        },
+        {
+          "key": "D",
+          "text": "Ma'muriy qamoq jazosi qo'llanilishi lozim"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Hayot uchun bevosita xavfli qurolli hujumni qaytarishda har qanday zarar yetkazilishi qonuniy zaruriy mudofaa hisoblanadi."
+    }
+  },
+  {
+    "id": "KEYS-18",
+    "title": "Er-xotinning nikoh shartnomasi (kontrakt) keysi",
+    "scenario": "Turmush qurayotgan Anvar va Dilnoza nikoh shartnomasi tuzishga qaror qilishdi. Ular shartnomaga quyidagi bandlarni kiritishni so'rashdi: 1) Kelgusida olinadigan ko'chmas mulklar kimning nomiga rasmiylashtirilsa, o'shaning shaxsiy mulki bo'lishi; 2) Ajrashilgan taqdirda er xotiniga aliment to'lamasligi; 3) Xotin erining ruxsatisiz ishlashga yoki o'qishga kirmasligi. Notarius ushbu shartnomaning ayrim bandlarini tasdiqlashdan bosh tortdi.",
+    "bookSource": "10-sinf darsligi (Nikoh shartnomasi)",
+    "lawSource": "Oila kodeksi, 29, 30, 31-moddalar (19-qonun)",
+    "q33": {
+      "text": "Oila kodeksining 29-moddasiga ko'ra nikoh shartnomasi qanday shaklda tuzilishi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yozma shaklda tuzilib, notarial tartibda tasdiqlanishi shart"
+        },
+        {
+          "key": "B",
+          "text": "Oddiy yozma shaklda imzolanishi kifoya"
+        },
+        {
+          "key": "C",
+          "text": "Faqat FHDY organida ro'yxatdan o'tadi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat mahalla guvohligida og'zaki tuziladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 29-moddasiga muvofiq nikoh shartnomasi yozma shaklda tuziladi va notarial tartibda tasdiqlanishi lozim."
+    },
+    "q34": {
+      "text": "Oila kodeksining 31-moddasiga binoan nikoh shartnomasida qanday shartlarni belgilash qat'iyan taqiqlanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Er-xotinning shaxsiy nomulkiy huquqlarini (kasb tanlash, o'qish erkinligi) hamda aliment huquqini cheklovchi shartlarni"
+        },
+        {
+          "key": "B",
+          "text": "Mol-mulkni bo'lish tartibini"
+        },
+        {
+          "key": "C",
+          "text": "Uy-joy xarajatlarini ko'tarish shartlarini"
+        },
+        {
+          "key": "D",
+          "text": "Kredit to'lovlarini taqsimlashni"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 31-moddasiga ko'ra nikoh shartnomasi er-xotinning shaxsiy nomulkiy munosabatlarini, er-xotinning bolalarga nisbatan huquq va majburiyatlarini, ta'minot olish huquqini cheklashga yo'l qo'ymaydi."
+    },
+    "q35": {
+      "text": "Nikoh shartnomasi qachon o'z kuchiga kiradi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Nikoh davlat ro'yxatidan o'tkazilgan kundan e'tiboran"
+        },
+        {
+          "key": "B",
+          "text": "Notarius imzolagan zahoti, hatto nikoh tuzilmasa ham"
+        },
+        {
+          "key": "C",
+          "text": "To'y bo'lgan kundan boshlab"
+        },
+        {
+          "key": "D",
+          "text": "Bola tug'ilgandan so'ng"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 30-moddasiga ko'ra nikoh shartnomasi nikoh davlat ro'yxatiga olingan kundan e'tiboran kuchga kiradi."
+    }
+  },
+  {
+    "id": "KEYS-19",
+    "title": "Mehnatda mayiblanish va ishlab chiqarishdagi zararni qoplash keysi",
+    "scenario": "Zavodda payvandchi bo'lib ishlovchi Olimov mehnatni muhofaza qilish texnika xavfsizligi qoidalari ish beruvchi tomonidan ta'minlanmaganligi sababli ishlab chiqarishda jiddiy jarohatlandi va 2-guruh nogironi bo'lib qoldi. Tibbiy-ijtimoiy ekspertiza uning kasbiy mehnat qobiliyatini 60 foizga yo'qotganini belgiladi. Zavod direktori esa unga faqat 1 oylik maosh berib, shartnomani bekor qilmoqchi bo'ldi.",
+    "bookSource": "10-sinf darsligi (Mehnat muhofazasi va xodim salomatligi kafolatlari)",
+    "lawSource": "Mehnat kodeksi 319-325-moddalar, Fuqarolik kodeksi 1005-modda (8-qonun)",
+    "q33": {
+      "text": "Xodim mehnat vazifalarini bajarish bilan bog'liq holda mayiblanganda ish beruvchi unga qanday to'lovlarni amalga oshirishi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yo'qotilgan ish haqi (mehnat qobiliyati yo'qotilgan foizda) hamda davolanish va qo'shimcha xarajatlarni"
+        },
+        {
+          "key": "B",
+          "text": "Faqat bir oylik maosh"
+        },
+        {
+          "key": "C",
+          "text": "Faqat jarima to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Hech qanday to'lov to'lamaydi, faqat pensiya jamg'armasi to'laydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 319 va FK 1005-moddasiga ko'ra ish beruvchi jabrlanuvchiga har oyda uning yo'qotilgan ish haqini va davolanishga ketgan qo'shimcha xarajatlarni to'lashi shart."
+    },
+    "q34": {
+      "text": "Mehnatda mayiblanish tufayli xodimga yetkazilgan zararni qoplash uchun to'lanadigan bir yo'la nafaqa miqdori qanday belgilanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Xodimning kamida bir yillik ish haqi miqdoridan kam bo'lmagan holda"
+        },
+        {
+          "key": "B",
+          "text": "Bir oylik maosh miqdorida"
+        },
+        {
+          "key": "C",
+          "text": "BHMning 1 baravari miqdorida"
+        },
+        {
+          "key": "D",
+          "text": "Faqat sud belgilagan ramziy summa"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 323-moddasiga ko'ra mehnatda mayiblanishda xodimga jabrlanuvchining kamida bir yillik ish haqi miqdorida bir yo'la nafaqa to'lanadi."
+    },
+    "q35": {
+      "text": "Mehnat qobiliyatini qisman yo'qotgan Olimov bilan tuzilgan mehnat shartnomasini ish beruvchi tashabbusi bilan bekor qilish mumkinmi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Sog'lig'i holatiga ko'ra ishiga noloyiq bo'lsa, faqat unga mos yengilroq ish taklif qilinib, u rad etgandagina mumkin"
+        },
+        {
+          "key": "B",
+          "text": "Darhol buyruq bilan bo'shatib yuborish mumkin"
+        },
+        {
+          "key": "C",
+          "text": "Hech qachon bekor qilib bo'lmaydi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat pensiya yoshiga yetganda mumkin"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 143 va 161-moddalariga ko'ra xodim sog'lig'iga noloyiq bo'lganda boshqa yengilroq ishga o'tkazish taklif qilinishi, xodim rozi bo'lmagandagina bekor qilinishi mumkin."
+    }
+  },
+  {
+    "id": "KEYS-20",
+    "title": "Majburiy ijro byurosi (MIB) ijro harakatlari keysi",
+    "scenario": "Fuqarolik ishlari bo'yicha tuman sudi qarori bilan qarzdor Hasanovdan undiruvchi Valiev foydasiga 50 million so'm qarz undirish belgilandi. Sud ijro varaqasi Majburiy ijro byurosi (MIB) davlat ijrochisiga topshirildi. Davlat ijrochisi ijro ishi qo'zg'atib, Hasanovga qarorni topshirdi. Hasanov pulni to'lashdan qasddan bo'yin tovlab yurdi.",
+    "bookSource": "11-sinf darsligi (Sud hujjatlari ijrosi)",
+    "lawSource": "'Sud hujjatlari va boshqa organlar hujjatlarini ijro etish to'g'risida'gi Qonun (28-qonun)",
+    "q33": {
+      "text": "Qonunga binoan davlat ijrochisi qarzdorga ijro hujjatidagi talablarni ixtiyoriy ravishda bajarish uchun ko'pi bilan necha kun muddat beradi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "O'n besh kunlik muddat"
+        },
+        {
+          "key": "B",
+          "text": "Bir oy muddat"
+        },
+        {
+          "key": "C",
+          "text": "Uch kunlik muddat"
+        },
+        {
+          "key": "D",
+          "text": "Olti oy muddat"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 23-moddasiga ko'ra ijro hujjatini ixtiyoriy ijro etish uchun o'n besh kun muddat belgilanadi."
+    },
+    "q34": {
+      "text": "Ixtiyoriy ijro muddati o'tgach qarz to'lanmagan taqdirda qarzdordan qanday qo'shimcha to'lov undiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Majburiy ijro yig'imi (undirilayotgan summaning tegishli foizi miqdorida)"
+        },
+        {
+          "key": "B",
+          "text": "Faqat 50 ming so'm jarima"
+        },
+        {
+          "key": "C",
+          "text": "BHMning 100 baravari"
+        },
+        {
+          "key": "D",
+          "text": "Qo'shimcha hech qanday haq olinmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 77-1-moddasiga ko'ra ixtiyoriy muddatda ijro etilmagan hujjatlar bo'yicha qarzdordan ijro yig'imi undiriladi."
+    },
+    "q35": {
+      "text": "Qarzdor Hasanovning chet elga chiqish huquqini vaqtincha cheklash qanday tartibda amalga oshiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Davlat ijrochisining asoslantirilgan qaroriga asosan sud tomonidan"
+        },
+        {
+          "key": "B",
+          "text": "Undiruvchining og'zaki talabi bilan"
+        },
+        {
+          "key": "C",
+          "text": "Mahalla fuqarolar yig'ini qarori bilan"
+        },
+        {
+          "key": "D",
+          "text": "Faqat chegarada to'xtatilganda"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Qonunning 42-1-moddasiga ko'ra ijro hujjati belgilangan muddatda uzrsiz sabablarga ko'ra ijro etilmaganda, sud orqali qarzdorning chiqishi vaqtincha cheklanadi."
+    }
+  },
+  {
+    "id": "KEYS-21",
+    "title": "Fuqarolik holati dalolatnomalari va otalikni belgilash keysi",
+    "scenario": "Zulayho va Ilhom o'zaro shar'iy nikohda yashab kelishgan, biroq qonuniy FHDY organida nikohdan o'tishmagan. Ularning farzandi tug'ilgach, Ilhom bolaga o'z familiyasini berishni va FHDYda ota sifatida yozilishni xohladi. FHDY bo'limi ulardan qonuniy nikoh guvohnomasi yo'qligini aytib, arizani qanday tartibda qabul qilishni tushuntirdi.",
+    "bookSource": "10-sinf darsligi (Bolaning kelib chiqishini belgilash)",
+    "lawSource": "Oila kodeksi, 61 va 62-moddalar (19-qonun)",
+    "q33": {
+      "text": "O'zaro qonuniy nikohda bo'lmagan ota-onadan bola tug'ilganda otalik qanday tartibda belgilanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ota-onaning FHDY organiga topshirgan birgalikdagi arizasiga binoan"
+        },
+        {
+          "key": "B",
+          "text": "Faqat onaning bir tomonlama arizasi bilan"
+        },
+        {
+          "key": "C",
+          "text": "Faqat mahalla oqsoqolining tavsiyanomasi bilan"
+        },
+        {
+          "key": "D",
+          "text": "Bunday bolaga hech qachon ota belgilanmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 61-moddasiga binoan o'zaro nikohda bo'lmagan ota-onadan bola tug'ilganda otalik ota va onaning FHDYga birgalikdagi arizasi bilan belgilanadi."
+    },
+    "q34": {
+      "text": "Agar ota bolani o'z farzandi deb tan olishdan bosh tortsa, otalikni belgilash qaysi organ tomonidan ko'rib chiqiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Sud tartibida da'vo arizasiga asosan ko'rib chiqiladi"
+        },
+        {
+          "key": "B",
+          "text": "Faqat prokuratura tomonidan"
+        },
+        {
+          "key": "C",
+          "text": "Ichki ishlar organi tomonidan"
+        },
+        {
+          "key": "D",
+          "text": "Xotin-qizlar qo'mitasi tomonidan"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 62-moddasiga ko'ra ota-onaning birgalikdagi arizasi bo'lmaganda otalik sud tartibida belgilanadi."
+    },
+    "q35": {
+      "text": "Sud tartibida otalik belgilanganda bolaning qanday huquqlari vujudga keladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qonuniy nikohda tug'ilgan bolalar bilan mutlaqo bir xil mulkiy va nomulkiy huquqlarga (aliment va meros) ega bo'ladi"
+        },
+        {
+          "key": "B",
+          "text": "Faqat otasining familiyasini oladi, meros ololmaydi"
+        },
+        {
+          "key": "C",
+          "text": "Aliment huquqiga ega bo'lmaydi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat 18 yoshga to'lgach huquqlari paydo bo'ladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "OK 63-moddasiga muvofiq otaligi belgilangan bolalar ota-onasi va ularning qarindoshlariga nisbatan nikohda tug'ilgan bolalar bilan teng huquqqa ega."
+    }
+  },
+  {
+    "id": "KEYS-22",
+    "title": "Yuridik shaxsning tugatilishi (bankrotlik) va kreditorlar navbati keysi",
+    "scenario": "'Omad-Tekstil' MChJ iqtisodiy sud qarori bilan to'lovga qobiliyatsiz (bankrot) deb topildi va unga nisbatan tugatishga doir ish yuritish boshlandi. Jamiyatning jami mol-mulki 400 million so'mni tashkil etdi, uning kreditorlik qarzdorligi esa quyidagicha: 1) Sobiq ishchilarining oylik maoshi va ishdan bo'shatish nafaqasi — 150 million so'm; 2) Soliq va byudjet qarzdorligi — 100 million so'm; 3) Fuqaroning hayoti va sog'lig'iga yetkazilgan zararni qoplash to'lovi — 150 million so'm; 4) Ta'minlanmagan tijorat banki krediti — 200 million so'm.",
+    "bookSource": "10-sinf darsligi (Yuridik shaxslarning tugatilishi)",
+    "lawSource": "Fuqarolik kodeksi, 56-modda (8-qonun)",
+    "q33": {
+      "text": "Fuqarolik kodeksining 56-moddasiga ko'ra yuridik shaxs tugatilganda kreditorlar talablari qaysi navbatda birinchi navbatda qondiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Fuqaroning hayoti yoki sog'lig'iga yetkazilgan zarar uchun to'lov talablari"
+        },
+        {
+          "key": "B",
+          "text": "Soliq va boshqa majburiy to'lovlar"
+        },
+        {
+          "key": "C",
+          "text": "Bank kreditlari"
+        },
+        {
+          "key": "D",
+          "text": "Barcha talablar bir vaqtda teng taqsimlanadi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 56-moddasi 1-qismiga ko'ra birinchi navbatda fuqaroning hayoti yoki sog'lig'iga yetkazilgan zarar uchun talablar qondiriladi."
+    },
+    "q34": {
+      "text": "Mehnat shartnomasi bo'yicha ishlayotgan shaxslarning ish haqlari va nafaqalari qaysi navbatda to'lanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ikkinchi navbatda"
+        },
+        {
+          "key": "B",
+          "text": "Birinchi navbatda"
+        },
+        {
+          "key": "C",
+          "text": "Uchinchi navbatda"
+        },
+        {
+          "key": "D",
+          "text": "Eng oxirgi to'rtinchi navbatda"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 56-moddasiga ko'ra ikkinchi navbatda mehnat shartnomasi bo'yicha ishlayotgan shaxslar bilan hisob-kitoblar amalga oshiriladi."
+    },
+    "q35": {
+      "text": "Bir navbatdagi talablarni to'liq qondirish uchun mol-mulk yetarli bo'lmagan taqdirda mablag' qanday taqsimlanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Shu navbatdagi kreditorlar o'rtasida ularning talablari summasiga mutanosib ravishda"
+        },
+        {
+          "key": "B",
+          "text": "Faqat birinchi murojaat qilgan kreditorga to'liq to'lanadi"
+        },
+        {
+          "key": "C",
+          "text": "Qura tashlash yo'li bilan"
+        },
+        {
+          "key": "D",
+          "text": "Mablag' davlat byudjetiga olib qo'yiladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 56-moddasiga ko'ra bitta navbatdagi talablar to'liq qondirilmasa, mablag' ularning talablari summasiga mutanosib taqsimlanadi."
+    }
+  },
+  {
+    "id": "KEYS-23",
+    "title": "Mehnat ta'tillari: asosiy va qo'shimcha ta'tillarni berish tartibi",
+    "scenario": "Kompaniyada dasturchi bo'lib ishlovchi Bobur 7 oy uzluksiz ishlagandan so'ng rahbariga birinchi ish yili uchun yillik mehnat ta'tili berish to'g'risida ariza yozdi. U ta'tilni 2 qismga (10 kun va 11 kunga) bo'lib olishni so'radi. Rahbariyat esa birinchi ish yilida ta'til faqat 11 oy ishlagandan so'ng berilishini va ta'tilni bo'lishga yo'l qo'yilmasligini aytib, arizani rad etdi.",
+    "bookSource": "10-sinf darsligi (Dam olish vaqti va ta'tillar)",
+    "lawSource": "Yangi Mehnat kodeksi, 216, 217, 227, 231-moddalar (14-qonun)",
+    "q33": {
+      "text": "Yangi Mehnat kodeksining 227-moddasiga binoan xodimga birinchi ish yili uchun yillik asosiy ta'tildan foydalanish huquqi necha oylik uzluksiz ishdan keyin paydo bo'ladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Olti oylik ishdan keyin"
+        },
+        {
+          "key": "B",
+          "text": "O'n bir oylik ishdan keyin"
+        },
+        {
+          "key": "C",
+          "text": "Bir yildan keyin"
+        },
+        {
+          "key": "D",
+          "text": "Uch oylik ishdan keyin"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 227-moddasiga binoan birinchi ish yili uchun ta'tildan foydalanish huquqi xodimda 6 oy uzluksiz ishlaganidan so'ng vujudga keladi."
+    },
+    "q34": {
+      "text": "Yangi Mehnat kodeksining 217-moddasiga ko'ra yillik asosiy mehnat ta'tilining eng kam muddati necha kalendar kunini tashkil etadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "21 kalendar kuni"
+        },
+        {
+          "key": "B",
+          "text": "15 ish kuni"
+        },
+        {
+          "key": "C",
+          "text": "24 kalendar kuni"
+        },
+        {
+          "key": "D",
+          "text": "30 kalendar kuni"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 217-moddasiga asosan yillik asosiy eng kam mehnat ta'tilining davomiyligi 21 kalendar kunini tashkil etadi."
+    },
+    "q35": {
+      "text": "Xodim va ish beruvchi kelishuviga ko'ra mehnat ta'tili qismlarga bo'linganda, uning kamida bitta qismi necha kundan kam bo'lmasligi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "14 kalendar kunidan kam bo'lmasligi shart"
+        },
+        {
+          "key": "B",
+          "text": "7 kundan kam bo'lmasligi shart"
+        },
+        {
+          "key": "C",
+          "text": "10 kundan kam bo'lmasligi shart"
+        },
+        {
+          "key": "D",
+          "text": "21 kundan kam bo'lmasligi shart"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MK 231-moddasiga ko'ra ta'til qismlarga bo'linganda uning bir qismi 14 kalendar kunidan kam bo'lmasligi kerak."
+    }
+  },
+  {
+    "id": "KEYS-24",
+    "title": "Yer uchastkasi olib qo'yilishi va mulkdorga kompensatsiya keysi",
+    "scenario": "Fuqaro Hakimovga tegishli shaxsiy uy-joy va yer uchastkasi tuman hududida xalqaro ahamiyatga molik avtomobil yo'li qurilishi (davlat va jamoat ehtiyojlari) munosabati bilan buzilishga tushdi. Hokimlik vakillari uy-joyni zudlik bilan bo'shatishni talab qilib, kompensatsiya puli yo'l qurilishi tugagach 2 yil ichida bo'lib-bo'lib to'lanishini ma'lum qildi. Hakimov uydan chiqishdan bosh tortdi.",
+    "bookSource": "9-sinf va 10-sinf darsliklari (Mulk daxlsizligi)",
+    "lawSource": "Yangi Konstitutsiya 65, 66-moddalar, Fuqarolik kodeksi 206-modda, Yer kodeksi 37-modda",
+    "q33": {
+      "text": "Yangi Konstitutsiyaning 65-moddasiga binoan mulkdor o'z mol-mulkidan qaysi hollarda va qanday tartibda mahrum etilishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat qonunda nazarda tutilgan hollarda va tartibda, sudning qaroriga asosan"
+        },
+        {
+          "key": "B",
+          "text": "Hokimning bir tomonlama farmoyishi bilan"
+        },
+        {
+          "key": "C",
+          "text": "Mahalla qarori bilan"
+        },
+        {
+          "key": "D",
+          "text": "Qurilish kompaniyasining buyrug'i bilan"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Konstitutsiyaning 65-moddasiga ko'ra hech kim sudning qarorisiz va qonunga zid tarzda o'z mol-mulkidan mahrum etilishi mumkin emas."
+    },
+    "q34": {
+      "text": "Davlat va jamoat ehtiyojlari uchun mulk olib qo'yilganda zararlarning o'rni (kompensatsiya) qachon va qanday miqdorda qoplanishi shart?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Mol-mulk olib qo'yilishidan oldin bozor qiymati bo'yicha to'liq va oldindan qoplanishi shart"
+        },
+        {
+          "key": "B",
+          "text": "Qurilish tugagandan keyin 2 yil ichida"
+        },
+        {
+          "key": "C",
+          "text": "Faqat kadastr qiymati miqdorida"
+        },
+        {
+          "key": "D",
+          "text": "Kompensatsiya to'lash shart emas"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Konstitutsiyaning 65-moddasiga binoan mulkni jamoat ehtiyojlari uchun olib qo'yishga faqat qonunda belgilangan tartibda va oldindan hamda teng qiymatli tovon to'langan taqdirdagina yo'l qo'yiladi."
+    },
+    "q35": {
+      "text": "Agar kompensatsiya oldindan to'liq to'lanmagan bo'lsa, fuqaroning turar joyini buzishga yo'l qo'yiladimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qat'iyan taqiqlanadi (bunday harakat javobgarlikka sabab bo'ladi)"
+        },
+        {
+          "key": "B",
+          "text": "Yo'l muhim bo'lsa yo'l qo'yiladi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat kunduz kuni buzish mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Hokim kafolat xati bersa mumkin"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Kompensatsiya to'liq to'lanmaguncha mulkni buzish qat'iyan taqiqlanadi va noqonuniy deb hisoblanadi."
+    }
+  },
+  {
+    "id": "KEYS-25",
+    "title": "Ma'muriy qamoq jazosini qo'llash va cheklovlar keysi",
+    "scenario": "Jamoat joyida mayda bezorilik sodir etganligi uchun 2 nafar shaxs ushlandi: 1) Fuqaro Ergashev (muqaddam ma'muriy jazolangan); 2) Fuqaro Rahimova (uning qaramog'ida 7 yoshli farzandi bor va homilador). Sudya ikkala shaxsga ham birdek 15 sutka ma'muriy qamoq jazosi qo'llash haqida qaror chiqardi.",
+    "bookSource": "11-sinf darsligi (Ma'muriy jazo turlari)",
+    "lawSource": "Ma'muriy javobgarlik to'g'risidagi kodeks, 29-modda (12-qonun)",
+    "q33": {
+      "text": "MJtK 29-moddasiga ko'ra ma'muriy qamoq jazosi odatdagi holatlarda ko'pi bilan necha sutkagacha muddatga qo'llanilishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "O'n besh sutkagacha (favqulodda holatda o'ttiz sutkagacha)"
+        },
+        {
+          "key": "B",
+          "text": "O'ttiz sutkagacha"
+        },
+        {
+          "key": "C",
+          "text": "O'n sutkagacha"
+        },
+        {
+          "key": "D",
+          "text": "Ikki oygacha"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MJtK 29-moddasiga binoan ma'muriy qamoq o'n besh sutkagacha, favqulodda holat tartibi sharoitida esa o'ttiz sutkagacha muddatga qo'llaniladi."
+    },
+    "q34": {
+      "text": "MJtK 29-moddasiga asosan ma'muriy qamoq jazosi quyidagi qaysi shaxslarga nisbatan mutlaqo qo'llanilishi mumkin emas?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Homilador ayollarga, o'n to'rt yoshgacha bolasi bo'lgan ayollarga va I-II guruh nogironlariga"
+        },
+        {
+          "key": "B",
+          "text": "Faqat nafaqaxo'rlarga"
+        },
+        {
+          "key": "C",
+          "text": "Faqat talabalarga"
+        },
+        {
+          "key": "D",
+          "text": "Faqat davlat xizmatchilariga"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MJtK 29-moddasiga ko'ra homilador ayollarga, o'n to'rt yoshgacha bolasi bo'lgan ayollarga, o'n sakkiz yoshga to'lmagan shaxslarga, I va II guruh nogironlariga ma'muriy qamoq qo'llanilishi mumkin emas."
+    },
+    "q35": {
+      "text": "Sudyaning Rahimova (homilador va 7 yoshli bolasi bor ayol)ga nisbatan 15 sutka ma'muriy qamoq tayinlashi qonuniymi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Noqonuniy, MJtK 29-moddasi talabiga ko'ra unga nisbatan ma'muriy qamoq jazosi qo'llanilishi mumkin emas"
+        },
+        {
+          "key": "B",
+          "text": "Qonuniy, sudda hamma teng javob beradi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat bolasi 3 yoshdan kichik bo'lsa noqonuniy bo'lardi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat eri norozi bo'lsa noqonuniy bo'ladi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Homilador va 14 yoshgacha bolasi bo'lgan ayollarga nisbatan ma'muriy qamoq jazosi qo'llash qonun bilan qat'iyan taqiqlangan."
+    }
+  }
+]

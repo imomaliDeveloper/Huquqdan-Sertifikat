@@ -1,0 +1,20 @@
+[
+  {
+    "id": "REC-1794992772536",
+    "transactionId": "TX-12345",
+    "userContact": "TX-12345",
+    "userName": "O'quvchi",
+    "amount": "49 000 UZS",
+    "date": "2026-11-18T09:06:12.536Z",
+    "status": "pending"
+  },
+  {
+    "id": "REC-1794992505028",
+    "transactionId": "TX-987654321",
+    "userContact": "@test_user",
+    "userName": "Test Oquvchi",
+    "amount": "49 000 UZS",
+    "date": "2026-11-18T09:01:45.028Z",
+    "status": "pending"
+  }
+]

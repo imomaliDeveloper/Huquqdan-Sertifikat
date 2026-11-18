@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "grade": "8-sinf",
+    "title": "Davlat va huquq asoslari",
+    "edition": "Yangi nashr (2024-2026)",
+    "description": "Davlat va huquq nazariyasi, davlat shakllari, huquqiy normalar, yuridik faktlar va javobgarlik asoslari.",
+    "examCoverage": "1–6 savollar (Nazariya), 31–32 (Atamalar va diagrammalar)",
+    "filename": "8-sinf yangi.pdf",
+    "url": "/books/8-sinf%20yangi.pdf",
+    "size": "105 MB",
+    "icon": "fa-landmark",
+    "color": "emerald"
+  },
+  {
+    "id": 2,
+    "grade": "9-sinf",
+    "title": "Konstitutsiyaviy huquq asoslari",
+    "edition": "Yangi tahrirdagi Konstitutsiya asosida",
+    "description": "Yangi Konstitutsiya prinsiplari, inson huquq va erkinliklari, Oliy Majlis, Prezident, Vazirlar Mahkamasi, Sud hokimiyati.",
+    "examCoverage": "7–16 savollar (Konstitutsiya), 36–38 (Ochiq muddatlar)",
+    "filename": "9-sinf yangi.pdf",
+    "url": "/books/9-sinf%20yangi.pdf",
+    "size": "26 MB",
+    "icon": "fa-scale-balanced",
+    "color": "teal"
+  },
+  {
+    "id": 3,
+    "grade": "10-sinf",
+    "title": "Davlat va huquq asoslari (Fuqarolik, Oila, Mehnat)",
+    "edition": "Yangi nashr",
+    "description": "Fuqarolik huquqi (bitimlar, mulk, meros), Oila huquqi (nikoh, aliment), Yangi Mehnat kodeksi (shartnoma, ish vaqti, ta'tillar).",
+    "examCoverage": "17–24 savollar, 33–35 (Mehnat/Meros keyslari), 39–42 (Ochiq topshiriqlar)",
+    "filename": "10-sinf yangi.pdf",
+    "url": "/books/10-sinf%20yangi.pdf",
+    "size": "6 MB",
+    "icon": "fa-briefcase",
+    "color": "blue"
+  },
+  {
+    "id": 4,
+    "grade": "11-sinf",
+    "title": "Davlat va huquq asoslari (Jinoyat, Ma'muriy, Sud)",
+    "edition": "Yangi nashr",
+    "description": "Jinoyat kodeksi, Ma'muriy javobgarlik, Sud va huquqni muhofaza qiluvchi organlar, Ekologiya huquqi, Jazo choralari va muddatlari.",
+    "examCoverage": "25–30 savollar (Jinoyat va Ma'muriy), 43–45 (Ochiq muddat va jarimalar)",
+    "filename": "11-sinf yangi.pdf",
+    "url": "/books/11-sinf%20yangi.pdf",
+    "size": "1 MB",
+    "icon": "fa-gavel",
+    "color": "indigo"
+  }
+]

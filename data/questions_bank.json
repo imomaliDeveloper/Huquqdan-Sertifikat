@@ -1,0 +1,102 @@
+[
+  {
+    "id": "Q101",
+    "section": "Mehnat huquqi",
+    "type": "Y-1",
+    "text": "Mehnat shartnomasida dastlabki sinov muddati ko‘pi bilan necha oydan oshishi mumkin emas?\n(Mehnat kodeksi, 130-modda)",
+    "options": ["1 oy", "2 oy", "3 oy", "6 oy"],
+    "correctIndex": 2,
+    "correctKey": "C",
+    "explanation": "Mehnat kodeksining 130-moddasiga ko‘ra, dastlabki sinov muddati uch oydan oshishi mumkin emas (tashkilot rahbarlari va ularning o‘rinbosarlari uchun esa olti oygacha)."
+  },
+  {
+    "id": "Q102",
+    "section": "Mehnat huquqi",
+    "type": "Y-1",
+    "text": "Xodimlarga har yilgi asosiy eng kam mehnat ta’tilining davomiyligi necha kalendar kunni tashkil etadi?\n(Mehnat kodeksi, 217-modda)",
+    "options": ["15 kun", "21 kun", "24 kun", "30 kun"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "Yangi Mehnat kodeksining 217-moddasiga binoan har yilgi asosiy eng kam mehnat ta’tili yigirma bir kalendar kundan kam bo‘lishi mumkin emas."
+  },
+  {
+    "id": "Q103",
+    "section": "Oila huquqi",
+    "type": "Y-1",
+    "text": "Nikoh yoshi erkaklar va ayollar uchun necha yosh etib belgilangan?\n(Oila kodeksi, 15-modda)",
+    "options": ["17 yosh", "18 yosh", "erkaklar 18, ayollar 17", "21 yosh"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "Oila kodeksining 15-moddasiga muvofiq, O‘zbekiston Respublikasida nikoh yoshi erkaklar va ayollar uchun bir xil — o‘n sakkiz yosh etib belgilangan."
+  },
+  {
+    "id": "Q104",
+    "section": "Jinoyat huquqi",
+    "type": "Y-1",
+    "text": "Jinoyat kodeksiga ko‘ra, jinoiy javobgarlikka tortishning umumiy yoshi necha yosh etib belgilangan?\n(Jinoyat kodeksi, 17-modda)",
+    "options": ["14 yosh", "16 yosh", "18 yosh", "21 yosh"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "JK 17-moddasiga ko‘ra, umumiy jinoiy javobgarlik yoshi 16 yoshdir. Ayrim o‘ta og‘ir jinoyatlar uchun esa 14 yoshdan javobgarlik belgilanadi."
+  },
+  {
+    "id": "Q105",
+    "section": "Fuqarolik huquqi",
+    "type": "Y-1",
+    "text": "Fuqarolik huquqida da’vo muddatining umumiy davomiyligi qancha?\n(Fuqarolik kodeksi, 150-modda)",
+    "options": ["1 yil", "3 yil", "5 yil", "10 yil"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "Fuqarolik kodeksining 150-moddasiga asosan umumiy da’vo muddati — uch yil qilib belgilangan."
+  },
+  {
+    "id": "Q106",
+    "section": "Konstitutsiyaviy huquq",
+    "type": "Y-1",
+    "text": "O‘zbekiston Respublikasi Prezidenti lavozimiga necha yil muddatga saylanadi?\n(Konstitutsiya, 106-modda)",
+    "options": ["4 yil", "5 yil", "7 yil", "Cheklanmagan"],
+    "correctIndex": 2,
+    "correctKey": "C",
+    "explanation": "Yangi tahrirdagi Konstitutsiyaning 106-moddasiga ko‘ra, O‘zbekiston Respublikasi Prezidenti yetti yil muddatga saylanadi."
+  },
+  {
+    "id": "Q107",
+    "section": "Ma'muriy huquq",
+    "type": "Y-1",
+    "text": "Ma’muriy huquqbuzarlik sodir etganlik uchun ma’muriy qamoqqa olish jazosi ko‘pi bilan necha sutkagacha qo‘llanilishi mumkin?\n(MJtK, 29-modda)",
+    "options": ["10 sutka", "15 sutka", "30 sutka", "60 sutka"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "MJtK 29-moddasiga ko‘ra, ma’muriy qamoqqa olish muddati o‘n besh sutkagacha (favqulodda holatda o‘ttiz sutkagacha) etib belgilangan."
+  },
+  {
+    "id": "Q108",
+    "section": "Oila huquqi",
+    "type": "Y-1",
+    "text": "Sud orqali ikki nafar bola uchun ota yoki onadan oylik daromadning qancha qismi miqdorida aliment undiriladi?\n(Oila kodeksi, 99-modda)",
+    "options": ["to‘rtdan bir qismi", "uchdan bir qismi", "yarmi", "beshdan bir qismi"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "Oila kodeksining 99-moddasiga binoan: 1 bola uchun 1/4 qismi, 2 bola uchun 1/3 qismi, 3 va undan ortiq bola uchun daromadning yarmi (1/2) undiriladi."
+  },
+  {
+    "id": "Q109",
+    "section": "Jinoyat huquqi",
+    "type": "Y-1",
+    "text": "Jinoyat kodeksiga binoan umrbod ozodlikdan mahrum qilish jazosi kimlarga nisbatan tayinlanishi MUMKIN?\n(Jinoyat kodeksi, 51-modda)",
+    "options": ["Ayollarga", "18 yoshga to‘lmagan shaxslarga", "60 yoshdan oshgan erkaklarga", "25 yoshli voyaga yetgan erkakka"],
+    "correctIndex": 3,
+    "correctKey": "D",
+    "explanation": "JK 51-moddasiga binoan umrbod ozodlikdan mahrum qilish jazosi ayollarga, o‘n sakkiz yoshga to‘lmagan shaxslarga va oltmish yoshdan oshgan erkaklarga nisbatan tayinlanmaydi."
+  },
+  {
+    "id": "Q110",
+    "section": "Davlat va huquq nazariyasi",
+    "type": "Y-1",
+    "text": "Davlatning boshqaruv shakli bo‘yicha qanday turlari mavjud?",
+    "options": ["Unitar va Federativ", "Monarxiya va Respublika", "Demokratik va Antidemokratik", "Konfederativ va Unitar"],
+    "correctIndex": 1,
+    "correctKey": "B",
+    "explanation": "Boshqaruv shakliga ko‘ra davlatlar Monarxiya va Respublikaga bo‘linadi. Tuzilish shakliga ko‘ra esa Unitar, Federativ va Konfederatsiyaga bo‘linadi."
+  }
+]

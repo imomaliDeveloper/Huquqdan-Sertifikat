@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "name": "Sardorbek Rahimov",
+    "score": 44,
+    "total": 45,
+    "percentage": 97.7,
+    "grade": "A+",
+    "timeSpent": "68 daqiqa",
+    "date": "18.11.2026"
+  },
+  {
+    "id": 2,
+    "name": "Madinabonu Aliyeva",
+    "score": 43,
+    "total": 45,
+    "percentage": 95.5,
+    "grade": "A+",
+    "timeSpent": "74 daqiqa",
+    "date": "17.11.2026"
+  },
+  {
+    "id": 3,
+    "name": "Jasurbek To'xtayev",
+    "score": 41,
+    "total": 45,
+    "percentage": 91.1,
+    "grade": "A",
+    "timeSpent": "81 daqiqa",
+    "date": "17.11.2026"
+  },
+  {
+    "id": 4,
+    "name": "Shahzoda Karimova",
+    "score": 39,
+    "total": 45,
+    "percentage": 86.6,
+    "grade": "A",
+    "timeSpent": "85 daqiqa",
+    "date": "16.11.2026"
+  },
+  {
+    "id": 5,
+    "name": "Bobur Mirzayev",
+    "score": 37,
+    "total": 45,
+    "percentage": 82.2,
+    "grade": "B+",
+    "timeSpent": "79 daqiqa",
+    "date": "16.11.2026"
+  },
+  {
+    "id": 1794992790483,
+    "name": "O'quvchi",
+    "score": 1,
+    "total": 45,
+    "percentage": 2,
+    "grade": "Qoniqarsiz",
+    "timeSpent": "0 daqiqa",
+    "date": "18/11/2026"
+  },
+  {
+    "id": 1794989818068,
+    "name": "O'quvchi",
+    "score": 0,
+    "total": 45,
+    "percentage": 0,
+    "grade": "Qoniqarsiz",
+    "timeSpent": "2 daqiqa",
+    "date": "18/11/2026"
+  },
+  {
+    "id": 1794991240918,
+    "name": "O'quvchi",
+    "score": 0,
+    "total": 45,
+    "percentage": 0,
+    "grade": "Qoniqarsiz",
+    "timeSpent": "0 daqiqa",
+    "date": "18/11/2026"
+  }
+]

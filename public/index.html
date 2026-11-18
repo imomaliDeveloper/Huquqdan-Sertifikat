@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="uz" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Huquq Milliy Sertifikat | BMBA Test Simulyatori</title>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Huquq Sertifikat">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Telegram WebApp JS SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      touch-action: manipulation;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.9);
+    }
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-6 select-none bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 flex items-center justify-between">
+    <div class="flex items-center space-x-2.5 cursor-pointer" onclick="showHome()">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-sm font-bold text-sm">
+        <i class="fa-solid fa-scale-balanced"></i>
+      </div>
+      <div>
+        <h1 class="text-xs font-bold tracking-tight text-slate-800 dark:text-white leading-tight">Huquq Sertifikat</h1>
+        <p class="text-[9px] text-emerald-600 font-semibold uppercase">BMBA Test Simulyatori</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+      <!-- Streak -->
+      <div id="headerStreak" class="flex items-center space-x-1 text-[11px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-full shadow-xs">
+        <i class="fa-solid fa-fire text-amber-500 animate-pulse"></i>
+        <span id="streakCount">1</span> kun
+      </div>
+
+      <!-- Leaderboard Trigger -->
+      <button onclick="openLeaderboardModal()" title="Reyting" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-slate-200 active:scale-95 transition">
+        <i class="fa-solid fa-trophy text-amber-500 text-xs"></i>
+      </button>
+
+      <!-- VIP Premium Trigger -->
+      <button onclick="openPremiumModal()" title="VIP A'zolik" class="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-extrabold text-[11px] shadow-sm flex items-center space-x-1 active:scale-95 transition">
+        <i class="fa-solid fa-crown text-[10px]"></i>
+        <span>VIP</span>
+      </button>
+
+      <!-- User Badge -->
+      <div id="userBadge" class="hidden sm:flex items-center space-x-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+        <i class="fa-regular fa-user text-emerald-500 text-xs"></i>
+        <span id="userName">O'quvchi</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main id="appContainer" class="flex-1 max-w-lg w-full mx-auto p-4">
+
+    <!-- VIEW 1: HOME DASHBOARD -->
+    <section id="viewHome" class="space-y-4">
+      <!-- Welcome Hero Banner -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-teal-700 to-slate-900 p-5 text-white shadow-lg">
+        <div class="relative z-10 space-y-2">
+          <div class="flex items-center space-x-2">
+            <span class="inline-block px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-500/30 border border-emerald-400/40 rounded-full text-emerald-200">
+              2026/2027 Yangi Format
+            </span>
+            <span class="inline-block px-2.5 py-0.5 text-[11px] font-bold bg-amber-400/30 border border-amber-300/40 rounded-full text-amber-200">
+              🤖 AI Repetitor
+            </span>
+          </div>
+          <h2 class="text-xl font-extrabold tracking-tight">Huquqshunoslik Milliy Testi</h2>
+          <p class="text-xs text-emerald-100 leading-relaxed">
+            Spesifikatsiyadagi 40 ta qonun, vaziyatli keyslar va ochiq topshiriqlar asosida o'z bilimingizni sinang.
+          </p>
+          <div class="pt-2 flex items-center space-x-4 text-xs text-emerald-200">
+            <span><i class="fa-regular fa-clock mr-1"></i> 90 daqiqa</span>
+            <span><i class="fa-solid fa-list-check mr-1"></i> 45 ta savol</span>
+            <span><i class="fa-solid fa-award mr-1"></i> Rash modeli</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-gavel absolute -right-4 -bottom-6 text-8xl text-white/10 pointer-events-none"></i>
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Select Variant from 50 Variants -->
+        <button onclick="openVariantsList()" class="p-4 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md text-left active:scale-95 transition col-span-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-xl">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold">50 ta Test Varianti (BMBA)</h3>
+                <p class="text-[11px] text-emerald-100">Barcha 45 talik yangi variantlar katalogi</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-white/20 text-xs font-bold">Tanlash <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+          </div>
+        </button>
+
+        <!-- Start Variant 1 Immediately -->
+        <button onclick="loadAndStartVariant(1)" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-emerald-500 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center text-lg mb-2">
+            <i class="fa-solid fa-play"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">1-Variant (T-760)</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Rasmiy BMBA varianti</p>
+        </button>
+
+        <!-- 4 ta Darslik Kitobi -->
+        <button onclick="openBooksDirectory()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-indigo-500 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 flex items-center justify-center text-lg mb-2">
+            <i class="fa-solid fa-book-open-reader"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">4 ta Darslik (PDF)</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">8, 9, 10, 11-sinf kitoblari</p>
+        </button>
+
+        <!-- Flashcards (Deadlines and Numbers) -->
+        <button onclick="openFlashcards()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-teal-500 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-950/50 text-teal-600 flex items-center justify-center text-lg mb-2">
+            <i class="fa-solid fa-stopwatch"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">Muddatlar & Foizlar</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Ochiq testlar trenajyori (64 ta)</p>
+        </button>
+
+        <!-- 40 Laws Directory -->
+        <button onclick="openLawsDirectory()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-blue-500 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center text-lg mb-2">
+            <i class="fa-solid fa-book-bookmark"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">40 ta Qonun</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Spesifikatsiya va Lex.uz</p>
+        </button>
+
+        <!-- 25 ta Vaziyatli Keyslar Banki (Y-2) -->
+        <button onclick="openCasesDirectory()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-amber-500 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center text-lg mb-2">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">25 ta Vaziyatli Keys</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Y-2 topshiriqlar banki</p>
+        </button>
+
+        <!-- Mening xatolarim (Xatolar ustida ishlash) -->
+        <button onclick="openMistakesTrainer()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-rose-500 active:scale-95 transition">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <span id="mistakesBadgeCount" class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-extrabold text-[10px]">0 ta</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">Mening xatolarim</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Xatolar ustida ishlash</p>
+        </button>
+
+        <!-- Foydali Kanallar & Hamjamiyat (@Huquq_study) -->
+        <button onclick="openChannelsDirectory()" class="p-4 rounded-xl bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 text-white shadow-md text-left active:scale-95 transition col-span-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-xl">
+                <i class="fa-brands fa-telegram text-sky-200"></i>
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <h3 class="text-sm font-extrabold">Huquqiy Kanallar & Hamjamiyat</h3>
+                  <span class="px-2 py-0.5 rounded-full bg-yellow-400 text-blue-950 text-[9px] font-black uppercase">7 ta kanal</span>
+                </div>
+                <p class="text-[11px] text-sky-100">@Huquq_study (Majburiy a'zolik) va rasmiy qonunchilik</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-white/20 text-xs font-bold">Ochish <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Mandatory Subscription Notice Banner -->
+      <div id="homeSubscriptionBanner" onclick="openSubscriptionModal()" class="p-3.5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-indigo-500/10 border border-sky-300 dark:border-sky-800 flex items-center justify-between cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-950/30 transition">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center text-sm shadow-xs">
+            <i class="fa-brands fa-telegram"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-1">
+              <span class="text-xs font-black text-slate-800 dark:text-white">@Huquq_study Rasmiy Kanali</span>
+              <span id="homeSubBadge" class="text-[9px] bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 px-1.5 py-0.2 rounded font-bold">Majburiy A'zolik</span>
+            </div>
+            <p id="homeSubStatusText" class="text-[10px] text-slate-500 dark:text-slate-400">To'liq imkoniyatlar uchun kanalga a'zo bo'ling</p>
+          </div>
+        </div>
+        <span id="homeSubStatusBtn" class="px-2.5 py-1 rounded-xl bg-sky-600 text-white font-bold text-[10px] shadow-xs">
+          Tekshirish
+        </span>
+      </div>
+
+      <!-- 🔥 HUQUQIY OCTAGON DUEL BANNER -->
+      <div onclick="openOctagonLobby()" class="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-red-600 via-rose-700 to-slate-900 text-white shadow-lg cursor-pointer hover:opacity-95 active:scale-98 transition space-y-2 border border-red-500/40">
+        <div class="flex items-center justify-between relative z-10">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur border border-white/20 flex items-center justify-center text-2xl shadow-inner text-yellow-300 animate-pulse">
+              <i class="fa-solid fa-hand-fist"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-yellow-400 text-red-950 uppercase tracking-wider">PvP Arena</span>
+                <span class="text-[10px] text-red-200 font-bold">1v1 Jonli Duel</span>
+              </div>
+              <h3 class="text-sm font-black tracking-wide uppercase mt-0.5">Huquqiy Octagon (Duel Jang)</h3>
+              <p class="text-[11px] text-red-100">Raqib bilan 5 raundlik qonuniy duelda kuch sinashing!</p>
+            </div>
+          </div>
+          <span class="px-3 py-1.5 rounded-xl bg-white/20 text-xs font-black tracking-wide border border-white/30 flex items-center space-x-1">
+            <span>Jangga kirish</span>
+            <i class="fa-solid fa-bolt text-yellow-300"></i>
+          </span>
+        </div>
+        <i class="fa-solid fa-shield-halved absolute -right-3 -bottom-5 text-7xl text-white/10 pointer-events-none"></i>
+      </div>
+
+      <!-- Monetization & VIP Access Banner (Card 9860 0366 7156 8792) -->
+      <div onclick="openPremiumModal()" class="p-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md cursor-pointer hover:opacity-95 active:scale-98 transition space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-lg">
+              <i class="fa-solid fa-crown text-yellow-200"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold leading-tight">💎 VIP Obuna & Barcha 50 ta Variant</h3>
+              <p class="text-[11px] text-amber-100">AI Repetitor, barcha yechimlar va sertifikat kafolati</p>
+            </div>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-white text-amber-700 font-extrabold text-xs shadow-sm">49 000 UZS</span>
+        </div>
+      </div>
+
+      <!-- Telegram Channel Quiz Autoposter Banner -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="fa-brands fa-telegram text-2xl text-sky-200"></i>
+            <div>
+              <h3 class="text-sm font-bold leading-tight">Telegram Kanalga Test Tashlash</h3>
+              <p class="text-[11px] text-blue-100">Kanal obunachilari uchun viktorina (Quiz)</p>
+            </div>
+          </div>
+          <span class="text-[10px] bg-sky-500/30 border border-sky-400/40 text-sky-100 px-2 py-0.5 rounded-full font-semibold">Admin</span>
+        </div>
+
+        <div class="flex items-center space-x-2 pt-1">
+          <button onclick="postTestToTelegramChannel()" id="btnPostToChannel" class="flex-1 py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs shadow transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Kanalga 1 ta Test Tashlash</span>
+          </button>
+          <button onclick="toggleAddQuestionModal()" class="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-plus"></i>
+            <span>Yangi Test</span>
+          </button>
+        </div>
+        <div id="channelPostStatus" class="hidden text-[11px] text-emerald-300 font-medium"></div>
+      </div>
+
+      <!-- Test Format Guide Card -->
+      <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+        <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center">
+          <i class="fa-solid fa-circle-info mr-2 text-emerald-600"></i> Imtihon Tuzilishi va Baholash
+        </h3>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900">
+            <span class="font-bold text-emerald-600 min-w-[55px]">1–32 (Y-1):</span>
+            <span class="text-slate-600 dark:text-slate-300">Yopiq testlar (nazariya, Konstitutsiya, atamalar). Har biri 1 balldan.</span>
+          </div>
+          <div class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900">
+            <span class="font-bold text-amber-600 min-w-[55px]">33–35 (Y-2):</span>
+            <span class="text-slate-600 dark:text-slate-300">Vaziyatli keys (25 ta sud va huquqiy amaliyot holati). Har biri 1.5 balldan.</span>
+          </div>
+          <div class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900">
+            <span class="font-bold text-sky-600 min-w-[55px]">36–45 (O):</span>
+            <span class="text-slate-600 dark:text-slate-300">Ochiq savollar (muddatlar, foizlar, atamalar). <strong>Gemini AI tekshiruvi mavjud!</strong></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: EXAM SIMULATOR -->
+    <section id="viewExam" class="hidden space-y-4">
+      <!-- Exam Control Header -->
+      <div class="sticky top-14 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span id="qBadgeType" class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Y-1</span>
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
+            Savol: <span id="currentQIndex" class="text-emerald-600">1</span> / 45
+          </span>
+        </div>
+
+        <div class="flex items-center space-x-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full font-mono text-xs font-bold text-slate-700 dark:text-slate-200" id="timerBox">
+          <i class="fa-regular fa-clock text-emerald-500" id="timerIcon"></i>
+          <span id="timerDisplay">90:00</span>
+        </div>
+
+        <button onclick="toggleGridModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-slate-200">
+          <i class="fa-solid fa-border-all text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Question Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <!-- Section / Subtitle -->
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2">
+          <span id="qSectionName" class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Davlat va huquq nazariyasi
+          </span>
+          <button onclick="toggleBookmark()" id="btnBookmark" class="text-slate-400 hover:text-amber-500 text-sm">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
+        </div>
+
+        <!-- Case-Study Scenario (For Y-2: Questions 33-35) -->
+        <div id="caseScenarioBox" class="hidden p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed space-y-1">
+          <div class="font-bold flex items-center text-[11px] text-amber-700 dark:text-amber-400">
+            <i class="fa-solid fa-file-contract mr-1.5"></i> Vaziyatli holat (Keys matni):
+          </div>
+          <p id="caseScenarioText" class="text-[11px] leading-relaxed"></p>
+        </div>
+
+        <!-- Question Text -->
+        <div id="questionText" class="text-sm font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+          Savol yuklanmoqda...
+        </div>
+
+        <!-- Closed Question Options (Y-1, Y-2) -->
+        <div id="optionsContainer" class="space-y-2"></div>
+
+        <!-- Open Question Input (O) -->
+        <div id="openAnswerContainer" class="hidden space-y-2">
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">
+            Javobingizni qisqa va aniq kiriting (son yoki so'z):
+          </label>
+          <div class="flex items-center space-x-2">
+            <input type="text" id="openAnswerInput" oninput="handleOpenInput(this.value)" placeholder="Masalan: 14 kun, 200 foiz..." class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-500 font-bold">
+            <button onclick="checkOpenAnswerLive()" id="btnCheckOpenAI" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center space-x-1">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>AI Tekshiruv</span>
+            </button>
+          </div>
+          <div id="openAnswerAiStatus" class="hidden p-2 rounded-lg text-[11px] font-medium"></div>
+        </div>
+
+        <!-- Source Reference Badge -->
+        <div class="pt-2 flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-100 dark:border-slate-700/60">
+          <span id="qBookSource"><i class="fa-solid fa-book mr-1"></i> Darslik</span>
+          <span id="qLawSource"><i class="fa-solid fa-scale-balanced mr-1"></i> Lex.uz</span>
+        </div>
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="prevQuestion()" id="btnPrev" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 disabled:opacity-40">
+          <i class="fa-solid fa-chevron-left mr-1"></i> Oldingisi
+        </button>
+
+        <button onclick="finishExamPrompt()" class="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold hover:bg-rose-100">
+          Yakunlash
+        </button>
+
+        <button onclick="nextQuestion()" id="btnNext" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-sm hover:bg-emerald-700">
+          Keyingisi <i class="fa-solid fa-chevron-right ml-1"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 3: RESULTS & DETAILED REVIEW -->
+    <section id="viewResult" class="hidden space-y-4">
+      <!-- Certificate Score Card -->
+      <div class="rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 p-6 text-white text-center shadow-lg relative overflow-hidden">
+        <div class="relative z-10 space-y-2">
+          <div class="w-16 h-16 mx-auto rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-3xl font-extrabold text-white">
+            <span id="resBadgeLevel">A</span>
+          </div>
+          <h2 class="text-lg font-bold">Imtihon Natijasi</h2>
+          <div class="flex justify-center items-baseline space-x-1">
+            <span id="resScore" class="text-4xl font-extrabold text-emerald-300">0</span>
+            <span class="text-sm text-emerald-100">/ 45 ball</span>
+          </div>
+          <p id="resPercent" class="text-xs text-emerald-100 font-medium">0% to'g'ri bajarildi</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="showHome()" class="py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200">
+          <i class="fa-solid fa-house mr-1"></i> Bosh sahifa
+        </button>
+        <button onclick="sendResultToTelegram()" class="py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-sm hover:bg-emerald-700">
+          <i class="fa-brands fa-telegram mr-1"></i> Botga yuborish
+        </button>
+      </div>
+
+      <!-- Certificate Button -->
+      <button onclick="openCertificateModal()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-xs shadow-md flex items-center justify-center space-x-2 active:scale-98 transition">
+        <i class="fa-solid fa-award text-base text-yellow-100"></i>
+        <span>📜 Rasmiy BMBA Sertifikatingizni Olish & Yuklab Olish</span>
+      </button>
+
+      <!-- 2. SHAXSIY STATISTIKA VA KUCHSIZ MAVZULAR (WEAK TOPICS) -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center">
+            <i class="fa-solid fa-chart-pie mr-2 text-emerald-600"></i> Sohalar diagnostikasi va Kuchsiz mavzular
+          </h3>
+          <span class="text-[10px] text-slate-400">BMBA mezonlari</span>
+        </div>
+        <div id="domainDiagnosticList" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Detailed Breakdown Header -->
+      <div class="pt-2">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">
+            Xatolar tahlili va Lex.uz sharhlari
+          </h3>
+          <span class="text-[10px] text-emerald-600 font-bold flex items-center">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI tahlil mavjud
+          </span>
+        </div>
+        <div id="resultsDetailedList" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: FLASHCARDS TRENAJYORI -->
+    <section id="viewFlashcards" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-teal-600">Muddatlar & Foizlar (64 ta kartochka)</span>
+      </div>
+
+      <div id="cardBox" onclick="flipCard()" class="w-full min-h-[260px] bg-white dark:bg-slate-800 rounded-2xl p-6 border-2 border-dashed border-teal-200 dark:border-teal-800 shadow-md flex flex-col justify-between cursor-pointer transition transform active:scale-98">
+        <div>
+          <div class="flex items-center justify-between text-[11px] text-teal-600 font-bold mb-3">
+            <span id="fcCategory">Kategoriya</span>
+            <span id="fcCounter">1 / 64</span>
+          </div>
+          <div id="fcQuestion" class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug">
+            Savol matni...
+          </div>
+        </div>
+
+        <div id="fcAnswerBox" class="hidden mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+          <div class="text-xs text-slate-400 font-medium">Javob va Qonun asosi:</div>
+          <div id="fcAnswer" class="text-lg font-extrabold text-teal-600 my-1">
+            Javob...
+          </div>
+          <div id="fcRef" class="text-[11px] text-slate-500">
+            Qonun moddasi
+          </div>
+        </div>
+
+        <div class="text-center pt-2">
+          <span class="text-[10px] text-slate-400 flex items-center justify-center">
+            <i class="fa-solid fa-arrows-rotate mr-1"></i> Javobni ko'rish uchun kartochkaga bosing
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="prevCard()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200">
+          <i class="fa-solid fa-chevron-left mr-1"></i> Oldingi
+        </button>
+        <button onclick="nextCard()" class="px-5 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700">
+          Keyingisi <i class="fa-solid fa-chevron-right ml-1"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 5: 40 TA QONUN RO'YXATI -->
+    <section id="viewLaws" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-blue-600">Spesifikatsiyadagi 40 ta Qonun</span>
+      </div>
+
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+        <input type="text" id="lawSearchInput" oninput="filterLaws()" placeholder="Qonun nomi yoki mavzuni qidiring..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500">
+      </div>
+
+      <div id="lawsListContainer" class="space-y-2 max-h-[70vh] overflow-y-auto pr-1"></div>
+    </section>
+
+    <!-- VIEW 6: 50 TA VARIANTLAR KATALOGI -->
+    <section id="viewVariants" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-emerald-600">50 ta Imtihon Varianti</span>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-center justify-between">
+        <div>
+          <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> 1–5 variantlar bepul. 6–50 variantlar VIP a'zolar uchun.
+        </div>
+        <button onclick="openPremiumModal()" class="px-2.5 py-1 bg-amber-500 text-white font-bold rounded-lg text-[10px] whitespace-nowrap ml-2">
+          💎 Ochish
+        </button>
+      </div>
+
+      <div id="variantsGridList" class="space-y-2.5 max-h-[72vh] overflow-y-auto pr-1"></div>
+    </section>
+
+    <!-- VIEW 7: 4 TA ASOSIY DARSLIK KITOBLARI (8, 9, 10, 11-sinf) -->
+    <section id="viewBooks" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-indigo-600">4 ta Asosiy Darslik Kitobi</span>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-xs text-indigo-900 dark:text-indigo-200 space-y-1">
+        <p class="font-bold flex items-center">
+          <i class="fa-solid fa-graduation-cap mr-1.5 text-indigo-600"></i> BMBA Milliy Test Manbasi:
+        </p>
+        <p class="text-[11px] leading-relaxed">
+          Ushbu 4 ta yangi darslik va 40 ta qonunchilik hujjati barcha 45 talik test variantlarining rasmiy manbasi hisoblanadi. PDF fayllarni to'g'ridan-to'g'ri o'qishingiz yoki yuklab olishingiz mumkin.
+        </p>
+      </div>
+
+      <div id="booksListContainer" class="space-y-3"></div>
+    </section>
+
+    <!-- VIEW 8: 25 TA VAZIYATLI KEYSLAR BANKI (Y-2) -->
+    <section id="viewCases" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-amber-600">25 ta Vaziyatli Keyslar (Y-2)</span>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+        <p class="font-bold flex items-center">
+          <i class="fa-solid fa-scale-balanced mr-1.5 text-amber-600"></i> BMBA Y-2 Vaziyatli Topshiriqlar Banki:
+        </p>
+        <p class="text-[11px] leading-relaxed">
+          Ushbu 25 ta keys 8, 9, 10, 11-sinf darsliklari va 40 ta qonunchilik asosidagi real sud va amaliyot holatlaridir. Har bir keys 3 ta chuqur savoldan (33, 34, 35) iborat.
+        </p>
+      </div>
+
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+        <input type="text" id="caseSearchInput" oninput="filterCases()" placeholder="Keys mavzusi yoki qonun moddasi bo'yicha qidiring..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-amber-500">
+      </div>
+
+      <div id="casesListContainer" class="space-y-3 max-h-[72vh] overflow-y-auto pr-1"></div>
+    </section>
+
+    <!-- VIEW 9: MENING XATOLARIM (XATOLAR USTIDA ISHLASH) -->
+    <section id="viewMistakes" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-rose-600">Xatolar ustida ishlash</span>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-900 dark:text-rose-200 space-y-1">
+        <p class="font-bold flex items-center">
+          <i class="fa-solid fa-brain mr-1.5 text-rose-600"></i> Shaxsiy Xatolar Banki:
+        </p>
+        <p class="text-[11px] leading-relaxed">
+          Variantlarda adashgan savollaringiz shu yerda saqlanadi. Har bir savolni tahlil qiling va takroriy xatoga yo'l qo'ymang.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
+          Jami xatolar: <span id="mistakesTotalNum" class="text-rose-600 font-extrabold">0</span> ta
+        </span>
+        <button onclick="clearAllMistakes()" class="text-[11px] text-slate-400 hover:text-rose-600 font-semibold flex items-center">
+          <i class="fa-regular fa-trash-can mr-1"></i> Hammasini tozalash
+        </button>
+      </div>
+
+      <div id="mistakesListContainer" class="space-y-3 max-h-[70vh] overflow-y-auto pr-1"></div>
+    </section>
+
+    <!-- VIEW 10: HUQUQIY OCTAGON (1v1 DUEL ARENA) -->
+    <section id="viewOctagon" class="hidden space-y-4">
+      <!-- Octagon Top Bar -->
+      <div class="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-red-700 via-rose-800 to-slate-900 text-white shadow-md">
+        <button onclick="exitOctagonPrompt()" class="text-xs text-red-200 hover:text-white flex items-center font-bold">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Chiqish
+        </button>
+        <div class="flex items-center space-x-2">
+          <span class="px-2 py-0.5 rounded-md bg-yellow-400 text-red-950 text-[10px] font-black uppercase">Octagon Ring</span>
+          <span id="octRoundIndicator" class="text-xs font-black text-white">Raund 1 / 5</span>
+        </div>
+        <!-- Round Timer -->
+        <div id="octTimerBox" class="w-8 h-8 rounded-full bg-red-950 border-2 border-yellow-400 flex items-center justify-center font-black text-xs text-yellow-300">
+          <span id="octTimerVal">15</span>
+        </div>
+      </div>
+
+      <!-- OCTAGON FIGHTERS HEAD-TO-HEAD HUD -->
+      <div class="p-4 rounded-2xl bg-slate-900 border-2 border-red-600/60 shadow-xl text-white relative overflow-hidden space-y-3">
+        <div class="grid grid-cols-11 items-center gap-2">
+          <!-- Fighter 1 (User) -->
+          <div class="col-span-5 space-y-1">
+            <div class="flex items-center space-x-2">
+              <div class="w-9 h-9 rounded-xl bg-emerald-600 border border-emerald-400 flex items-center justify-center font-black text-sm">
+                <i class="fa-solid fa-user-ninja"></i>
+              </div>
+              <div class="overflow-hidden">
+                <h4 id="octPlayerName" class="text-xs font-extrabold truncate">Siz</h4>
+                <p class="text-[9px] text-emerald-400 font-bold uppercase">Moviy Burchak</p>
+              </div>
+            </div>
+            <!-- Health Bar (User) -->
+            <div class="w-full bg-slate-800 rounded-full h-3.5 border border-slate-700 overflow-hidden relative">
+              <div id="octPlayerHpBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300 w-full"></div>
+              <span id="octPlayerHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black tracking-wider text-white">100 HP</span>
+            </div>
+          </div>
+
+          <!-- VS Emblem in Center -->
+          <div class="col-span-1 text-center">
+            <div class="w-8 h-8 mx-auto rounded-full bg-red-600 border border-yellow-300 flex items-center justify-center text-[10px] font-black text-yellow-300 shadow-lg animate-pulse-slow">
+              VS
+            </div>
+          </div>
+
+          <!-- Fighter 2 (Opponent) -->
+          <div class="col-span-5 space-y-1 text-right">
+            <div class="flex items-center justify-end space-x-2">
+              <div class="overflow-hidden">
+                <h4 id="octOpponentName" class="text-xs font-extrabold truncate">Advokat Aliyev</h4>
+                <p class="text-[9px] text-red-400 font-bold uppercase">Qizil Burchak</p>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-red-600 border border-red-400 flex items-center justify-center font-black text-sm">
+                <i class="fa-solid fa-user-shield"></i>
+              </div>
+            </div>
+            <!-- Health Bar (Opponent) -->
+            <div class="w-full bg-slate-800 rounded-full h-3.5 border border-slate-700 overflow-hidden relative">
+              <div id="octOpponentHpBar" class="bg-gradient-to-l from-rose-500 to-red-600 h-full transition-all duration-300 w-full ml-auto"></div>
+              <span id="octOpponentHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black tracking-wider text-white">100 HP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Combat Floating Impact Text -->
+        <div id="octCombatImpact" class="hidden text-center text-xs font-black py-1 rounded-lg"></div>
+      </div>
+
+      <!-- Duel Question Card -->
+      <div id="octQuestionCard" class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-700/60 pb-2">
+          <span id="octQCategory"><i class="fa-solid fa-gavel mr-1 text-red-600"></i> Duel Savoli</span>
+          <span class="text-yellow-600 font-extrabold">+25 HP Zarba</span>
+        </div>
+
+        <div id="octQuestionText" class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+          Duel savoli yuklanmoqda...
+        </div>
+
+        <!-- 4 Options for Duel -->
+        <div id="octOptionsContainer" class="space-y-2 pt-1"></div>
+      </div>
+
+      <!-- Post-Match Result Modal inside Octagon -->
+      <div id="octResultModal" class="hidden p-5 rounded-2xl bg-slate-900 border-2 border-yellow-400 text-white text-center space-y-4 shadow-2xl animate-fade-in">
+        <div id="octResultIcon" class="w-16 h-16 mx-auto rounded-full bg-yellow-400/20 text-yellow-400 flex items-center justify-center text-3xl border-2 border-yellow-400">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <div>
+          <h3 id="octResultTitle" class="text-lg font-black uppercase text-yellow-300">G'alaba! (Knockout)</h3>
+          <p id="octResultDesc" class="text-xs text-slate-300 mt-1">Siz raqibingizni qonuniy dalillar bilan to'liq mag'lub etdingiz!</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-mono">
+          <span class="text-emerald-400 font-bold">+25 Reyting Bali</span> | Octagon Chempioni
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="startOctagonBattle()" class="py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-xs flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>Qayta Jang</span>
+          </button>
+          <button onclick="showHome()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs">
+            Bosh sahifa
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 11: FOYDALI KANALLAR VA HAMJAMIYAT (@Huquq_study) -->
+    <section id="viewChannels" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-bold text-sky-600">Huquqiy Kanallar & Hamjamiyat</span>
+      </div>
+
+      <!-- Mandatory Channel Hero Banner (@Huquq_study) -->
+      <div class="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-700 text-white shadow-lg space-y-3 border border-sky-400/30">
+        <div class="flex items-start justify-between relative z-10">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-2xl shadow-inner text-yellow-300">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] bg-yellow-400/20 text-yellow-200 border border-yellow-300/30 px-2 py-0.5 rounded-full font-extrabold uppercase">Asosiy Rasmiy Kanal</span>
+                <span id="channelSubscribedBadge" class="text-[10px] bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold hidden">
+                  <i class="fa-solid fa-check mr-1"></i> A'zo bo'lingan
+                </span>
+              </div>
+              <h3 class="text-base font-black tracking-wide mt-1">@Huquq_study</h3>
+              <p class="text-[11px] text-sky-100">Huquq Study | BMBA Milliy Sertifikat</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-blue-50 leading-relaxed relative z-10">
+          Ushbu kanalimizda har kuni yangi 45 talik testlar, vaziyatli keyslar, 40 ta qonunning dolzarb tahlili va sertifikat yangiliklari joylab boriladi.
+        </p>
+
+        <div class="flex items-center space-x-2 pt-1 relative z-10">
+          <a href="https://t.me/Huquq_study" target="_blank" onclick="markChannelOpened()" class="flex-1 py-2.5 px-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-black text-xs text-center shadow transition flex items-center justify-center space-x-1.5">
+            <i class="fa-brands fa-telegram text-base text-blue-500"></i>
+            <span>Kanalga A'zo Bo'lish ↗️</span>
+          </a>
+          <button onclick="verifyChannelSubscription(true)" class="py-2.5 px-3.5 rounded-xl bg-blue-500/40 hover:bg-blue-500/60 border border-white/30 text-white font-bold text-xs transition flex items-center space-x-1">
+            <i class="fa-solid fa-shield-check"></i>
+            <span>Tekshirish</span>
+          </button>
+        </div>
+        <i class="fa-brands fa-telegram absolute -right-4 -bottom-6 text-8xl text-white/10 pointer-events-none"></i>
+      </div>
+
+      <!-- Search & Category Filters -->
+      <div class="space-y-2">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+          <input type="text" id="channelSearchInput" oninput="filterChannelsList()" placeholder="Kanal nomi yoki mavzusi bo'yicha qidiring..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar" id="channelCategoryTabs">
+          <button onclick="filterChannelCategory('all')" class="channel-tab-btn active px-3 py-1.5 rounded-xl font-bold bg-sky-600 text-white whitespace-nowrap shadow-xs">
+            Barchasi (7)
+          </button>
+          <button onclick="filterChannelCategory('O\'quv')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
+            O'quv & Tayyorgarlik
+          </button>
+          <button onclick="filterChannelCategory('Rasmiy')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
+            Rasmiy Davlat
+          </button>
+          <button onclick="filterChannelCategory('Sud')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
+            Sud & Amaliyot
+          </button>
+          <button onclick="filterChannelCategory('Test')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
+            Viktorinalar
+          </button>
+        </div>
+      </div>
+
+      <!-- Channels List Container -->
+      <div id="channelsListContainer" class="space-y-3 max-h-[65vh] overflow-y-auto pr-1"></div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. MODAL: AI Repetitor Tahlili (Explain Modal) -->
+  <div id="aiExplainModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <div class="flex items-center space-x-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold text-slate-800 dark:text-white">AI Repetitor (Gemini 3.8)</h3>
+            <p class="text-[9px] text-slate-400">Xatolar ustida qonuniy tahlil</p>
+          </div>
+        </div>
+        <button onclick="closeAiExplainModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="aiExplainLoading" class="hidden py-8 text-center space-y-2">
+        <div class="w-8 h-8 mx-auto border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-xs text-slate-500 font-medium">Sun'iy intellekt qonun moddasini tahlil qilmoqda...</p>
+      </div>
+
+      <div id="aiExplainContent" class="space-y-3 text-xs leading-relaxed">
+        <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
+          <h4 class="font-bold mb-1 flex items-center text-[11px]">
+            <i class="fa-solid fa-scale-balanced mr-1.5 text-emerald-600"></i> Qonun moddasi:
+          </h4>
+          <p id="aiLawArticle" class="font-mono text-[11px]"></p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
+          <h4 class="font-bold mb-1 flex items-center text-[11px]">
+            <i class="fa-solid fa-chalkboard-user mr-1.5 text-indigo-500"></i> Nega aynan shu javob to'g'ri?
+          </h4>
+          <p id="aiExplanationText"></p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+          <h4 class="font-bold mb-1 flex items-center text-[11px]">
+            <i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600"></i> Abituriyentlar eng ko'p qiladigan xato:
+          </h4>
+          <p id="aiMistakeReason"></p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 text-sky-900 dark:text-sky-200">
+          <h4 class="font-bold mb-1 flex items-center text-[11px]">
+            <i class="fa-solid fa-brain mr-1.5 text-sky-600"></i> Imtihonda eslab qolish yo'li (Mnemonika):
+          </h4>
+          <p id="aiMemoryTip"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 2. MODAL: Reyting & Leaderboard (TOP-10) -->
+  <div id="leaderboardModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white">TOP-10 O'quvchilar Reytingi</h3>
+            <p class="text-[10px] text-slate-400">BMBA Milliy Test Tizimi natijalari</p>
+          </div>
+        </div>
+        <button onclick="closeLeaderboardModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="leaderboardList" class="space-y-2 text-xs"></div>
+    </div>
+  </div>
+
+
+  <!-- 3. MODAL: VIP Obuna & Monetizatsiya (Card: 9860 0366 7156 8792) -->
+  <div id="premiumModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white">VIP A'zolik & 50 ta Variant</h3>
+            <p class="text-[10px] text-amber-600 font-semibold">Bir martalik to'liq kirish</p>
+          </div>
+        </div>
+        <button onclick="closePremiumModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Benefits list -->
+      <div class="space-y-2 text-xs">
+        <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+          <i class="fa-solid fa-circle-check text-emerald-500"></i>
+          <span>Barcha <strong>50 ta to'liq BMBA test variantlari</strong> (2 250 ta savol)</span>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+          <i class="fa-solid fa-circle-check text-emerald-500"></i>
+          <span><strong>Cheksiz AI Repetitor (Gemini 3.8)</strong> tahlillari</span>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+          <i class="fa-solid fa-circle-check text-emerald-500"></i>
+          <span>Barcha 40 ta qonun bo'yicha maxsus keyslar va sharhlar</span>
+        </div>
+      </div>
+
+      <!-- Payment Card Details -->
+      <div class="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Humo Karta</span>
+          <span class="text-xs font-bold text-amber-400">49 000 UZS</span>
+        </div>
+
+        <div class="font-mono text-lg font-extrabold tracking-widest text-emerald-400" id="cardNumberDisplay">
+          9860 0366 7156 8792
+        </div>
+
+        <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-700/80">
+          <span class="text-[11px] text-slate-300">Huquq Sertifikat Markazi</span>
+          <button onclick="copyCardNumber()" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center space-x-1 shadow transition">
+            <i class="fa-regular fa-copy"></i>
+            <span id="copyBtnText">Nusxa olish</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Steps to activate -->
+      <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+        <p class="font-bold flex items-center">
+          <i class="fa-solid fa-info-circle mr-1.5 text-amber-600"></i> Qanday faollashtiriladi?
+        </p>
+        <p class="text-[11px]">1. Yuqoridagi kartaga 49 000 so'm to'lang (Click, Payme, Uzum orqali).</p>
+        <p class="text-[11px]">2. To'lov chekini pastdagi tugma orqali adminga yuboring.</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="space-y-2.5">
+        <!-- Receipt submission form -->
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <i class="fa-solid fa-receipt mr-1 text-emerald-600"></i> To'lov cheki yoki Telegram @username:
+          </label>
+          <div class="flex items-center space-x-2">
+            <input type="text" id="receiptTxInput" placeholder="Masalan: Click tranzaksiya № yoki @username" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500">
+            <button onclick="submitPaymentReceipt()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow whitespace-nowrap">
+              Yuborish
+            </button>
+          </div>
+          <div id="receiptSubmitStatus" class="hidden text-[11px] font-semibold text-emerald-600"></div>
+        </div>
+
+        <button onclick="openTelegramAdminContact()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow transition">
+          <i class="fa-brands fa-telegram text-base"></i>
+          <span>Telegram orqali to'lov chekini yuborish</span>
+        </button>
+
+        <div class="flex items-center space-x-2 pt-1">
+          <input type="text" id="promoCodeInput" placeholder="Promo-kod (masalan: BMBA2026)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+          <button onclick="applyPromoCode()" class="px-4 py-2 bg-slate-800 text-white dark:bg-slate-700 font-bold text-xs rounded-xl hover:bg-slate-900">
+            Kiritish
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 4. MODAL: Question Matrix / Navigator Grid (1..45) -->
+  <div id="gridModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-slate-800 dark:text-white flex items-center">
+          <i class="fa-solid fa-table-cells mr-2 text-emerald-600"></i> Savollar xaritasi
+        </h3>
+        <button onclick="toggleGridModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-5 gap-2" id="gridModalContent"></div>
+    </div>
+  </div>
+
+
+  <!-- 5. MODAL: Rasmiy BMBA Elektron Sertifikat -->
+  <div id="certificateModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl p-5 space-y-4 shadow-2xl border border-amber-300 dark:border-amber-700/60 my-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-800 dark:text-white">BMBA Milliy Sertifikati</h3>
+            <p class="text-[10px] text-amber-600 font-semibold">Rasmiy namunadagi elektron sertifikat</p>
+          </div>
+        </div>
+        <button onclick="closeCertificateModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Ismni tahrirlash inputi -->
+      <div class="flex items-center space-x-2">
+        <label class="text-[11px] font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Sertifikat egasi:</label>
+        <input type="text" id="certStudentNameInput" oninput="updateCertName(this.value)" placeholder="Ism Sharifingizni kiriting" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-slate-800 font-bold text-slate-800 dark:text-white focus:outline-none">
+      </div>
+
+      <!-- SERTIFIKAT BLOKI -->
+      <div id="printableCertificate" class="relative overflow-hidden rounded-xl border-4 border-amber-500/80 bg-gradient-to-br from-amber-50 via-white to-amber-50/50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-5 text-center shadow-inner space-y-3">
+        <!-- Bezakli ramka burchaklari -->
+        <div class="absolute top-1.5 left-1.5 w-6 h-6 border-t-2 border-l-2 border-amber-600 pointer-events-none"></div>
+        <div class="absolute top-1.5 right-1.5 w-6 h-6 border-t-2 border-r-2 border-amber-600 pointer-events-none"></div>
+        <div class="absolute bottom-1.5 left-1.5 w-6 h-6 border-b-2 border-l-2 border-amber-600 pointer-events-none"></div>
+        <div class="absolute bottom-1.5 right-1.5 w-6 h-6 border-b-2 border-r-2 border-amber-600 pointer-events-none"></div>
+
+        <!-- Gerb va Rasmiy Sarlavha -->
+        <div class="space-y-1">
+          <div class="w-12 h-12 mx-auto rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-md border-2 border-amber-400">
+            <i class="fa-solid fa-scale-balanced"></i>
+          </div>
+          <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            O'zbekiston Respublikasi Bilim va Malakalarni Baholash Agentligi (BMBA)
+          </p>
+          <h2 class="text-base font-black tracking-tight text-slate-800 dark:text-white uppercase">
+            Huquqshunoslik Milliy Sertifikati
+          </h2>
+          <p class="text-[10px] text-amber-700 dark:text-amber-400 font-mono font-bold" id="certSerialNum">
+            № BMBA-2026-HQ-84920
+          </p>
+        </div>
+
+        <!-- Berildi -->
+        <div class="py-1 border-y border-amber-200 dark:border-amber-800/60 my-2">
+          <p class="text-[10px] text-slate-500 italic">Mazkur sertifikat tasdiqlaydi:</p>
+          <h3 id="certDisplayName" class="text-lg font-black text-slate-900 dark:text-amber-300 tracking-wide capitalize my-1">
+            Abdurahmonov Jasur
+          </h3>
+          <p class="text-[10px] text-slate-600 dark:text-slate-300">
+            Davlat ta'lim standartlari va 40 ta qonunchilik hujjati bo'yicha milliy test sinovidan muvaffaqiyatli o'tdi.
+          </p>
+        </div>
+
+        <!-- Natija va Daraja -->
+        <div class="grid grid-cols-2 gap-2 p-2 rounded-xl bg-amber-100/60 dark:bg-slate-800/80 border border-amber-300 dark:border-amber-700/60 text-center">
+          <div>
+            <span class="text-[10px] text-slate-500 font-semibold block">To'plangan Ball:</span>
+            <span id="certScoreDisplay" class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">42 / 45 (93%)</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 font-semibold block">Sertifikat Darajasi:</span>
+            <span id="certGradeBadge" class="inline-block px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500 text-white shadow-xs">A+ (A'lo)</span>
+          </div>
+        </div>
+
+        <!-- Imtiyoz matni -->
+        <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60" id="certPrivilegeText">
+          🎓 OTMga kirish imtihonlarida Huquqshunoslik fanidan 100% maksimal ball beriladi.
+        </div>
+
+        <!-- Pastki rekvizitlar va QR kod -->
+        <div class="flex items-center justify-between text-[9px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div class="text-left font-mono">
+            <div>Sana: <span id="certDateDisplay">18.11.2026</span></div>
+            <div>Holati: <span class="text-emerald-600 font-bold">FAOL (VERIFIED)</span></div>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <div class="w-9 h-9 border border-slate-300 dark:border-slate-700 rounded bg-white p-0.5 flex items-center justify-center text-slate-800">
+              <i class="fa-solid fa-qrcode text-2xl"></i>
+            </div>
+            <div class="text-[8px] text-right text-slate-400">
+              Agentlik maxsus<br>elektron muhri
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="downloadCertificateAsImage()" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow transition">
+          <i class="fa-solid fa-download"></i>
+          <span>Rasm qilib yuklash</span>
+        </button>
+        <button onclick="shareCertificateToTelegram()" class="py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow transition">
+          <i class="fa-brands fa-telegram"></i>
+          <span>Telegramda ulashish</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 6. MODAL: Test Qo'shish (Admin Modal) -->
+  <div id="addQuestionModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-slate-800 dark:text-white flex items-center">
+          <i class="fa-solid fa-circle-plus mr-2 text-sky-600"></i> Yangi Test Savoli Qo'shish
+        </h3>
+        <button onclick="toggleAddQuestionModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateQuestion(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">Savol matni:</label>
+          <textarea id="newQText" rows="2" required placeholder="Savol matnini kiriting..." class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-sky-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-500 mb-1">A varianti:</label>
+            <input type="text" id="newQOptA" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-500 mb-1">B varianti:</label>
+            <input type="text" id="newQOptB" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-500 mb-1">C varianti:</label>
+            <input type="text" id="newQOptC" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-500 mb-1">D varianti:</label>
+            <input type="text" id="newQOptD" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">To'g'ri variant:</label>
+          <select id="newQCorrect" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold">
+            <option value="0">A varianti</option>
+            <option value="1">B varianti</option>
+            <option value="2">C varianti</option>
+            <option value="3">D varianti</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">Qonuniy izoh (Explanation):</label>
+          <input type="text" id="newQExplanation" required placeholder="Masalan: Mehnat kodeksining 130-moddasiga binoan..." class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow transition">
+          <i class="fa-solid fa-plus mr-1"></i> Bazaga saqlash
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. MODAL: Majburiy A'zolik (@Huquq_study) -->
+  <div id="subscriptionModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3 animate-fade-in">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/60 text-sky-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-brands fa-telegram"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-800 dark:text-white">Rasmiy Kanalga A'zolik</h3>
+            <p class="text-[10px] text-sky-600 font-semibold">@Huquq_study | Milliy Sertifikat</p>
+          </div>
+        </div>
+        <button onclick="closeSubscriptionModal()" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-center space-y-2">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center text-2xl shadow-md">
+          <i class="fa-solid fa-bullhorn animate-pulse"></i>
+        </div>
+        <h4 class="text-sm font-black text-slate-800 dark:text-white">Bot va Ilovadan To'liq Foydalanish</h4>
+        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          50 ta variant, 25 ta vaziyatli keys, AI tahlillari va Octagon duelida qatnashish uchun avval rasmiy kanalimizga obuna bo'lishingiz talab etiladi:
+        </p>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 text-xs font-bold text-sky-600 dark:text-sky-300 flex items-center justify-center space-x-2">
+          <i class="fa-brands fa-telegram text-base"></i>
+          <span>@Huquq_study</span>
+          <span class="text-[10px] text-slate-400 font-normal">(18.5K+ obunachi)</span>
+        </div>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <a href="https://t.me/Huquq_study" target="_blank" onclick="markChannelOpened()" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-brands fa-telegram text-base"></i>
+          <span>1. Kanalga A'zo Bo'lish ↗️</span>
+        </a>
+        <button onclick="verifyChannelSubscription(true)" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-check-double"></i>
+          <span>2. A'zolikni Tasdiqlash & Kirish</span>
+        </button>
+        <button onclick="openChannelsDirectory(); closeSubscriptionModal();" class="w-full py-2 text-center text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 font-bold">
+          🏛️ Barcha 7 ta huquqiy kanalni ko'rish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl hidden transition-all">
+    <span id="toastMessage"></span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/exam_data.js?v=8"></script>
+  <script src="js/flashcards.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
+</body>
+</html>

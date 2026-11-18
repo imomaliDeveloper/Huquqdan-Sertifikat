@@ -1,0 +1,1202 @@
+{
+  "id": "VAR-9",
+  "variantNumber": 9,
+  "title": "Variant 9 (BMBA Standart)",
+  "totalQuestions": 45,
+  "timeMinutes": 90,
+  "description": "BMBA milliy sertifikat spesifikatsiyasiga to'liq mos variant №9. Manbalar: 8, 9, 10, 11-sinf darsliklari hamda 40 ta normativ-huquqiy hujjat.",
+  "specification": {
+    "total": 45,
+    "y1Closed": 32,
+    "y2Cases": 3,
+    "oOpen": 10,
+    "sources": {
+      "textbooks": [
+        "8-sinf yangi.pdf",
+        "9-sinf yangi.pdf",
+        "10-sinf yangi.pdf",
+        "11-sinf yangi.pdf"
+      ],
+      "lawsCount": 40
+    }
+  },
+  "sections": [
+    {
+      "id": 1,
+      "name": "Davlat va huquq nazariyasi (asoslari)",
+      "range": [
+        1,
+        6
+      ],
+      "source": "8-sinf darsligi"
+    },
+    {
+      "id": 2,
+      "name": "Konstitutsiyaviy huquq asoslari",
+      "range": [
+        7,
+        17
+      ],
+      "source": "9-sinf darsligi & Yangi Konstitutsiya"
+    },
+    {
+      "id": 3,
+      "name": "Huquq sohalari (Fuqarolik, Mehnat, Oila, Jinoyat, Ma'muriy)",
+      "range": [
+        18,
+        35
+      ],
+      "source": "10-11 sinf darsliklari & Kodekslar"
+    },
+    {
+      "id": 4,
+      "name": "Ochiq topshiriqlar (qisqa javobli muddatlar)",
+      "range": [
+        36,
+        45
+      ],
+      "source": "40 ta Qonun muddatlari va stavkalari"
+    }
+  ],
+  "questions": [
+    {
+      "num": 1,
+      "type": "Y-1",
+      "section": "Davlat va huquq nazariyasi",
+      "text": "Huquqiy ongning tarkibiy qismlari qaysi javobda to'g'ri ko'rsatilgan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Huquqiy mafkura va huquqiy psixologiya"
+        },
+        {
+          "key": "B",
+          "text": "Faqat qonunlarni yoddan bilish"
+        },
+        {
+          "key": "C",
+          "text": "Sud amaliyoti va tergov usullari"
+        },
+        {
+          "key": "D",
+          "text": "Axloqiy qoidalar va urf-odatlar"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Huquqiy ong ikki asosiy elementdan iborat: Huquqiy mafkura (nazariy, ilmiy qarashlar) va Huquqiy psixologiya (his-tuyg'ular, munosabat).",
+      "bookSource": "8-sinf darsligi (Huquqiy ong va huquqiy madaniyat)",
+      "lawSource": "Davlat va huquq nazariyasi"
+    },
+    {
+      "num": 2,
+      "type": "Y-1",
+      "section": "Davlat va huquq nazariyasi",
+      "text": "Davlatning boshqaruv shakli deganda nima tushuniladi?\n1) Davlat oliy hokimiyat organlarini tashkil etish, ularning tuzilishi va xalq bilan munosabatlari;\n2) Davlatning hududiy bo‘linishi va markaz bilan hududlar munosabati;\n3) Davlat hokimiyatini amalga oshirish usul va vositalari;\n4) Davlat suverenitetini ta’minlash usullari.",
+      "options": [
+        {
+          "key": "A",
+          "text": "1"
+        },
+        {
+          "key": "B",
+          "text": "2"
+        },
+        {
+          "key": "C",
+          "text": "3"
+        },
+        {
+          "key": "D",
+          "text": "4"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Davlat boshqaruv shakli — davlat oliy hokimiyat organlarining tashkil etilishi, tuzilishi va ularning xalq bilan munosabatlari tartibini ifodalaydi.",
+      "bookSource": "8-sinf Davlat va huquq asoslari darsligi (1-bob)",
+      "lawSource": "Davlat va huquq nazariyasi kursi (BMBA 1-mavzu)"
+    },
+    {
+      "num": 3,
+      "type": "Y-1",
+      "section": "Davlat va huquq nazariyasi",
+      "text": "Davlatning hududiy-ma’muriy tuzilishi shakliga ko‘ra qanday asosiy turlari mavjud?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Monarxiya va Respublika"
+        },
+        {
+          "key": "B",
+          "text": "Unitar, Federatsiya va Konfederatsiya"
+        },
+        {
+          "key": "C",
+          "text": "Demokratik, Avtoritar va Totalitar"
+        },
+        {
+          "key": "D",
+          "text": "Prezidentlik, Parlamentar va Aralash"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Hududiy tuzilishiga ko‘ra davlatlar unitar (yaxlit), federativ (ittifoqdosh davlatlar) va konfederativ (davlatlar ittifoqi) shakllarda bo‘ladi.",
+      "bookSource": "8-sinf darsligi (Davlatning tuzilish shakli)",
+      "lawSource": "O'zbekiston Respublikasi Konstitutsiyasi, 1-modda"
+    },
+    {
+      "num": 4,
+      "type": "Y-1",
+      "section": "Davlat va huquq nazariyasi",
+      "text": "Inson irodasiga bog‘liq bo‘lmagan, lekin qonunga asosan huquqiy oqibat keltirib chiqaradigan yuridik faktlar nima deb ataladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yuridik harakatlar"
+        },
+        {
+          "key": "B",
+          "text": "Yuridik hodisalar"
+        },
+        {
+          "key": "C",
+          "text": "Huquqiy aktlar"
+        },
+        {
+          "key": "D",
+          "text": "Yuridik qilmishlar"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Inson irodasiga bog‘liq bo‘lmagan voqeliklar (tabiiy ofat, shaxsning tug‘ilishi yoki vafoti, muddatning o‘tishi) yuridik hodisalardir.",
+      "bookSource": "8-sinf darsligi (Yuridik faktlar tasnifi)",
+      "lawSource": "Fuqarolik kodeksi, 8-modda (8-qonun)"
+    },
+    {
+      "num": 5,
+      "type": "Y-1",
+      "section": "Davlat va huquq nazariyasi",
+      "text": "Huquqiy ongning tarkibiy qismlari qaysi javobda to'g'ri ko'rsatilgan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Huquqiy mafkura va huquqiy psixologiya"
+        },
+        {
+          "key": "B",
+          "text": "Faqat qonunlarni yoddan bilish"
+        },
+        {
+          "key": "C",
+          "text": "Sud amaliyoti va tergov usullari"
+        },
+        {
+          "key": "D",
+          "text": "Axloqiy qoidalar va urf-odatlar"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Huquqiy ong ikki asosiy elementdan iborat: Huquqiy mafkura (nazariy, ilmiy qarashlar) va Huquqiy psixologiya (his-tuyg'ular, munosabat).",
+      "bookSource": "8-sinf darsligi (Huquqiy ong va huquqiy madaniyat)",
+      "lawSource": "Davlat va huquq nazariyasi"
+    },
+    {
+      "num": 6,
+      "type": "Y-1",
+      "section": "Davlat va huquq nazariyasi",
+      "text": "Davlatning boshqaruv shakli deganda nima tushuniladi?\n1) Davlat oliy hokimiyat organlarini tashkil etish, ularning tuzilishi va xalq bilan munosabatlari;\n2) Davlatning hududiy bo‘linishi va markaz bilan hududlar munosabati;\n3) Davlat hokimiyatini amalga oshirish usul va vositalari;\n4) Davlat suverenitetini ta’minlash usullari.",
+      "options": [
+        {
+          "key": "A",
+          "text": "1"
+        },
+        {
+          "key": "B",
+          "text": "2"
+        },
+        {
+          "key": "C",
+          "text": "3"
+        },
+        {
+          "key": "D",
+          "text": "4"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Davlat boshqaruv shakli — davlat oliy hokimiyat organlarining tashkil etilishi, tuzilishi va ularning xalq bilan munosabatlari tartibini ifodalaydi.",
+      "bookSource": "8-sinf Davlat va huquq asoslari darsligi (1-bob)",
+      "lawSource": "Davlat va huquq nazariyasi kursi (BMBA 1-mavzu)"
+    },
+    {
+      "num": 7,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaga ko‘ra O‘zbekiston Respublikasi Prezidenti necha yil muddatga saylanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "4 yil"
+        },
+        {
+          "key": "B",
+          "text": "5 yil"
+        },
+        {
+          "key": "C",
+          "text": "7 yil"
+        },
+        {
+          "key": "D",
+          "text": "6 yil"
+        }
+      ],
+      "correct": "C",
+      "explanation": "Konstitutsiyaning 106-moddasiga asosan O‘zbekiston Respublikasi Prezidenti O‘zbekiston Respublikasining fuqarolari tomonidan yetti yil muddatga saylanadi.",
+      "bookSource": "9-sinf darsligi (Prezidentlik instituti)",
+      "lawSource": "Konstitutsiya, 106-modda & Saylov kodeksi"
+    },
+    {
+      "num": 8,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaning 55-moddasiga ko‘ra shaxs milliy himoya vositalarining barchasidan foydalanib bo‘lganidan so‘ng o'z huquqlarini himoya qilish uchun qayerga murojaat qilishga haqli?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Inson huquqlarini himoya qiluvchi xalqaro organlarga"
+        },
+        {
+          "key": "B",
+          "text": "Boshqa xorijiy davlatlarning tuman sudlariga"
+        },
+        {
+          "key": "C",
+          "text": "Xorijiy elchixonalarga"
+        },
+        {
+          "key": "D",
+          "text": "Hech qayerga murojaat qila olmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "55-moddaga ko‘ra har kim davlatning huquqiy himoyaga doir barcha vositalaridan foydalanib bo‘lganidan so‘ng inson huquqlarini himoya qiluvchi xalqaro organlarga murojaat qilishga haqlidir.",
+      "bookSource": "9-sinf darsligi (Huquqiy himoya vositalari)",
+      "lawSource": "Konstitutsiya, 55-modda (1-qonun)"
+    },
+    {
+      "num": 9,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaga muvofiq, O‘zbekiston Respublikasi Vazirlar Mahkamasi o‘z faoliyatida kimlarning oldida javobgardir?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat Oliy Majlis Qonunchilik palatasi oldida"
+        },
+        {
+          "key": "B",
+          "text": "O‘zbekiston Respublikasi Prezidenti va O‘zbekiston Respublikasi Oliy Majlisi oldida"
+        },
+        {
+          "key": "C",
+          "text": "Faqat Konstitutsiyaviy sud oldida"
+        },
+        {
+          "key": "D",
+          "text": "Faqat Adliya vazirligi oldida"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Konstitutsiyaning 114-moddasiga ko‘ra Hukumat (Vazirlar Mahkamasi) O‘zbekiston Respublikasi Prezidenti va Oliy Majlis oldida javobgardir.",
+      "bookSource": "9-sinf darsligi (Ijro etuvchi hokimiyat)",
+      "lawSource": "Konstitutsiya, 114-modda & Vazirlar Mahkamasi to'g'risidagi Qonun"
+    },
+    {
+      "num": 10,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaning 128-moddasiga ko‘ra, O‘zbekiston Respublikasi fuqarolari necha yoshdan boshlab saylash huquqiga ega bo‘ladilar?",
+      "options": [
+        {
+          "key": "A",
+          "text": "16 yoshdan"
+        },
+        {
+          "key": "B",
+          "text": "18 yoshdan"
+        },
+        {
+          "key": "C",
+          "text": "21 yoshdan"
+        },
+        {
+          "key": "D",
+          "text": "25 yoshdan"
+        }
+      ],
+      "correct": "B",
+      "explanation": "128-moddaga ko‘ra o‘n sakkiz yoshga to‘lgan fuqarolar saylash huquqiga egadirlar.",
+      "bookSource": "9-sinf darsligi (Saylov tizimi)",
+      "lawSource": "Saylov kodeksi (6-qonun)"
+    },
+    {
+      "num": 11,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaga ko‘ra O‘zbekiston Respublikasi Prezidenti necha yil muddatga saylanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "4 yil"
+        },
+        {
+          "key": "B",
+          "text": "5 yil"
+        },
+        {
+          "key": "C",
+          "text": "7 yil"
+        },
+        {
+          "key": "D",
+          "text": "6 yil"
+        }
+      ],
+      "correct": "C",
+      "explanation": "Konstitutsiyaning 106-moddasiga asosan O‘zbekiston Respublikasi Prezidenti O‘zbekiston Respublikasining fuqarolari tomonidan yetti yil muddatga saylanadi.",
+      "bookSource": "9-sinf darsligi (Prezidentlik instituti)",
+      "lawSource": "Konstitutsiya, 106-modda & Saylov kodeksi"
+    },
+    {
+      "num": 12,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaning 55-moddasiga ko‘ra shaxs milliy himoya vositalarining barchasidan foydalanib bo‘lganidan so‘ng o'z huquqlarini himoya qilish uchun qayerga murojaat qilishga haqli?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Inson huquqlarini himoya qiluvchi xalqaro organlarga"
+        },
+        {
+          "key": "B",
+          "text": "Boshqa xorijiy davlatlarning tuman sudlariga"
+        },
+        {
+          "key": "C",
+          "text": "Xorijiy elchixonalarga"
+        },
+        {
+          "key": "D",
+          "text": "Hech qayerga murojaat qila olmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "55-moddaga ko‘ra har kim davlatning huquqiy himoyaga doir barcha vositalaridan foydalanib bo‘lganidan so‘ng inson huquqlarini himoya qiluvchi xalqaro organlarga murojaat qilishga haqlidir.",
+      "bookSource": "9-sinf darsligi (Huquqiy himoya vositalari)",
+      "lawSource": "Konstitutsiya, 55-modda (1-qonun)"
+    },
+    {
+      "num": 13,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaga muvofiq, O‘zbekiston Respublikasi Vazirlar Mahkamasi o‘z faoliyatida kimlarning oldida javobgardir?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat Oliy Majlis Qonunchilik palatasi oldida"
+        },
+        {
+          "key": "B",
+          "text": "O‘zbekiston Respublikasi Prezidenti va O‘zbekiston Respublikasi Oliy Majlisi oldida"
+        },
+        {
+          "key": "C",
+          "text": "Faqat Konstitutsiyaviy sud oldida"
+        },
+        {
+          "key": "D",
+          "text": "Faqat Adliya vazirligi oldida"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Konstitutsiyaning 114-moddasiga ko‘ra Hukumat (Vazirlar Mahkamasi) O‘zbekiston Respublikasi Prezidenti va Oliy Majlis oldida javobgardir.",
+      "bookSource": "9-sinf darsligi (Ijro etuvchi hokimiyat)",
+      "lawSource": "Konstitutsiya, 114-modda & Vazirlar Mahkamasi to'g'risidagi Qonun"
+    },
+    {
+      "num": 14,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaning 128-moddasiga ko‘ra, O‘zbekiston Respublikasi fuqarolari necha yoshdan boshlab saylash huquqiga ega bo‘ladilar?",
+      "options": [
+        {
+          "key": "A",
+          "text": "16 yoshdan"
+        },
+        {
+          "key": "B",
+          "text": "18 yoshdan"
+        },
+        {
+          "key": "C",
+          "text": "21 yoshdan"
+        },
+        {
+          "key": "D",
+          "text": "25 yoshdan"
+        }
+      ],
+      "correct": "B",
+      "explanation": "128-moddaga ko‘ra o‘n sakkiz yoshga to‘lgan fuqarolar saylash huquqiga egadirlar.",
+      "bookSource": "9-sinf darsligi (Saylov tizimi)",
+      "lawSource": "Saylov kodeksi (6-qonun)"
+    },
+    {
+      "num": 15,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaga ko‘ra O‘zbekiston Respublikasi Prezidenti necha yil muddatga saylanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "4 yil"
+        },
+        {
+          "key": "B",
+          "text": "5 yil"
+        },
+        {
+          "key": "C",
+          "text": "7 yil"
+        },
+        {
+          "key": "D",
+          "text": "6 yil"
+        }
+      ],
+      "correct": "C",
+      "explanation": "Konstitutsiyaning 106-moddasiga asosan O‘zbekiston Respublikasi Prezidenti O‘zbekiston Respublikasining fuqarolari tomonidan yetti yil muddatga saylanadi.",
+      "bookSource": "9-sinf darsligi (Prezidentlik instituti)",
+      "lawSource": "Konstitutsiya, 106-modda & Saylov kodeksi"
+    },
+    {
+      "num": 16,
+      "type": "Y-1",
+      "section": "Konstitutsiyaviy huquq asoslari",
+      "text": "Konstitutsiyaning 55-moddasiga ko‘ra shaxs milliy himoya vositalarining barchasidan foydalanib bo‘lganidan so‘ng o'z huquqlarini himoya qilish uchun qayerga murojaat qilishga haqli?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Inson huquqlarini himoya qiluvchi xalqaro organlarga"
+        },
+        {
+          "key": "B",
+          "text": "Boshqa xorijiy davlatlarning tuman sudlariga"
+        },
+        {
+          "key": "C",
+          "text": "Xorijiy elchixonalarga"
+        },
+        {
+          "key": "D",
+          "text": "Hech qayerga murojaat qila olmaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "55-moddaga ko‘ra har kim davlatning huquqiy himoyaga doir barcha vositalaridan foydalanib bo‘lganidan so‘ng inson huquqlarini himoya qiluvchi xalqaro organlarga murojaat qilishga haqlidir.",
+      "bookSource": "9-sinf darsligi (Huquqiy himoya vositalari)",
+      "lawSource": "Konstitutsiya, 55-modda (1-qonun)"
+    },
+    {
+      "num": 17,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Xodim homilador bo‘lgan davrida ish beruvchi o‘z tashabbusi bilan u bilan mehnat shartnomasini bekor qilishi mumkinmi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ha, xodim ogohlantirilgan taqdirda mumkin"
+        },
+        {
+          "key": "B",
+          "text": "Faqat korxona butunlay tugatilgan hollardagina yo‘l qo‘yiladi"
+        },
+        {
+          "key": "C",
+          "text": "Shtat qisqarganda mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Xodim sinovdan o'tolmaganda mumkin"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Mehnat kodeksining 408-moddasiga binoan homilador ayollar bilan mehnat shartnomasini ish beruvchi tashabbusi bilan bekor qilishga faqat tashkilot tugatilgandagina yo‘l qo‘yiladi.",
+      "bookSource": "10-sinf darsligi (Ayollar va yoshlar mehnati kafolatlari)",
+      "lawSource": "Mehnat kodeksi, 408-modda (14-qonun)"
+    },
+    {
+      "num": 18,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Advokatura to‘g‘risidagi qonunga ko‘ra advokat maqomini olish uchun shaxs kamida necha yillik yuridik stajga ega bo‘lishi lozim?",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 yil"
+        },
+        {
+          "key": "B",
+          "text": "2 yil"
+        },
+        {
+          "key": "C",
+          "text": "3 yil"
+        },
+        {
+          "key": "D",
+          "text": "Staj talab qilinmaydi"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Advokatura to‘g‘risidagi qonunga ko‘ra oliy yuridik ma’lumotga va kamida ikki yillik yuridik stajga ega bo‘lgan shaxs advokat bo‘lishi mumkin.",
+      "bookSource": "11-sinf darsligi (Advokatura va Notariat)",
+      "lawSource": "Advokatura to'g'risidagi Qonun (21-qonun)"
+    },
+    {
+      "num": 19,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Fuqarolik huquqida merosxo'rlikning qaysi navbatiga vafot etgan shaxsning tug'ishgan hamda o'gay aka-ukalari va opa-singillari, shuningdek uning bobosi va buvisi kiradi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Birinchi navbat"
+        },
+        {
+          "key": "B",
+          "text": "Ikkinchi navbat"
+        },
+        {
+          "key": "C",
+          "text": "Uchinchi navbat"
+        },
+        {
+          "key": "D",
+          "text": "To'rtinchi navbat"
+        }
+      ],
+      "correct": "B",
+      "explanation": "FK 1136-moddasiga binoan aka-uka, opa-singillar va bobo-buvilar ikkinchi navbatdagi qonuniy merosxo'rlardir.",
+      "bookSource": "10-sinf darsligi (Meros navbatlari)",
+      "lawSource": "Fuqarolik kodeksi, 1136-modda (8-qonun)"
+    },
+    {
+      "num": 20,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Mehnat kodeksiga ko‘ra xodimga nisbatan qanday intizomiy jazo choralari qo‘llanilishi mumkin?\n1) Hayfsan; 2) Jarima (30% gacha, qoidalarda 50% gacha); 3) Mehnat shartnomasini bekor qilish; 4) Majburiy mehnat; 5) Lavozimini pasaytirish.",
+      "options": [
+        {
+          "key": "A",
+          "text": "1, 2, 3"
+        },
+        {
+          "key": "B",
+          "text": "1, 2, 4"
+        },
+        {
+          "key": "C",
+          "text": "1, 3, 5"
+        },
+        {
+          "key": "D",
+          "text": "2, 4, 5"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Mehnat kodeksining 312-moddasida intizomiy jazo sifatida faqat 3 ta chora nazarda tutilgan: Hayfsan, Jarima va Shartnomani bekor qilish. Boshqa jazolarni qo'llash qat'iyan taqiqlanadi.",
+      "bookSource": "10-sinf darsligi (Mehnat intizomi)",
+      "lawSource": "Mehnat kodeksi, 312-modda (14-qonun)"
+    },
+    {
+      "num": 21,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Jinoyat kodeksiga binoan jinoiy jazoning asosiy maqsadi nimalardan iborat?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Mahkumdan jismoniy qasos olish va uni tahqirlash"
+        },
+        {
+          "key": "B",
+          "text": "Mahkumni axloqan tuzatish, uning jinoiy faoliyatni davom ettirishiga to‘sqinlik qilish hamda yangi jinoyatlar sodir etilishining oldini olish"
+        },
+        {
+          "key": "C",
+          "text": "Mahkumning butun mol-mulkini davlat hisobiga musodara qilish"
+        },
+        {
+          "key": "D",
+          "text": "Faqat jabrlanuvchiga moddiy kompensatsiya undirib berish"
+        }
+      ],
+      "correct": "B",
+      "explanation": "JK 42-moddasiga ko‘ra jazo mahkumni axloqan tuzatish, yangi jinoyatlar sodir etilishining oldini olish maqsadida qo‘llaniladi.",
+      "bookSource": "11-sinf darsligi (Jinoyat huquqi asoslari)",
+      "lawSource": "Jinoyat kodeksi, 42-modda (11-qonun)"
+    },
+    {
+      "num": 22,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Mualliflik huquqi to'g'risidagi qonunga ko'ra, mulkiy huquqlar muallifning butun hayoti davomida va uning vafotidan keyin necha yil davomida amal qiladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "25 yil"
+        },
+        {
+          "key": "B",
+          "text": "50 yil"
+        },
+        {
+          "key": "C",
+          "text": "70 yil"
+        },
+        {
+          "key": "D",
+          "text": "30 yil"
+        }
+      ],
+      "correct": "C",
+      "explanation": "Mualliflik huquqi va turdosh huquqlar to‘g‘risidagi qonunning 35-moddasiga binoan mulkiy huquqlar muallif vafotidan so‘ng 70 yil davomida amal qiladi.",
+      "bookSource": "10-sinf darsligi (Intellektual mulk huquqi)",
+      "lawSource": "Mualliflik huquqi va turdosh huquqlar to'g'risidagi Qonun (26-qonun)"
+    },
+    {
+      "num": 23,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Iste’molchilarning huquqlarini himoya qilish to‘g‘risidagi qonunga ko‘ra, iste’molchi nuqsonli bo‘lmagan nooziq-ovqat tovarini sotib olgan kundan boshlab necha kun ichida almashtirib olishga haqli?",
+      "options": [
+        {
+          "key": "A",
+          "text": "3 kun ichida"
+        },
+        {
+          "key": "B",
+          "text": "10 kun ichida"
+        },
+        {
+          "key": "C",
+          "text": "14 kun ichida"
+        },
+        {
+          "key": "D",
+          "text": "30 kun ichida"
+        }
+      ],
+      "correct": "C",
+      "explanation": "Qonunning 18-moddasiga binoan iste’molchi maqbul sifatli tovardan foydalanmagan taqdirda 14 kun ichida almashtirishga haqli.",
+      "bookSource": "10-sinf darsligi (Iste'molchilar huquqlari)",
+      "lawSource": "Iste'molchilarning huquqlarini himoya qilish to'g'risidagi Qonun (25-qonun)"
+    },
+    {
+      "num": 24,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Oila kodeksiga ko‘ra sud tartibida ota-onalik huquqidan mahrum qilingan ota-ona bolaga ta'minot (aliment) to'lash majburiyatidan ozod qilinadimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ha, to'liq ozod qilinadi"
+        },
+        {
+          "key": "B",
+          "text": "Yo'q, ota-onalik huquqidan mahrum qilinishi ota-onani bolaga ta'minot berish majburiyatidan ozod qilmaydi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat bola 14 yoshga to'lganda to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat sud ruxsat bergan hollarda ozod qilinadi"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Oila kodeksining 81-moddasiga binoan ota-onalik huquqidan mahrum qilinishi ota-onani o‘z bolasiga ta’minot berish (aliment to'lash) majburiyatidan ozod qilmaydi.",
+      "bookSource": "10-sinf darsligi (Ota-onalik huquqlari va majburiyatlari)",
+      "lawSource": "Oila kodeksi, 81-modda (19-qonun)"
+    },
+    {
+      "num": 25,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Mehnat kodeksining 130-moddasiga ko‘ra korxona rahbari, uning o‘rinbosarlari va bosh buxgalterlar uchun dastlabki sinov muddati ko‘pi bilan necha oygacha bo‘lishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "3 oy"
+        },
+        {
+          "key": "B",
+          "text": "6 oy"
+        },
+        {
+          "key": "C",
+          "text": "1 yil"
+        },
+        {
+          "key": "D",
+          "text": "2 oy"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Oddiy xodimlar uchun sinov muddati ko'pi bilan 3 oy, rahbarlar va bosh buxgalterlar uchun esa ko'pi bilan 6 oygacha belgilanishi mumkin.",
+      "bookSource": "10-sinf darsligi (Mehnat huquqi asoslari)",
+      "lawSource": "Yangi Mehnat kodeksi, 130-modda (14-qonun)"
+    },
+    {
+      "num": 26,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Oila kodeksiga ko‘ra qaysi holatda shaxslar o‘rtasida nikoh tuzish qonunan qat'iyan taqiqlanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Nasl-nasab shajarasi bo‘yicha to‘g‘ri tutashgan qarindoshlar o‘rtasida"
+        },
+        {
+          "key": "B",
+          "text": "Turli millat yoki irq vakillari o‘rtasida"
+        },
+        {
+          "key": "C",
+          "text": "Turli din vakillari o‘rtasida"
+        },
+        {
+          "key": "D",
+          "text": "Harbiy xizmatchilar va fuqarolar o‘rtasida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Oila kodeksining 16-moddasiga ko‘ra yaqin qarindoshlar, tutash shajaradagi shaxslar, tug'ishgan va o'gay aka-singillar o‘rtasida nikoh taqiqlanadi.",
+      "bookSource": "10-sinf darsligi (Oila huquqi)",
+      "lawSource": "Oila kodeksi, 16-modda (19-qonun)"
+    },
+    {
+      "num": 27,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Ma’muriy huquqbuzarlik to‘g‘risidagi bayonnoma tuzilgach, ishni ko‘rib chiqish uchun vakolatli organga (sudga) necha kun ichida yuboriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Bir sutka (24 soat) ichida"
+        },
+        {
+          "key": "B",
+          "text": "Uch kun ichida"
+        },
+        {
+          "key": "C",
+          "text": "O‘n kun ichida"
+        },
+        {
+          "key": "D",
+          "text": "Bir oy ichida"
+        }
+      ],
+      "correct": "A",
+      "explanation": "MJtK 282-moddasiga ko‘ra bayonnoma tuzilgan vaqtdan boshlab bir sutka ichida ko‘rib chiqish uchun yuboriladi.",
+      "bookSource": "11-sinf darsligi (Ma'muriy jarayon)",
+      "lawSource": "Ma'muriy javobgarlik to'g'risidagi kodeks, 282-modda (12-qonun)"
+    },
+    {
+      "num": 28,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Korrupsiyaga qarshi kurashish sohasida maxsus vakolatli davlat organi qaysi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Korrupsiyaga qarshi kurashish agentligi"
+        },
+        {
+          "key": "B",
+          "text": "Davlat xavfsizlik xizmati"
+        },
+        {
+          "key": "C",
+          "text": "Hisob palatasi"
+        },
+        {
+          "key": "D",
+          "text": "Adliya vazirligi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Korrupsiyaga qarshi kurashish to‘g‘risidagi qonunga binoan Korrupsiyaga qarshi kurashish agentligi ushbu sohadagi maxsus vakolatli davlat organidir.",
+      "bookSource": "11-sinf darsligi (Huquqni muhofaza qiluvchi organlar)",
+      "lawSource": "Korrupsiyaga qarshi kurashish to'g'risidagi Qonun (28-qonun)"
+    },
+    {
+      "num": 29,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Mehnat kodeksiga ko‘ra xodimlar uchun normal ish vaqtining davomiyligi haftasiga ko‘pi bilan necha soatdan ortiq bo‘lishi mumkin emas?",
+      "options": [
+        {
+          "key": "A",
+          "text": "36 soat"
+        },
+        {
+          "key": "B",
+          "text": "40 soat"
+        },
+        {
+          "key": "C",
+          "text": "48 soat"
+        },
+        {
+          "key": "D",
+          "text": "35 soat"
+        }
+      ],
+      "correct": "B",
+      "explanation": "Yangi Mehnat kodeksining 182-moddasiga binoan xodim uchun normal ish vaqtining davomiyligi haftasiga qirq soatdan oshishi mumkin emas.",
+      "bookSource": "10-sinf darsligi (Ish vaqti me'yori)",
+      "lawSource": "Mehnat kodeksi, 182-modda (14-qonun)"
+    },
+    {
+      "num": 30,
+      "type": "Y-1",
+      "section": "Huquq sohalari",
+      "text": "Zaruriy mudofaa holatida tajovuzkorga yetkazilgan zarar yuzasidan jinoiy javobgarlik kelib chiqadimi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Har doim jinoiy javobgarlik kelib chiqadi"
+        },
+        {
+          "key": "B",
+          "text": "Agar zaruriy mudofaa chegarasidan chetga chiqilmagan bo'lsa, qilmish jinoyat deb topilmaydi va javobgarlik kelib chiqmaydi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat ma'muriy javobgarlik kelib chiqadi"
+        },
+        {
+          "key": "D",
+          "text": "Faqat moddiy tovon to'lanadi"
+        }
+      ],
+      "correct": "B",
+      "explanation": "JK 37-moddasiga ko‘ra zaruriy mudofaa chegarasidan chetga chiqilmasdan yetkazilgan zarar jinoiy javobgarlikni istisno qiladi.",
+      "bookSource": "11-sinf darsligi (Javobgarlikni istisno qiluvchi holatlar)",
+      "lawSource": "Jinoyat kodeksi, 37-modda (11-qonun)"
+    },
+    {
+      "num": 31,
+      "type": "Y-1",
+      "section": "Huquqiy tahlil va diagramma",
+      "text": "Eyler-Venn diagrammasi bo‘yicha to‘g‘ri moslikni toping:\nI: Fuqarolik huquqi | II: Mehnat huquqi | III: Ikkisi uchun umumiy belgilar\n\na) mulkiy va shaxsiy nomulkiy munosabatlarni tartibga soladi;\nb) xodim va ish beruvchi o'rtasidagi ijtimoiy-mehnat munosabatlarini tartibga soladi;\nc) shartnoma erkinligi va nizolarni sud orqali hal etish tamoyili.",
+      "options": [
+        {
+          "key": "A",
+          "text": "I-a; II-b; III-c"
+        },
+        {
+          "key": "B",
+          "text": "I-b; II-a; III-c"
+        },
+        {
+          "key": "C",
+          "text": "I-c; II-b; III-a"
+        },
+        {
+          "key": "D",
+          "text": "I-a; II-c; III-b"
+        }
+      ],
+      "correct": "A",
+      "explanation": "I-a (mulkiy munosabat), II-b (mehnat munosabati), III-c (umumiy prinsiplar).",
+      "bookSource": "10-sinf darsligi (Huquq sohalari qiyosiy tahlili)",
+      "lawSource": "Fuqarolik kodeksi & Mehnat kodeksi"
+    },
+    {
+      "num": 32,
+      "type": "Y-1",
+      "section": "Huquqiy atamalar",
+      "text": "Atamalar va ularning izohi to‘g‘ri moslashtirilgan javobni toping.\n1. Veto | 2. Ratifakatsiya | 3. Amnistiya | 4. Pretsedent | 5. Alibi\n\na) davlat boshlig‘ining qonun loyihasini rad etish huquqi;\nb) xalqaro shartnomani oliy davlat organi tomonidan tasdiqlanishi;\nc) sud yoki ma’muriy organning kelgusida namuna bo‘ladigan qarori;\nd) jinoyat sodir bo‘lgan vaqtda shaxsning boshqa joyda bo‘lganligi isboti;\ne) vakolatli organ tomonidan shaxslarni jazodan ozod qilish akti.",
+      "options": [
+        {
+          "key": "A",
+          "text": "1-a, 2-b, 3-e, 4-c, 5-d"
+        },
+        {
+          "key": "B",
+          "text": "1-b, 2-a, 3-c, 4-d, 5-e"
+        },
+        {
+          "key": "C",
+          "text": "1-a, 2-c, 3-b, 4-e, 5-d"
+        },
+        {
+          "key": "D",
+          "text": "1-c, 2-b, 3-a, 4-d, 5-e"
+        }
+      ],
+      "correct": "A",
+      "explanation": "Veto - rad etish; Ratifakatsiya - tasdiqlash; Amnistiya - jazodan ozod qilish; Pretsedent - sud namunasi; Alibi - boshqa joyda bo'lganlik.",
+      "bookSource": "8-sinf va 11-sinf darsliklari (Huquqiy atamalar lug'ati)",
+      "lawSource": "Davlat va huquq nazariyasi atamalar tizimi"
+    },
+    {
+      "num": 33,
+      "type": "Y-2",
+      "section": "Vaziyatli keys (15 yoshli o'smir tomonidan yetkazilgan zararni qoplash keysi)",
+      "scenario": "15 yoshli maktab o'quvchisi Jasur ko'chada velosiped haydab ketayotib, yo'l chetida to'xtab turgan fuqaro Ilhomovga tegishli 'Cobalt' avtomashinasining eshik qismini chizib yubordi va jami 4 million so'm moddiy zarar yetkazdi. Jasurning o'z nomida hech qanday mulki va daromadi yo'q. Avtomobil egasi Ilhomov zararni qoplashni talab qilib sudga da'vo berdi.",
+      "text": "Fuqarolik kodeksining 994-moddasiga ko'ra 14 yoshdan 18 yoshgacha bo'lgan voyaga yetmaganlar yetkazilgan zarar uchun qanday tartibda javob beradilar?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Umumiy asoslarda mustaqil ravishda o'z mol-mulki yoki daromadi hisobidan javob beradilar"
+        },
+        {
+          "key": "B",
+          "text": "Ular mutlaqo javobgar bo'lmaydilar"
+        },
+        {
+          "key": "C",
+          "text": "Birinchi navbatda har doim faqat o'qituvchisi to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Davlat sug'urtasi to'laydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 994-moddasining 1-qismiga binoan 14 yoshdan 18 yoshgacha bo'lgan voyaga yetmaganlar o'zlari yetkazgan zarar uchun umumiy asoslarda mustaqil javob beradilar.",
+      "bookSource": "10-sinf darsligi (Zarar yetkazishdan kelib chiqadigan majburiyatlar)",
+      "lawSource": "Fuqarolik kodeksi, 993 va 994-moddalar (8-qonun)"
+    },
+    {
+      "num": 34,
+      "type": "Y-2",
+      "section": "Vaziyatli keys (15 yoshli o'smir tomonidan yetkazilgan zararni qoplash keysi)",
+      "scenario": "15 yoshli maktab o'quvchisi Jasur ko'chada velosiped haydab ketayotib, yo'l chetida to'xtab turgan fuqaro Ilhomovga tegishli 'Cobalt' avtomashinasining eshik qismini chizib yubordi va jami 4 million so'm moddiy zarar yetkazdi. Jasurning o'z nomida hech qanday mulki va daromadi yo'q. Avtomobil egasi Ilhomov zararni qoplashni talab qilib sudga da'vo berdi.",
+      "text": "Agar 15 yoshli Jasurning zararni qoplash uchun yetarli mol-mulki yoki daromadi bo'lmasa, zarar kim tomonidan to'lanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Uning ota-onasi (vasiylari) tomonidan subsidiar (qo'shimcha) tartibda"
+        },
+        {
+          "key": "B",
+          "text": "Zarar qoplanmasdan qoladi"
+        },
+        {
+          "key": "C",
+          "text": "Mahalla jamg'armasi to'laydi"
+        },
+        {
+          "key": "D",
+          "text": "Maktab direktori o'z oyligidan to'laydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 994-moddasi 2-qismiga binoan agar 14 yoshdan 18 yoshgacha bo'lgan voyaga yetmaganning mol-mulki bo'lmasa, zarar uning ota-onasi yoki vasiylari tomonidan to'lanadi.",
+      "bookSource": "10-sinf darsligi (Zarar yetkazishdan kelib chiqadigan majburiyatlar)",
+      "lawSource": "Fuqarolik kodeksi, 993 va 994-moddalar (8-qonun)"
+    },
+    {
+      "num": 35,
+      "type": "Y-2",
+      "section": "Vaziyatli keys (15 yoshli o'smir tomonidan yetkazilgan zararni qoplash keysi)",
+      "scenario": "15 yoshli maktab o'quvchisi Jasur ko'chada velosiped haydab ketayotib, yo'l chetida to'xtab turgan fuqaro Ilhomovga tegishli 'Cobalt' avtomashinasining eshik qismini chizib yubordi va jami 4 million so'm moddiy zarar yetkazdi. Jasurning o'z nomida hech qanday mulki va daromadi yo'q. Avtomobil egasi Ilhomov zararni qoplashni talab qilib sudga da'vo berdi.",
+      "text": "Jasur 18 yoshga to'lsa yoki o'z daromadiga ega bo'lsa, ota-onasining zararni to'lash majburiyati qanday bo'ladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Ota-onasining majburiyati bekor bo'ladi va qolgan zarar Jasurning o'zidan undiriladi"
+        },
+        {
+          "key": "B",
+          "text": "Ota-onasi baribir umrbod to'laydi"
+        },
+        {
+          "key": "C",
+          "text": "Ikki barobar jarima qo'shiladi"
+        },
+        {
+          "key": "D",
+          "text": "Sud qayta jinoiy jazo tayinlaydi"
+        }
+      ],
+      "correct": "A",
+      "explanation": "FK 994-moddasiga ko'ra zarar yetkazuvchi voyaga yetgach yoki yetarli mol-mulk yoki daromadga ega bo'lgach ota-onaning subsidiar majburiyati tugaydi.",
+      "bookSource": "10-sinf darsligi (Zarar yetkazishdan kelib chiqadigan majburiyatlar)",
+      "lawSource": "Fuqarolik kodeksi, 993 va 994-moddalar (8-qonun)"
+    },
+    {
+      "num": 36,
+      "type": "O",
+      "section": "Jinoyat huquqi",
+      "text": "Og'ir jinoyatlar sodir etilgan taqdirda shaxs necha yoshdan boshlab jinoiy javobgarlikka tortiladi?",
+      "acceptableAnswers": [
+        "14 yosh",
+        "14",
+        "o'n to'rt"
+      ],
+      "canonicalAnswer": "14 yosh",
+      "explanation": "Jinoyat kodeksining 17-moddasiga ko‘ra og‘irlashtiruvchi holatlardagi qasddan odam o‘ldirish, bosqinchilik, terrorizm kabi jinoyatlar uchun 14 yoshdan javobgarlik belgilanadi.",
+      "bookSource": "11-sinf darsligi (Jinoiy javobgarlik yoshi)",
+      "lawSource": "Jinoyat kodeksi, 17-modda (11-qonun)"
+    },
+    {
+      "num": 37,
+      "type": "O",
+      "section": "Fuqarolik huquqi",
+      "text": "Fuqarolik qonunchiligida buzilgan huquqlarni himoya qilish uchun umumiy da’vo muddati necha yilni tashkil etadi?",
+      "acceptableAnswers": [
+        "3 yil",
+        "uch yil",
+        "3"
+      ],
+      "canonicalAnswer": "3 yil",
+      "explanation": "Fuqarolik kodeksining 150-moddasiga asosan umumiy da’vo muddati uch yil qilib belgilangan.",
+      "bookSource": "10-sinf darsligi (Da'vo muddatlari)",
+      "lawSource": "Fuqarolik kodeksi, 150-modda (8-qonun)"
+    },
+    {
+      "num": 38,
+      "type": "O",
+      "section": "Oila huquqi",
+      "text": "Ikki nafar voyaga yetmagan bola uchun ota-onadan undiriladigan aliment miqdori oylik daromadning necha qismini tashkil etadi?",
+      "acceptableAnswers": [
+        "uchdan bir",
+        "uchdan bir qismi",
+        "1/3",
+        "33%"
+      ],
+      "canonicalAnswer": "uchdan bir qismi (1/3)",
+      "explanation": "Oila kodeksining 99-moddasiga ko‘ra ikki bola uchun — oylik ish haqining uchdan bir qismi (1/3) miqdorida aliment undiriladi.",
+      "bookSource": "10-sinf darsligi (Aliment stavkalari)",
+      "lawSource": "Oila kodeksi, 99-modda (19-qonun)"
+    },
+    {
+      "num": 39,
+      "type": "O",
+      "section": "Mehnat huquqi",
+      "text": "Xodim o‘z tashabbusi bilan mehnat shartnomasini bekor qilish to‘g‘risida ish beruvchini necha kun oldin yozma ogohlantirishi lozim?",
+      "acceptableAnswers": [
+        "14 kun",
+        "ikki hafta",
+        "14",
+        "2 hafta"
+      ],
+      "canonicalAnswer": "14 kun",
+      "explanation": "Mehnat kodeksining 160-moddasiga binoan xodim 14 kun (ikki hafta) oldin yozma ogohlantiradi.",
+      "bookSource": "10-sinf darsligi (Xodim tashabbusi bilan bo'shash)",
+      "lawSource": "Mehnat kodeksi, 160-modda (14-qonun)"
+    },
+    {
+      "num": 40,
+      "type": "O",
+      "section": "Ma'muriy huquq",
+      "text": "Ma’muriy jarima solish to‘g‘risidagi qaror ustidan shikoyat berish muddati qaror topshirilgan kundan e’tiboran necha kunni tashkil etadi?",
+      "acceptableAnswers": [
+        "10 kun",
+        "o'n kun",
+        "10",
+        "o'n"
+      ],
+      "canonicalAnswer": "10 kun",
+      "explanation": "MJtK 315-moddasiga ko‘ra ma’muriy jazo qarori ustidan o‘n kun ichida shikoyat berilishi mumkin.",
+      "bookSource": "11-sinf darsligi (Ma'muriy jazo ustidan shikoyat)",
+      "lawSource": "Ma'muriy javobgarlik to'g'risidagi kodeks, 315-modda (12-qonun)"
+    },
+    {
+      "num": 41,
+      "type": "O",
+      "section": "Jinoyat-protsessual huquqi",
+      "text": "Gumon qilinuvchi shaxs ushlab turilgan paytdan boshlab uzog‘i bilan necha soat ichida so‘roq qilinishi shart?",
+      "acceptableAnswers": [
+        "24 soat",
+        "yigirma to'rt soat",
+        "24",
+        "yigirma to'rt"
+      ],
+      "canonicalAnswer": "24 soat",
+      "explanation": "JPK 226-moddasiga binoan ushlangan shaxs 24 soatdan kechiktirilmasdan so‘roq qilinishi shart.",
+      "bookSource": "11-sinf darsligi (Protsessual muddatlar)",
+      "lawSource": "Jinoyat-protsessual kodeksi, 226-modda"
+    },
+    {
+      "num": 42,
+      "type": "O",
+      "section": "Mehnat huquqi",
+      "text": "Mehnat kodeksiga ko‘ra har yilgi asosiy mehnat ta’tilining eng kam muddati necha kalendar kun etib belgilangan?",
+      "acceptableAnswers": [
+        "21",
+        "21 kun",
+        "yigirma bir",
+        "21 kalendar kun"
+      ],
+      "canonicalAnswer": "21 kalendar kun",
+      "explanation": "Mehnat kodeksining 217-moddasiga asosan har yilgi asosiy mehnat ta’tilining eng kam davomiyligi 21 kalendar kunni tashkil etadi.",
+      "bookSource": "10-sinf darsligi (Dam olish vaqti va ta'tillar)",
+      "lawSource": "Mehnat kodeksi, 217-modda (14-qonun)"
+    },
+    {
+      "num": 43,
+      "type": "O",
+      "section": "Ma'muriy huquq",
+      "text": "Sudya yoki vakolatli organ tomonidan tayinlanadigan ma’muriy qamoq jazosining eng ko‘p muddati necha sutka?",
+      "acceptableAnswers": [
+        "15 sutka",
+        "15",
+        "o'n besh",
+        "o'n besh sutka"
+      ],
+      "canonicalAnswer": "15 sutka",
+      "explanation": "MJtK 29-moddasiga ko‘ra ma’muriy qamoq o‘n besh sutkagacha, favqulodda holatda esa 30 sutkagacha qo‘llaniladi.",
+      "bookSource": "11-sinf darsligi (Ma'muriy jazo turlari)",
+      "lawSource": "Ma'muriy javobgarlik to'g'risidagi kodeks, 29-modda (12-qonun)"
+    },
+    {
+      "num": 44,
+      "type": "O",
+      "section": "Iste'molchilar huquqi",
+      "text": "Iste’molchi nuqsoni bo‘lmagan maqbul sifatli nooziq-ovqat tovarini xarid qilgan kundan boshlab necha kun ichida almashtirishga haqli?",
+      "acceptableAnswers": [
+        "14 kun",
+        "o'n to'rt kun",
+        "14"
+      ],
+      "canonicalAnswer": "14 kun",
+      "explanation": "Qonunning 18-moddasiga binoan iste’molchi o‘n to‘rt kun ichida tovarni almashtirib olishga haqli.",
+      "bookSource": "10-sinf darsligi (Iste'molchilar huquqlari)",
+      "lawSource": "Iste'molchilarning huquqlarini himoya qilish to'g'risidagi Qonun, 18-modda"
+    },
+    {
+      "num": 45,
+      "type": "O",
+      "section": "Advokatura",
+      "text": "Advokat maqomini olish uchun talabgordan kamida necha yillik yuridik ish staji talab etiladi?",
+      "acceptableAnswers": [
+        "2 yil",
+        "ikki yil",
+        "2"
+      ],
+      "canonicalAnswer": "2 yil",
+      "explanation": "Advokatura to‘g‘risidagi qonunga muvofiq oliy yuridik ma’lumotga va kamida 2 yillik yuridik stajga ega bo‘lish lozim.",
+      "bookSource": "11-sinf darsligi (Advokatura asoslari)",
+      "lawSource": "Advokatura to'g'risidagi Qonun (21-qonun)"
+    }
+  ]
+}
