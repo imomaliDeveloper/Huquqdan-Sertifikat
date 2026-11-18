@@ -11,5 +11,31 @@
     "testsCompleted": 12,
     "averageScore": "92%",
     "bestGrade": "A+"
+  },
+  {
+    "id": "USR-1795002244140",
+    "name": "Dilshod Karimov",
+    "phone": "+998909876543",
+    "password": "pass1234",
+    "plan": "START",
+    "role": "Abituriyent",
+    "city": "Toshkent shahri",
+    "registeredAt": "2026-11-18T11:44:04.140Z",
+    "testsCompleted": 0,
+    "averageScore": "0%",
+    "bestGrade": "C"
+  },
+  {
+    "id": "USR-1795009283555",
+    "name": "Imoomali",
+    "phone": "+998883998860",
+    "password": "imom",
+    "plan": "START",
+    "role": "Abituriyent",
+    "city": "Samarqand",
+    "registeredAt": "2026-11-18T13:41:23.555Z",
+    "testsCompleted": 0,
+    "averageScore": "0%",
+    "bestGrade": "C"
   }
 ]

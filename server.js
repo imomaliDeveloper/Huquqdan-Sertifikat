@@ -6,6 +6,7 @@ const fs = require('fs');
 const { GoogleGenAI } = require('@google/genai');
 const { generateVariant } = require('./scripts/generator');
 const { initBot, getBotInstance } = require('./bot');
+const { askAiTutor, checkOpenAnswer, explainQuestion } = require('./scripts/aiService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -274,91 +275,15 @@ app.post('/api/ai/check-open-answer', async (req, res) => {
     });
   }
 
-  // Agar Gemini AI mavjud bo'lsa, semantik tekshiramiz
-  if (genAI) {
-    try {
-      const prompt = `Siz O'zbekiston Respublikasi BMBA (Davlat test markazi) Huquqshunoslik milliy sertifikat imtihoni bo'yicha bosh ekspert va o'qituvchisiz.
-Savol: "${questionText || 'Huquqiy savol'}"
-Kutilgan to'g'ri javob: "${expectedAnswer}"
-Talaba yozgan javob: "${userAnswer}"
-Qonuniy izoh: "${explanation || ''}"
-
-Vazifa: Talabaning javobini tahlil qiling. Agar talaba javobni so'zlar bilan (masalan "uch yuz" va "300"), kichik sinonimlar, qo'shimcha so'zlar ("1 oy" va "bir oylik muddatda") yoki kichik imlo farqlari bilan to'g'ri yozgan bo'lsa, isCorrect=true deb toping.
-Qat'iy JSON formatida javob qaytaring:
-{
-  "isCorrect": boolean (true yoki false),
-  "similarityScore": raqam (0 dan 100 gacha),
-  "feedback": "Talabaga o'zbek tilida 1 jumlada do'stona baho va tushuntirish",
-  "standardizedAnswer": "${expectedAnswer}"
-}`;
-
-      const aiResponse = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' }
-      });
-
-      const parsed = JSON.parse(aiResponse.text);
-      return res.json(parsed);
-    } catch (err) {
-      console.error('Gemini check-open-answer xatolik:', err.message);
-    }
-  }
-
-  // Fallback (Agar AI ishlamasa yoki ulanish bo'lmasa)
-  const isMatch = normUser.includes(normExpected) || normExpected.includes(normUser);
-  return res.json({
-    isCorrect: isMatch,
-    similarityScore: isMatch ? 85 : 30,
-    feedback: isMatch ? "Javob to'g'ri deb qabul qilindi!" : "Kutilgan javobdan farq qiladi.",
-    standardizedAnswer: expectedAnswer
-  });
+  const result = await checkOpenAnswer({ questionText, expectedAnswer, userAnswer, explanation });
+  return res.json(result);
 });
 
 // Xatolar ustida AI Tahlil ("Nega aynan shu javob to'g'ri?")
 app.post('/api/ai/explain-question', async (req, res) => {
   const { questionText, options, correctAnswer, userAnswer, explanation, lawRef } = req.body;
-
-  if (genAI) {
-    try {
-      const prompt = `Siz BMBA Huquqshunoslik milliy sertifikati bo'yicha professional repetitor-o'qituvchisiz.
-Talaba quyidagi test savoli bo'yicha tushuntirish so'ramoqda:
-Savol: "${questionText}"
-Variantlar: ${JSON.stringify(options || [])}
-To'g'ri javob: "${correctAnswer}"
-Talaba kiritgan javob: "${userAnswer || 'Belgilanmagan'}"
-Mavjud sharh: "${explanation || ''}"
-Qonuniy asos: "${lawRef || ''}"
-
-Vazifa: Talabaga 100% tushunarli, aniq moddalar bilan asoslangan va yodda qoladigan qilib tushuntiring.
-Faqat JSON qaytaring:
-{
-  "lawArticle": "Tegishli qonun va moddasi (masalan, Mehnat kodeksi 204-modda)",
-  "explanation": "Nega aynan shu javob to'g'ri ekanligi haqida 2-3 jumlali lo'nda tushuntirish",
-  "mistakeReason": "O'quvchilar bu savolda qaysi nozik nuqtada chalg'iydi",
-  "memoryTip": "Imtihonda ushbu normani oson eslab qolish uchun 1 ta amaliy maslahat yoki mnemonika"
-}`;
-
-      const aiResponse = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' }
-      });
-
-      const parsed = JSON.parse(aiResponse.text);
-      return res.json(parsed);
-    } catch (err) {
-      console.error('AI explain-question xatolik:', err.message);
-    }
-  }
-
-  // Fallback tushuntirish
-  return res.json({
-    lawArticle: lawRef || "O'zbekiston Respublikasi Qonunchiligi",
-    explanation: explanation || "Ushbu savol bo'yicha to'g'ri javob normativ-huquqiy hujjat talablariga to'liq mos keladi.",
-    mistakeReason: "Savoldagi shartlar va muddatlarga e'tibor bermaslik ko'p uchraydi.",
-    memoryTip: "Savol kalit so'zlari va unga berilgan muddatlarni Flashcards orqali mustahkamlang."
-  });
+  const result = await explainQuestion({ questionText, options, correctAnswer, userAnswer, explanation, lawRef });
+  return res.json(result);
 });
 
 // ==================== AI USTOZ (CHATGPT KABI HAR QANDAY SAVOLGA JAVOB BERUVCHI AI) ====================
@@ -370,66 +295,8 @@ app.post('/api/ai/tutor-chat', async (req, res) => {
     return res.status(400).json({ error: "Savol matni kiritilmadi." });
   }
 
-  const userQuery = message.trim();
-
-  if (genAI) {
-    try {
-      const systemInstruction = `Siz xuddi ChatGPT (GPT-4o) kabi nihoyatda aqlli, keng dunyoqarashli, madaniyatli, do'stona va universal "AI Ustoz"siz.
-Foydalanuvchi sizga har qanday mavzuda savol berishi mumkin:
-1. Huquqshunoslik, BMBA milliy sertifikat imtihonlari, 40 ta qonun, O'zbekiston Respublikasi Konstitutsiyasi, Mehnat kodeksi, Fuqarolik kodeksi, Oila kodeksi, Jinoyat kodeksi, vaziyatli keyslar va barcha maktab darsliklari;
-2. Istalgan umumiy sohalar: ta'lim, ilm-fan, tarix, matematika, tillar, axborot texnologiyalari, dasturlash, insho yoki arizalar yozish, motivatsiya, hayotiy maslahatlar va umumiy suhbat.
-
-QOIDALAR:
-- Xuddi ChatGPT kabi barcha savollarga xushmuomala, to'liq, batafsil, mantiqiy va tushunarli qilib javob bering.
-- Hech qachon javob berishdan bosh tortmang (hech qachon "men faqat huquqni bilaman" deb aytmang!). Foydalanuvchi nima so'rasa, o'sha mavzuda eng oliy darajada yordam bering.
-- Huquq va BMBA imtihonlariga oid savollarda qat'iy ravishda tegishli qonun nomi, moddasi va amaliy tushuntirishini keltiring.
-- Boshqa fanlar yoki hayotiy savollarda esa eng to'g'ri, foydali ma'lumotlar, misollar va maslahatlarni bering.
-- Javobni chiroyli va o'qishga oson markdown formatida (qalin shriftlar, ro'yxatlar, chiroyli bo'limlar va mos emojilar bilan) taqdim eting.`;
-
-      let prompt = `${systemInstruction}\n\n`;
-      if (Array.isArray(history) && history.length > 0) {
-        prompt += "Oldingi suhbat:\n" + history.slice(-6).map(h => `${h.role === 'user' ? 'Foydalanuvchi' : 'AI Ustoz'}: ${h.text}`).join("\n") + "\n\n";
-      }
-      prompt += `Foydalanuvchining yangi savoli: "${userQuery}"\nAI Ustoz (ChatGPT kabi) javobi:`;
-
-      const aiResponse = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt
-      });
-
-      return res.json({
-        reply: aiResponse.text || "Savolingiz o'rganildi. Iltimos, batafsilroq ma'lumot kiriting.",
-        source: "AI Ustoz (ChatGPT)",
-        timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
-      });
-    } catch (err) {
-      console.error('AI Ustoz chat xatolik:', err.message);
-    }
-  }
-
-  // Aqlli Universal ChatGPT Fallback Javoblar
-  let fallbackReply = "";
-  const qLower = userQuery.toLowerCase();
-
-  if (qLower.includes("salom") || qLower.includes("assalom") || qLower.includes("qalaysiz") || qLower.includes("qalesan") || qLower.includes("kim siz")) {
-    fallbackReply = `Assalomu alaykum! Xush kelibsiz! 👋\n\nMen sizning universal **AI Ustozingizman** (ChatGPT kabi ishlayman). Menga xohlagan mavzuingizda savol berishingiz mumkin:\n\n• ⚖️ **Huquq va Qonunchilik:** BMBA sertifikati, 40 ta qonun, Mehnat, Oila, Fuqarolik va Jinoyat kodekslari;\n• 📚 **Ta'lim va Fanlar:** Tarix, matematika, tillar, darsliklar va imtihonga tayyorlanish uslublari;\n• 💡 **Maslahatlar:** Insho yozish, mantiqiy masalalar, shaxsiy rivojlanish va boshqa istalgan savollar.\n\nBugun sizga qaysi masala yoki savol bo'yicha yordam beray?`;
-  } else if (qLower.includes("mehnat") || qLower.includes("shartnoma") || qLower.includes("ish haqi") || qLower.includes("ta'til") || qLower.includes("ishdan bo'shatish")) {
-    fallbackReply = `📋 **Mehnat qonunchiligi (Yangi Mehnat kodeksi tahlili):**\n\n1. **Mehnat shartnomasini bekor qilish (155–173-moddalar):**\n• Ish beruvchi tashabbusi bilan bekor qilishda ogohlantirish muddatlari: shtat qisqarganda kamida 2 oy, xodim malakasi yetarli bo'lmaganda 1 oy oldin yozma xabar beriladi.\n\n2. **Ishdan bo'shatish nafaqasi (173-modda):**\n• Ish staji 3 yilgacha: o'rtacha oylik ish haqining 50% miqdorida;\n• 3 yildan 5 yilgacha: 75%;\n• 5 yildan 10 yilgacha: 100%;\n• 10 yildan 15 yilgacha: 150%;\n• 15 yildan ortiq: 200% miqdorida kafolatlangan to'lov to'lanadi.\n\n3. **Sinov muddati (129–132-moddalar):** Umumiy tartibda ko'pi bilan 3 oydan oshmasligi shart.`;
-  } else if (qLower.includes("nikoh") || qLower.includes("oila") || qLower.includes("aliment") || qLower.includes("ajralish")) {
-    fallbackReply = `💍 **Oila huquqi (Oila kodeksi tahlili):**\n\n1. **Nikoh yoshi (15-modda):** Erkaklar va ayollar uchun qat'iy 18 yosh.\n2. **Nikoh shartnomasi (38–48-moddalar):** Nikoh shartnomasi faqat va faqat er-xotinning **mulkiy** huquq va majburiyatlarini belgilaydi. Notarial tasdiqlash majburiydir.\n3. **Aliment undirish (99-modda):** Voyaga yetmagan bolalar uchun: 1 bola uchun daromadning 1/4 qismi, 2 bola uchun 1/3 qismi, 3 va undan ortiq bola uchun yarmi (1/2) miqdorida undiriladi.\n4. **300 kun qoidasi (60-modda):** Nikoh bekor qilinganidan keyin 300 kun ichida tug'ilgan bola sobiq erdan deb hisoblanadi.`;
-  } else if (qLower.includes("keys") || qLower.includes("y-2") || qLower.includes("vaziyat")) {
-    fallbackReply = `⚖️ **BMBA Y-2 Vaziyatli keyslarni ChatGPT usulida yechish:**\n\n1. **Faktlarni ajrating:** Vaziyatda da'vogar kim va javobgar kim? Taraflar orasidagi munosabat qachon boshlangan?\n2. **Normativ asosni aniqlang:** Bu holat Mehnat kodeksi, Fuqarolik kodeksi, Iste'molchilar huquqlarini himoya qilish yoki Ma'muriy javobgarlik sohasiga kiradimi?\n3. **Muddatlar va sanalarni tekshiring:** Huquqiy da'vo muddati (odatda FK bo'yicha 3 yil, mehnat nizolarida esa ishdan bo'shatish bo'yicha buyruq berilgan kundan boshlab 1 oy) o'tmaganligini aniqlang.\n4. **Xulosa qiling:** Qonunning aniq moddasiga asoslanib da'vo qanoatlantirilishi yoki rad etilishi kerakligini belgilang.`;
-  } else if (qLower.includes("40") || qLower.includes("qonun") || qLower.includes("spesifikatsiya")) {
-    fallbackReply = `📜 **BMBA Milliy Sertifikatining 40 ta Qonuni:**\n\nImtihon quyidagi asosiy normativ hujjatlarni qamrab oladi:\n• **O'zbekiston Respublikasi Konstitutsiyasi** (barcha bo'limlar);\n• **Mehnat kodeksi**, **Fuqarolik kodeksi**, **Oila kodeksi**, **Jinoyat kodeksi**, **Ma'muriy javobgarlik to'g'risidagi kodeks**;\n• *"Sudlar to'g'risida"*, *"Prokuratura to'g'risida"*, *"Advokatura to'g'risida"*, *"Ichki ishlar organlari to'g'risida"*, *"Korrupsiyaga qarshi kurashish to'g'risida"* va boshqa 40 ta maxsus qonunlar.\n\n💡 Ilovaning **"40 ta Qonun"** bo'limida barcha hujjatlarning to'liq Lex.uz havolalari keltirilgan.`;
-  } else {
-    fallbackReply = `🤖 **ChatGPT AI Ustoz tahlili:**\n\nSizning savolingiz: **"${userQuery}"**\n\nUshbu masala bo'yicha quyidagi muhim jihatlarga e'tibor qaratish lozim:\n\n1. **Asosiy tushuncha va mohiyat:** Har qanday fanda yoki hayotiy vaziyatda eng avvalo fundamental qoidalar va ta'riflarga tayanish to'g'ri natija beradi.\n2. **Mantiqiy yondashuv:** Mavzuni bosqichma-bosqich tahlil qiling: sabab, jarayon va natija bog'liqligini aniqlang.\n3. **Amaliy tavsiya:** Agar bu savol imtihon yoki huquqqa oid bo'lsa, qonun moddasi va amaliyotdagi pretsedentlarni o'rganing; agar umumiy mavzuda bo'lsa, tizimli reja tuzib o'rganishni tavsiya qilaman.\n\nSizga ushbu mavzu bo'yicha yana qanday batafsil ma'lumot yoki tushuntirish kerak bo'lsa, bemalol so'rang!`;
-  }
-
-  return res.json({
-    reply: fallbackReply,
-    source: "AI Ustoz (ChatGPT)",
-    timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
-  });
+  const result = await askAiTutor(message, history);
+  return res.json(result);
 });
 
 // ==================== 2. REYTING & LEADERBOARD API ====================

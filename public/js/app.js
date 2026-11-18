@@ -2692,9 +2692,14 @@ async function handleAiTutorSubmit(e) {
     // Markdown-ga o'xshash qatorlarni chiroyli HTML-ga o'girish (ChatGPT uslubi)
     const formattedReply = replyText
       .replace(/```([\s\S]*?)```/g, '<pre class="p-2.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto my-1.5">$1</pre>')
+      .replace(/^### (.*$)/gim, '<h4 class="font-bold text-emerald-600 dark:text-emerald-400 mt-2 mb-1">$1</h4>')
+      .replace(/^## (.*$)/gim, '<h3 class="font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1">$1</h3>')
+      .replace(/^---$/gim, '<hr class="my-2 border-slate-200 dark:border-slate-700">')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/\n•/g, '<br>•')
+      .replace(/\n\*\s/g, '<br>• ')
+      .replace(/\n-\s/g, '<br>• ')
       .replace(/\n(\d+)\.\s/g, '<br><strong>$1.</strong> ')
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>');

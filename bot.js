@@ -1,6 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const { askAiTutor } = require('./scripts/aiService');
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const webAppUrl = process.env.WEB_APP_URL || 'http://localhost:5000';
@@ -319,6 +320,38 @@ class SimpleTelegramBot {
         return await this.sendAllChannels(chatId);
       } else if (text === '/post_quiz') {
         await this.postNextQuizToChannel(chatId);
+      } else if (text.trim()) {
+        const isSubscribed = await this.checkUserSubscription(userId, '@Huquq_study');
+        if (!isSubscribed) {
+          return await this.sendSubscriptionGate(chatId, firstName);
+        }
+
+        // AI Ustoz - Har qanday savolga aqlli, to'liq va tushunarli javob beradi
+        await this.callApi('sendChatAction', { chat_id: chatId, action: 'typing' });
+        const aiRes = await askAiTutor(text.trim());
+        const replyText = `🤖 *AI Ustoz:*\n\n${aiRes.reply}`;
+
+        try {
+          await this.sendMessage(chatId, replyText, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "📲 Mini Appni ochish", web_app: { url: this.appUrl } }],
+                [{ text: "🔙 Asosiy Menyu", callback_data: "cmd_home" }]
+              ]
+            }
+          });
+        } catch (e) {
+          await this.callApi('sendMessage', {
+            chat_id: chatId,
+            text: `🤖 AI Ustoz:\n\n${aiRes.reply}`,
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "📲 Mini Appni ochish", web_app: { url: this.appUrl } }],
+                [{ text: "🔙 Asosiy Menyu", callback_data: "cmd_home" }]
+              ]
+            }
+          });
+        }
       }
     } else if (update.callback_query) {
       const q = update.callback_query;
