@@ -62,6 +62,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Kanallarga a'zolik holatini yangilash
   updateHomeSubscriptionUI();
+
+  // Majburiy ro'yxatdan o'tish: agar foydalanuvchi hisobiga kirmagan bo'lsa
+  if (!state.currentUser) {
+    setTimeout(() => {
+      switchAuthTab('register');
+      openAuthModal();
+    }, 600);
+  }
 });
 
 // Kunlik Streak (Daily Streak) hisoblash
@@ -88,8 +96,25 @@ function updateDailyStreak() {
   if (el) el.innerText = state.streak;
 }
 
+// Majburiy ro'yxatdan o'tish tekshiruvi (Har bir bo'limga kirish uchun)
+function checkAuthRequired(featureName) {
+  if (!state.currentUser) {
+    const msg = featureName 
+      ? `🔒 "${featureName}" bo'limiga kirish uchun ro'yxatdan o'tish majburiy!`
+      : "🔒 Platforma imkoniyatlaridan foydalanish uchun ro'yxatdan o'tish majburiy!";
+    showToast(msg);
+    switchAuthTab('register');
+    openAuthModal();
+    return false;
+  }
+  return true;
+}
+
 // Ko'rinishlarni almashtirish
 function switchView(viewId) {
+  if (viewId !== "viewHome" && !checkAuthRequired()) {
+    return;
+  }
   const views = ["viewHome", "viewExam", "viewResult", "viewFlashcards", "viewLaws", "viewVariants", "viewBooks", "viewCases", "viewMistakes", "viewOctagon", "viewAiTutor", "viewProfile"];
   views.forEach(v => {
     const el = document.getElementById(v);
@@ -113,6 +138,7 @@ function showHome() {
 /* ==================== 1. IMTIHON MODULI ==================== */
 
 function startExam() {
+  if (!checkAuthRequired("Mock Imtihon")) return;
   state.currentQuestion = 0;
   state.userAnswers = {};
   state.bookmarks.clear();
@@ -125,6 +151,7 @@ function startExam() {
 }
 
 function startCaseStudy() {
+  if (!checkAuthRequired("Vaziyatli keyslar")) return;
   startExam();
   goToQuestion(32); // 33-savolga o'tish (0-indexed: 32)
 }
@@ -775,12 +802,15 @@ function initAuthUI() {
   else if (state.userPlan === "tariff_start") planTitle = "START";
   if (headerPlanBadge) headerPlanBadge.innerText = planTitle;
 
+  const guestBanner = document.getElementById("guestNoticeBanner");
+
   if (user) {
     if (btnLogin) btnLogin.classList.add("hidden");
     if (btnProfile) {
       btnProfile.classList.remove("hidden");
       btnProfile.classList.add("flex");
     }
+    if (guestBanner) guestBanner.classList.add("hidden");
     const shortName = (user.name || "O'quvchi").split(" ")[0];
     if (userNameElem) userNameElem.innerText = shortName;
   } else {
@@ -789,6 +819,7 @@ function initAuthUI() {
       btnProfile.classList.add("hidden");
       btnProfile.classList.remove("flex");
     }
+    if (guestBanner) guestBanner.classList.remove("hidden");
     if (userNameElem) userNameElem.innerText = "O'quvchi";
   }
 
@@ -1172,6 +1203,7 @@ function showToast(msg) {
 /* ==================== 6. FLASHCARDS MODULI ==================== */
 
 function openFlashcards() {
+  if (!checkAuthRequired("Muddatlar & Foizlar")) return;
   state.currentCard = 0;
   state.isCardFlipped = false;
   switchView("viewFlashcards");
@@ -1224,6 +1256,7 @@ function prevCard() {
 /* ==================== 7. 40 TA QONUN RO'YXATI ==================== */
 
 function openLawsDirectory() {
+  if (!checkAuthRequired("40 ta Qonun")) return;
   switchView("viewLaws");
   renderLawsList(state.laws);
 }
@@ -1289,6 +1322,7 @@ function filterLaws() {
 /* ==================== 8. 50 TA VARIANTLAR BOSHQARUVI ==================== */
 
 async function openVariantsList() {
+  if (!checkAuthRequired("50 ta Variant")) return;
   switchView("viewVariants");
   const container = document.getElementById("variantsGridList");
   if (!container) return;
@@ -1356,6 +1390,7 @@ function renderVariantsGrid(list) {
 }
 
 function handleVariantClick(variantId, isLocked) {
+  if (!checkAuthRequired("Test varianti")) return;
   if (isLocked) {
     openPremiumModal();
     return;
@@ -1364,6 +1399,7 @@ function handleVariantClick(variantId, isLocked) {
 }
 
 async function loadAndStartVariant(variantId) {
+  if (!checkAuthRequired("Mock Imtihon")) return;
   try {
     const res = await fetch(`/api/variants/${variantId}`);
     if (res.ok) {
@@ -1477,6 +1513,7 @@ async function submitNewQuestion(e) {
 /* ==================== 9. 4 TA DARSLIK KITOBLARI ==================== */
 
 async function openBooksDirectory() {
+  if (!checkAuthRequired("Darsliklar (PDF)")) return;
   switchView("viewBooks");
   const container = document.getElementById("booksListContainer");
   container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Darsliklar yuklanmoqda...</div>';
@@ -1539,6 +1576,7 @@ function renderBooksList(books) {
 let allCasesCache = [];
 
 async function openCasesDirectory() {
+  if (!checkAuthRequired("25 ta Vaziyatli Keys")) return;
   switchView("viewCases");
   const container = document.getElementById("casesListContainer");
   container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> 25 ta vaziyatli keys yuklanmoqda...</div>';
@@ -1728,6 +1766,7 @@ function updateMistakesCount() {
 }
 
 function openMistakesTrainer() {
+  if (!checkAuthRequired("Mening xatolarim")) return;
   switchView("viewMistakes");
   renderMistakesList();
 }
@@ -2090,6 +2129,7 @@ const octagonState = {
 };
 
 function openOctagonLobby() {
+  if (!checkAuthRequired("Huquqiy Octagon Duellari")) return;
   switchView("viewOctagon");
   startOctagonBattle();
 }
@@ -2491,11 +2531,12 @@ async function verifyChannelSubscription(showAlert = true) {
   }
 }
 
-/* ==================== 11. AI USTOZ (CHAT & HUQUQIY REPETITOR) ==================== */
+/* ==================== 11. AI USTOZ (CHATGPT KABI UNIVERSAL AI) ==================== */
 
 let aiTutorHistory = [];
 
 function openAiTutorView() {
+  if (!checkAuthRequired("AI Ustoz")) return;
   switchView("viewAiTutor");
   const container = document.getElementById("aiTutorMessages");
   if (container) {
@@ -2526,19 +2567,19 @@ function clearAiTutorChat() {
     if (container) {
       container.innerHTML = `
         <div class="flex items-start space-x-2.5">
-          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
             <i class="fa-solid fa-robot"></i>
           </div>
           <div class="space-y-1.5 max-w-[85%]">
             <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-800 dark:text-slate-100 text-xs leading-relaxed">
-              <p class="font-bold text-indigo-600 dark:text-indigo-400 mb-1 flex items-center">
+              <p class="font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center">
                 <i class="fa-solid fa-sparkles mr-1.5"></i> Assalomu alaykum!
               </p>
-              Men sizning BMBA Huquqshunoslik Milliy Sertifikati bo'yicha shaxsiy <strong>AI Ustozingizman</strong>.
+              Men sizning universal <strong>AI Ustozingizman</strong> (xuddi ChatGPT kabi ishlayman).
               <br><br>
-              Spesifikatsiyadagi <strong>40 ta qonun</strong>, 8, 9, 10, 11-sinf darsliklari, vaziyatli keyslar va qonun moddalari bo'yicha istalgan savolingizni bering. Men sizga darhol asosli qonuniy javob beraman!
+              Huquqshunoslik, BMBA imtihoni, <strong>40 ta qonun</strong>, vaziyatli keyslar, darsliklar yoki istalgan boshqa mavzuda savolingizni bering. Men barchasiga to'liq, mukammal va tushunarli javob beraman!
             </div>
-            <span class="text-[9px] text-slate-400 pl-1">AI Ustoz · Yangi suhbat</span>
+            <span class="text-[9px] text-slate-400 pl-1">AI Ustoz (ChatGPT) · Yangi suhbat</span>
           </div>
         </div>
       `;
@@ -2548,6 +2589,7 @@ function clearAiTutorChat() {
 }
 
 function askAiQuick(questionText) {
+  if (!checkAuthRequired("AI Ustoz")) return;
   const input = document.getElementById("aiTutorInput");
   if (input) {
     input.value = questionText;
@@ -2557,6 +2599,7 @@ function askAiQuick(questionText) {
 
 async function handleAiTutorSubmit(e) {
   if (e && e.preventDefault) e.preventDefault();
+  if (!checkAuthRequired("AI Ustoz")) return;
   const input = document.getElementById("aiTutorInput");
   const sendBtn = document.getElementById("btnAiSend");
   const container = document.getElementById("aiTutorMessages");
@@ -2588,13 +2631,13 @@ async function handleAiTutorSubmit(e) {
   loadingBubble.id = loadingId;
   loadingBubble.className = "flex items-start space-x-2.5 animate-pulse";
   loadingBubble.innerHTML = `
-    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+    <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
       <i class="fa-solid fa-robot"></i>
     </div>
     <div class="space-y-1.5 max-w-[85%]">
       <div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-500 text-xs flex items-center space-x-2">
-        <i class="fa-solid fa-spinner fa-spin text-indigo-500"></i>
-        <span>AI Ustoz qonun moddalarini tahlil qilmoqda...</span>
+        <i class="fa-solid fa-spinner fa-spin text-emerald-500"></i>
+        <span>ChatGPT kabi javob tayyorlanmoqda...</span>
       </div>
     </div>
   `;
@@ -2618,7 +2661,7 @@ async function handleAiTutorSubmit(e) {
     if (loadingEl) loadingEl.remove();
 
     const replyText = data.reply || "Savolingiz bo'yicha javob topilmadi. Qayta urinib ko'ring.";
-    const replySource = data.source || "AI Ustoz";
+    const replySource = data.source || "AI Ustoz (ChatGPT)";
     const replyTime = data.timestamp || nowTime;
 
     // Tarixga qo'shish
@@ -2629,15 +2672,18 @@ async function handleAiTutorSubmit(e) {
     const aiBubble = document.createElement("div");
     aiBubble.className = "flex items-start space-x-2.5 animate-fade-in";
     
-    // Markdown-ga o'xshash qatorlarni chiroyli HTML-ga o'girish
+    // Markdown-ga o'xshash qatorlarni chiroyli HTML-ga o'girish (ChatGPT uslubi)
     const formattedReply = replyText
+      .replace(/```([\s\S]*?)```/g, '<pre class="p-2.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto my-1.5">$1</pre>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/\n•/g, '<br>•')
+      .replace(/\n(\d+)\.\s/g, '<br><strong>$1.</strong> ')
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>');
 
     aiBubble.innerHTML = `
-      <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+      <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
         <i class="fa-solid fa-robot"></i>
       </div>
       <div class="space-y-1.5 max-w-[88%]">
@@ -2646,7 +2692,7 @@ async function handleAiTutorSubmit(e) {
         </div>
         <div class="flex items-center space-x-2 text-[9px] text-slate-400 pl-1">
           <span>${replySource} · ${replyTime}</span>
-          <button onclick="copyAiAnswer(this)" class="hover:text-indigo-500 font-semibold flex items-center ml-2">
+          <button onclick="copyAiAnswer(this)" class="hover:text-emerald-500 font-semibold flex items-center ml-2">
             <i class="fa-regular fa-copy mr-0.5"></i> Nusxa
           </button>
         </div>
