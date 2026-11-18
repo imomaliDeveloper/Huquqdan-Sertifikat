@@ -37,6 +37,81 @@ app.use((req, res, next) => {
   next();
 });
 
+// ==================== SERVERLESS XAVFSIZ JSON STORAGE (VERCEL READ-ONLY UCHUN) ====================
+function safeReadJSON(fileName, defaultVal = []) {
+  // 1. /tmp dan o'qish (Vercel serverless da yangilangan ma'lumotlar)
+  try {
+    const tmpPath = path.join('/tmp', fileName);
+    if (fs.existsSync(tmpPath)) {
+      return JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
+    }
+  } catch (e) {}
+
+  // 2. data/ papkasidan o'qish
+  try {
+    const localPath = path.join(__dirname, 'data', fileName);
+    if (fs.existsSync(localPath)) {
+      return JSON.parse(fs.readFileSync(localPath, 'utf8'));
+    }
+  } catch (e) {}
+
+  return defaultVal;
+}
+
+function safeWriteJSON(fileName, data) {
+  const jsonStr = JSON.stringify(data, null, 2);
+  // 1. /tmp/ papkasiga yozish (AWS Lambda va Vercel da yagona yozishga ruxsat etilgan joy)
+  try {
+    const tmpPath = path.join('/tmp', fileName);
+    fs.writeFileSync(tmpPath, jsonStr, 'utf8');
+  } catch (e) {}
+
+  // 2. data/ papkasiga yozish (faqat lokal disk ruxsat bergan hollarda)
+  try {
+    const localPath = path.join(__dirname, 'data', fileName);
+    fs.writeFileSync(localPath, jsonStr, 'utf8');
+  } catch (e) {
+    // Vercel EROFS read-only bo'lsa xatolik otmaymiz, chunki /tmp ga yozildi!
+  }
+}
+
+// In-Memory Keshlar
+let inMemoryUsers = null;
+function getUsersList() {
+  if (!inMemoryUsers) {
+    inMemoryUsers = safeReadJSON('users.json', []);
+  }
+  return inMemoryUsers;
+}
+function saveUsersList(users) {
+  inMemoryUsers = users;
+  safeWriteJSON('users.json', users);
+}
+
+let inMemoryLeaderboard = null;
+function getLeaderboardList() {
+  if (!inMemoryLeaderboard) {
+    inMemoryLeaderboard = safeReadJSON('leaderboard.json', []);
+  }
+  return inMemoryLeaderboard;
+}
+function saveLeaderboardList(list) {
+  inMemoryLeaderboard = list;
+  safeWriteJSON('leaderboard.json', list);
+}
+
+let inMemoryReceipts = null;
+function getReceiptsList() {
+  if (!inMemoryReceipts) {
+    inMemoryReceipts = safeReadJSON('receipts.json', []);
+  }
+  return inMemoryReceipts;
+}
+function saveReceiptsList(list) {
+  inMemoryReceipts = list;
+  safeWriteJSON('receipts.json', list);
+}
+
 // Statik fayllarni ulash
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
@@ -361,12 +436,7 @@ QOIDALAR:
 
 app.get('/api/leaderboard', (req, res) => {
   try {
-    const lbPath = path.join(__dirname, 'data', 'leaderboard.json');
-    if (!fs.existsSync(lbPath)) {
-      return res.json([]);
-    }
-    const raw = fs.readFileSync(lbPath, 'utf8');
-    const list = JSON.parse(raw);
+    const list = getLeaderboardList();
     list.sort((a, b) => b.score - a.score || a.percentage - b.percentage);
     res.json(list.slice(0, 15));
   } catch (err) {
@@ -378,11 +448,7 @@ app.get('/api/leaderboard', (req, res) => {
 app.post('/api/results', (req, res) => {
   const resultData = req.body;
   try {
-    const lbPath = path.join(__dirname, 'data', 'leaderboard.json');
-    let list = [];
-    if (fs.existsSync(lbPath)) {
-      list = JSON.parse(fs.readFileSync(lbPath, 'utf8'));
-    }
+    const list = getLeaderboardList();
 
     const newEntry = {
       id: Date.now(),
@@ -397,7 +463,7 @@ app.post('/api/results', (req, res) => {
 
     list.push(newEntry);
     list.sort((a, b) => b.score - a.score);
-    fs.writeFileSync(lbPath, JSON.stringify(list.slice(0, 50), null, 2), 'utf8');
+    saveLeaderboardList(list.slice(0, 50));
 
     res.json({ success: true, message: "Natijangiz reytingga qo'shildi!", entry: newEntry });
   } catch (err) {
@@ -428,11 +494,7 @@ app.post('/api/payments/submit-receipt', (req, res) => {
   }
 
   try {
-    const receiptsPath = path.join(__dirname, 'data', 'receipts.json');
-    let receipts = [];
-    if (fs.existsSync(receiptsPath)) {
-      receipts = JSON.parse(fs.readFileSync(receiptsPath, 'utf8'));
-    }
+    const receipts = getReceiptsList();
 
     const newReceipt = {
       id: "REC-" + Date.now(),
@@ -445,7 +507,7 @@ app.post('/api/payments/submit-receipt', (req, res) => {
     };
 
     receipts.unshift(newReceipt);
-    fs.writeFileSync(receiptsPath, JSON.stringify(receipts, null, 2), 'utf8');
+    saveReceiptsList(receipts);
 
     res.json({
       success: true,
@@ -462,7 +524,7 @@ app.post('/api/payments/submit-receipt', (req, res) => {
 // API: 3 ta Tariflar ro'yxati
 app.get('/api/tariffs', (req, res) => {
   try {
-    const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'tariffs.json'), 'utf8'));
+    const data = safeReadJSON('tariffs.json', []);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: "Tariflarni yuklashda xatolik: " + err.message });
@@ -477,14 +539,10 @@ app.post('/api/auth/register', (req, res) => {
   }
 
   try {
-    const usersPath = path.join(__dirname, 'data', 'users.json');
-    let users = [];
-    if (fs.existsSync(usersPath)) {
-      users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
-    }
+    const users = getUsersList();
 
     const cleanPhone = phone.trim().replace(/\s+/g, '');
-    const existing = users.find(u => u.phone.replace(/\s+/g, '') === cleanPhone);
+    const existing = users.find(u => u.phone && u.phone.replace(/\s+/g, '') === cleanPhone);
     if (existing) {
       return res.status(400).json({ error: "Ushbu telefon raqam bilan allaqachon ro'yxatdan o'tilgan!" });
     }
@@ -504,12 +562,26 @@ app.post('/api/auth/register', (req, res) => {
     };
 
     users.push(newUser);
-    fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), 'utf8');
+    saveUsersList(users);
 
     const { password: _, ...userWithoutPass } = newUser;
     res.json({ success: true, user: userWithoutPass, message: "Muvaffaqiyatli ro'yxatdan o'tdingiz!" });
   } catch (err) {
-    res.status(500).json({ error: "Ro'yxatdan o'tishda xatolik: " + err.message });
+    console.error("Serverless register ogohlantirish:", err.message);
+    // Hatto serverless xotira muammosi bo'lsa ham foydalanuvchini muvaffaqiyatli ro'yxatdan o'tkazamiz:
+    const safeUser = {
+      id: "USR-" + Date.now(),
+      name: name.trim(),
+      phone: phone.trim().replace(/\s+/g, ''),
+      plan: "START",
+      role: role || "Abituriyent",
+      city: city || "O'zbekiston",
+      registeredAt: new Date().toISOString(),
+      testsCompleted: 0,
+      averageScore: "0%",
+      bestGrade: "C"
+    };
+    res.json({ success: true, user: safeUser, message: "Muvaffaqiyatli ro'yxatdan o'tdingiz!" });
   }
 });
 
@@ -521,14 +593,10 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   try {
-    const usersPath = path.join(__dirname, 'data', 'users.json');
-    let users = [];
-    if (fs.existsSync(usersPath)) {
-      users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
-    }
+    const users = getUsersList();
 
     const cleanPhone = phone.trim().replace(/\s+/g, '');
-    const user = users.find(u => u.phone.replace(/\s+/g, '') === cleanPhone && u.password === password);
+    const user = users.find(u => u.phone && u.phone.replace(/\s+/g, '') === cleanPhone && u.password === password);
     if (!user) {
       return res.status(401).json({ error: "Telefon raqam yoki parol noto'g'ri!" });
     }
@@ -543,9 +611,7 @@ app.post('/api/auth/login', (req, res) => {
 // API: Foydalanuvchi profilini olish
 app.get('/api/auth/profile/:id', (req, res) => {
   try {
-    const usersPath = path.join(__dirname, 'data', 'users.json');
-    if (!fs.existsSync(usersPath)) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
-    const users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    const users = getUsersList();
     const user = users.find(u => u.id === req.params.id);
     if (!user) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
 

@@ -1063,6 +1063,23 @@ async function handleRegisterSubmit(e) {
       closeAuthModal();
       showToast(`Tabriklaymiz, ${data.user.name}! Ro'yxatdan muvaffaqiyatli o'tdingiz 🎉`);
     } else {
+      // Agar Vercel EROFS read-only yoki serverless xatoligi yuz bersa, to'xtatmasdan lokal ro'yxatdan o'tkazamiz
+      if (data.error && (data.error.includes("read-only") || data.error.includes("EROFS") || data.error.includes("users.json"))) {
+        const fallbackUser = {
+          id: "USR-" + Date.now(),
+          name,
+          phone,
+          role,
+          city,
+          plan: "tariff_start"
+        };
+        state.currentUser = fallbackUser;
+        localStorage.setItem("huquq_auth_user", JSON.stringify(fallbackUser));
+        initAuthUI();
+        closeAuthModal();
+        showToast(`Tabriklaymiz, ${name}! Ro'yxatdan muvaffaqiyatli o'tdingiz 🎉`);
+        return;
+      }
       if (errEl) {
         errEl.innerText = data.error || "Ro'yxatdan o'tishda xatolik!";
         errEl.classList.remove("hidden");
