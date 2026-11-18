@@ -378,15 +378,20 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serverni ishga tushirish
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`⚖️  Huquq Milliy Sertifikat Platformasi ishga tushdi!`);
-  console.log(`🌐  Lokal veb-manzil: http://localhost:${PORT}`);
-  console.log(`🤖  AI Repetitor (Gemini): ${genAI ? "Faol (gemini-3.8-flash)" : "O'chiq"}`);
-  console.log(`💳  To'lov tizimi (Humo): 9860 0366 7156 8792`);
-  console.log(`=======================================================`);
+// Serverni ishga tushirish (Vercel serverless da listen qilinmaydi)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`⚖️  Huquq Milliy Sertifikat Platformasi ishga tushdi!`);
+    console.log(`🌐  Lokal veb-manzil: http://localhost:${PORT}`);
+    console.log(`🤖  AI Repetitor (Gemini): ${genAI ? "Faol (gemini-3.8-flash)" : "O'chiq"}`);
+    console.log(`💳  To'lov tizimi (Humo): 9860 0366 7156 8792`);
+    console.log(`=======================================================`);
 
-  // Telegram botni ishga tushirish (agar token bo'lsa)
-  initBot();
-});
+    // Telegram botni ishga tushirish (faqat lokal yoki doimiy serverda)
+    initBot();
+  });
+}
+
+// Vercel serverless uchun eksport
+module.exports = app;

@@ -918,26 +918,34 @@ function filterLaws() {
 async function openVariantsList() {
   switchView("viewVariants");
   const container = document.getElementById("variantsGridList");
+  if (!container) return;
   container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Variantlar yuklanmoqda...</div>';
 
   try {
     const res = await fetch("/api/variants");
-    const variants = await res.json();
-    renderVariantsGrid(variants);
-  } catch (e) {
-    const list = [];
-    for (let i = 1; i <= 50; i++) {
-      list.push({
-        id: i,
-        title: i === 1 ? "Variant 1 (T-760 Rasmiy Namunaviy)" : `Variant ${i} (BMBA Standart)`,
-        totalQuestions: 45,
-        timeMinutes: 90,
-        badge: i === 1 ? "Rasmiy Namunaviy" : (i <= 5 ? "Bepul sinov" : "🔒 Premium"),
-        isPremium: i > 5
-      });
+    if (res.ok) {
+      const variants = await res.json();
+      if (Array.isArray(variants) && variants.length > 0) {
+        renderVariantsGrid(variants);
+        return;
+      }
     }
-    renderVariantsGrid(list);
+  } catch (e) {
+    console.warn("Variants API fallback:", e);
   }
+
+  const list = [];
+  for (let i = 1; i <= 50; i++) {
+    list.push({
+      id: i,
+      title: i === 1 ? "Variant 1 (T-760 Rasmiy Namunaviy)" : `Variant ${i} (BMBA Standart)`,
+      totalQuestions: 45,
+      timeMinutes: 90,
+      badge: i === 1 ? "Rasmiy Namunaviy" : (i <= 5 ? "Bepul sinov" : "🔒 Premium"),
+      isPremium: i > 5
+    });
+  }
+  renderVariantsGrid(list);
 }
 
 function renderVariantsGrid(list) {
@@ -985,18 +993,20 @@ function handleVariantClick(variantId, isLocked) {
 async function loadAndStartVariant(variantId) {
   try {
     const res = await fetch(`/api/variants/${variantId}`);
-    const variantData = await res.json();
-    if (variantData && variantData.questions) {
-      EXAM_DATA.id = variantData.id;
-      EXAM_DATA.title = variantData.title;
-      EXAM_DATA.questions = variantData.questions;
-      startExam();
-    } else {
-      startExam();
+    if (res.ok) {
+      const variantData = await res.json();
+      if (variantData && variantData.questions && variantData.questions.length > 0) {
+        EXAM_DATA.id = variantData.id;
+        EXAM_DATA.title = variantData.title;
+        EXAM_DATA.questions = variantData.questions;
+        startExam();
+        return;
+      }
     }
   } catch (err) {
-    startExam();
+    console.warn("Variant fetch error, starting with default exam data:", err);
   }
+  startExam();
 }
 
 async function postTestToTelegramChannel() {
