@@ -2551,10 +2551,74 @@ async function verifyChannelSubscription(showAlert = true) {
 /* ==================== 11. AI USTOZ (CHATGPT KABI UNIVERSAL AI) ==================== */
 
 let aiTutorHistory = [];
+const FREE_AI_QUESTION_LIMIT = 2;
+
+function getAiUserKey() {
+  if (state.currentUser && state.currentUser.phone) return state.currentUser.phone;
+  if (state.currentUser && state.currentUser.id) return state.currentUser.id;
+  return "guest_user";
+}
+
+function getAiQuestionsUsed() {
+  const key = "huquq_ai_used_" + getAiUserKey();
+  return parseInt(localStorage.getItem(key) || "0", 10);
+}
+
+function incrementAiQuestionsUsed() {
+  const key = "huquq_ai_used_" + getAiUserKey();
+  const current = getAiQuestionsUsed() + 1;
+  localStorage.setItem(key, current.toString());
+  updateAiLimitUI();
+  return current;
+}
+
+function isAiUnlimited() {
+  return state.userPlan === "tariff_vip" || 
+         state.isPremium === true || 
+         localStorage.getItem("huquq_premium_active") === "true";
+}
+
+function updateAiLimitUI() {
+  const badgeText = document.getElementById("aiLimitText");
+  const badgeContainer = document.getElementById("aiLimitBadge");
+  if (!badgeText) return;
+
+  if (isAiUnlimited()) {
+    badgeText.innerHTML = `<span class="text-amber-500 font-black flex items-center"><i class="fa-solid fa-crown mr-1.5 text-xs"></i> VIP PRO: Cheksiz Savollar</span>`;
+    if (badgeContainer) {
+      badgeContainer.className = "flex items-center justify-between px-3.5 py-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-[11px] shadow-xs";
+    }
+  } else {
+    const used = getAiQuestionsUsed();
+    const remaining = Math.max(0, FREE_AI_QUESTION_LIMIT - used);
+    if (remaining > 0) {
+      badgeText.innerHTML = `<span class="text-indigo-700 dark:text-indigo-300 font-bold flex items-center"><i class="fa-solid fa-gift text-amber-500 mr-1.5 text-xs"></i> Bepul savollar: <strong class="ml-1">${remaining}/${FREE_AI_QUESTION_LIMIT} ta qoldi</strong></span>`;
+      if (badgeContainer) {
+        badgeContainer.className = "flex items-center justify-between px-3.5 py-2 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-[11px] shadow-xs";
+      }
+    } else {
+      badgeText.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-black flex items-center"><i class="fa-solid fa-lock text-rose-500 mr-1.5 text-xs"></i> 2 ta bepul limit tugadi</span>`;
+      if (badgeContainer) {
+        badgeContainer.className = "flex items-center justify-between px-3.5 py-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-[11px] shadow-xs";
+      }
+    }
+  }
+}
+
+function openAiLimitModal() {
+  const m = document.getElementById("aiLimitModal");
+  if (m) m.classList.remove("hidden");
+}
+
+function closeAiLimitModal() {
+  const m = document.getElementById("aiLimitModal");
+  if (m) m.classList.add("hidden");
+}
 
 function openAiTutorView() {
   if (!checkAuthRequired("AI Ustoz")) return;
   switchView("viewAiTutor");
+  updateAiLimitUI();
   const container = document.getElementById("aiTutorMessages");
   if (container) {
     container.scrollTop = container.scrollHeight;
@@ -2624,6 +2688,16 @@ async function handleAiTutorSubmit(e) {
   if (!input || !container) return;
   const question = input.value.trim();
   if (!question) return;
+
+  // 0. Bepul limitni tekshirish (Faqat 2 ta bepul savol)
+  if (!isAiUnlimited()) {
+    const used = getAiQuestionsUsed();
+    if (used >= FREE_AI_QUESTION_LIMIT) {
+      openAiLimitModal();
+      showToast("⚠️ 2 ta bepul savol limitingiz tugagan. Cheksiz foydalanish uchun VIP PRO ga ulaning!");
+      return;
+    }
+  }
 
   const nowTime = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
 
@@ -2722,6 +2796,17 @@ async function handleAiTutorSubmit(e) {
     `;
     container.appendChild(aiBubble);
     container.scrollTop = container.scrollHeight;
+
+    // 3. Agar foydalanuvchi VIP bo'lmasa, limitni oshiramiz va xabar beramiz
+    if (!isAiUnlimited()) {
+      const usedNow = incrementAiQuestionsUsed();
+      const remainingNow = Math.max(0, FREE_AI_QUESTION_LIMIT - usedNow);
+      if (remainingNow > 0) {
+        showToast(`💡 Yana ${remainingNow} ta bepul AI savoli qoldi.`);
+      } else {
+        showToast("⚠️ 2 ta bepul savol limitingiz tugadi! Cheksiz foydalanish uchun VIP PRO ga ulaning.");
+      }
+    }
 
   } catch (err) {
     const loadingEl = document.getElementById(loadingId);

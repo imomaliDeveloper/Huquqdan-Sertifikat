@@ -1,4 +1,4 @@
-const CACHE_NAME = 'huquq-sertifikat-v16';
+const CACHE_NAME = 'huquq-sertifikat-v17';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

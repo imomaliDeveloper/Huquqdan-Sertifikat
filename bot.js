@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { askAiTutor } = require('./scripts/aiService');
 
+const botUserAiCounts = {};
+
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const webAppUrl = process.env.WEB_APP_URL || 'http://localhost:5000';
 const channelId = process.env.TELEGRAM_CHANNEL_ID || '@Huquq_study'; // Asosiy kanal
@@ -326,10 +328,30 @@ class SimpleTelegramBot {
           return await this.sendSubscriptionGate(chatId, firstName);
         }
 
+        const used = botUserAiCounts[userId] || 0;
+        if (used >= 2) {
+          return await this.sendMessage(chatId,
+            `⚠️ *Hurmatli ${firstName}! Siz 2 ta bepul AI Ustoz savol limitidan to'liq foydalandingiz.*\n\n` +
+            `Cheksiz va to'liq savol-javoblar uchun Mini App orqali *VIP PRO* tarifiga ulaning! 🚀`, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "👑 VIP PRO Tarifiga Ulanish", web_app: { url: this.appUrl } }],
+                [{ text: "🔙 Asosiy Menyu", callback_data: "cmd_home" }]
+              ]
+            }
+          });
+        }
+
         // AI Ustoz - Har qanday savolga aqlli, to'liq va tushunarli javob beradi
         await this.callApi('sendChatAction', { chat_id: chatId, action: 'typing' });
         const aiRes = await askAiTutor(text.trim());
-        const replyText = `🤖 *AI Ustoz:*\n\n${aiRes.reply}`;
+        botUserAiCounts[userId] = used + 1;
+        const remaining = 2 - botUserAiCounts[userId];
+        const limitNote = remaining > 0 
+          ? `\n\n_(💡 Sizda yana ${remaining} ta bepul savol imkoniyati qoldi)_` 
+          : `\n\n_(⚠️ 2 ta bepul savol limitingiz tugadi. Cheksiz foydalanish uchun VIP PRO ga o'ting!)_`;
+
+        const replyText = `🤖 *AI Ustoz:*\n\n${aiRes.reply}${limitNote}`;
 
         try {
           await this.sendMessage(chatId, replyText, {
