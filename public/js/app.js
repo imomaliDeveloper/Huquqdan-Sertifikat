@@ -340,7 +340,8 @@ function toggleGridModal(forceState) {
 }
 
 function renderGridMatrix() {
-  const container = document.getElementById("gridMatrix");
+  const container = document.getElementById("gridModalContent") || document.getElementById("gridMatrix");
+  if (!container) return;
   container.innerHTML = "";
 
   for (let i = 0; i < EXAM_DATA.totalQuestions; i++) {
