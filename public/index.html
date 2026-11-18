@@ -243,23 +243,26 @@
           <p class="text-[11px] text-slate-500 mt-0.5">Xatolar ustida ishlash</p>
         </button>
 
-        <!-- Foydali Kanallar & Hamjamiyat (@Huquq_study) -->
-        <button onclick="openChannelsDirectory()" class="p-4 rounded-xl bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 text-white shadow-md text-left active:scale-95 transition col-span-2">
-          <div class="flex items-center justify-between">
+        <!-- 🤖 AI USTOZ (HUQUQIY SUHBAT & REPETITOR) -->
+        <button onclick="openAiTutorView()" class="p-4 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white shadow-md text-left active:scale-95 transition col-span-2 relative overflow-hidden">
+          <div class="flex items-center justify-between relative z-10">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-xl">
-                <i class="fa-brands fa-telegram text-sky-200"></i>
+              <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-2xl shadow-inner text-yellow-300">
+                <i class="fa-solid fa-graduation-cap"></i>
               </div>
               <div>
-                <div class="flex items-center space-x-1.5">
-                  <h3 class="text-sm font-extrabold">Huquqiy Kanallar & Hamjamiyat</h3>
-                  <span class="px-2 py-0.5 rounded-full bg-yellow-400 text-blue-950 text-[9px] font-black uppercase">7 ta kanal</span>
+                <div class="flex items-center space-x-2">
+                  <h3 class="text-sm font-black tracking-wide">AI Ustoz (Huquqiy Repetitor)</h3>
+                  <span class="px-2 py-0.5 rounded-full bg-yellow-400 text-indigo-950 text-[9px] font-black uppercase">Gemini 3.8</span>
                 </div>
-                <p class="text-[11px] text-sky-100">@Huquq_study (Majburiy a'zolik) va rasmiy qonunchilik</p>
+                <p class="text-[11px] text-indigo-100 mt-0.5">Istalgan huquqiy savol, keys va qonunlarni so'rang</p>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-full bg-white/20 text-xs font-bold">Ochish <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+            <span class="px-2.5 py-1.5 rounded-xl bg-white text-indigo-900 font-extrabold text-xs shadow-sm whitespace-nowrap">
+              Savol berish <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
+            </span>
           </div>
+          <i class="fa-solid fa-robot absolute -right-3 -bottom-5 text-7xl text-white/10 pointer-events-none"></i>
         </button>
       </div>
 
@@ -790,80 +793,84 @@
       </div>
     </section>
 
-    <!-- VIEW 11: FOYDALI KANALLAR VA HAMJAMIYAT (@Huquq_study) -->
-    <section id="viewChannels" class="hidden space-y-4">
-      <div class="flex items-center justify-between">
-        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
-          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
-        </button>
-        <span class="text-xs font-bold text-sky-600">Huquqiy Kanallar & Hamjamiyat</span>
-      </div>
-
-      <!-- Mandatory Channel Hero Banner (@Huquq_study) -->
-      <div class="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-700 text-white shadow-lg space-y-3 border border-sky-400/30">
-        <div class="flex items-start justify-between relative z-10">
-          <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-2xl shadow-inner text-yellow-300">
-              <i class="fa-solid fa-graduation-cap"></i>
+    <!-- VIEW 11: AI USTOZ (HUQUQIY SUHBAT & REPETITOR) -->
+    <section id="viewAiTutor" class="hidden space-y-3">
+      <!-- AI Tutor Top Bar -->
+      <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-900 text-white shadow-md">
+        <div class="flex items-center space-x-2.5">
+          <button onclick="showHome()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="w-9 h-9 rounded-xl bg-yellow-400 text-indigo-950 flex items-center justify-center text-base font-black shadow-inner">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <h3 class="text-xs font-black tracking-wide">AI Ustoz (BMBA Repetitor)</h3>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
-            <div>
-              <div class="flex items-center space-x-1.5">
-                <span class="text-[10px] bg-yellow-400/20 text-yellow-200 border border-yellow-300/30 px-2 py-0.5 rounded-full font-extrabold uppercase">Asosiy Rasmiy Kanal</span>
-                <span id="channelSubscribedBadge" class="text-[10px] bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold hidden">
-                  <i class="fa-solid fa-check mr-1"></i> A'zo bo'lingan
-                </span>
-              </div>
-              <h3 class="text-base font-black tracking-wide mt-1">@Huquq_study</h3>
-              <p class="text-[11px] text-sky-100">Huquq Study | BMBA Milliy Sertifikat</p>
-            </div>
+            <p class="text-[10px] text-indigo-200">Gemini 3.8 · 40 ta Qonun va Darsliklar</p>
           </div>
         </div>
 
-        <p class="text-xs text-blue-50 leading-relaxed relative z-10">
-          Ushbu kanalimizda har kuni yangi 45 talik testlar, vaziyatli keyslar, 40 ta qonunning dolzarb tahlili va sertifikat yangiliklari joylab boriladi.
-        </p>
-
-        <div class="flex items-center space-x-2 pt-1 relative z-10">
-          <a href="https://t.me/Huquq_study" target="_blank" onclick="markChannelOpened()" class="flex-1 py-2.5 px-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-black text-xs text-center shadow transition flex items-center justify-center space-x-1.5">
-            <i class="fa-brands fa-telegram text-base text-blue-500"></i>
-            <span>Kanalga A'zo Bo'lish ↗️</span>
-          </a>
-          <button onclick="verifyChannelSubscription(true)" class="py-2.5 px-3.5 rounded-xl bg-blue-500/40 hover:bg-blue-500/60 border border-white/30 text-white font-bold text-xs transition flex items-center space-x-1">
-            <i class="fa-solid fa-shield-check"></i>
-            <span>Tekshirish</span>
-          </button>
-        </div>
-        <i class="fa-brands fa-telegram absolute -right-4 -bottom-6 text-8xl text-white/10 pointer-events-none"></i>
+        <button onclick="clearAiTutorChat()" title="Suhbatni tozalash" class="text-xs text-indigo-200 hover:text-white px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center space-x-1">
+          <i class="fa-regular fa-trash-can"></i>
+          <span class="hidden sm:inline text-[10px]">Tozalash</span>
+        </button>
       </div>
 
-      <!-- Search & Category Filters -->
-      <div class="space-y-2">
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
-          <input type="text" id="channelSearchInput" oninput="filterChannelsList()" placeholder="Kanal nomi yoki mavzusi bo'yicha qidiring..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-sky-500">
-        </div>
-
-        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar" id="channelCategoryTabs">
-          <button onclick="filterChannelCategory('all')" class="channel-tab-btn active px-3 py-1.5 rounded-xl font-bold bg-sky-600 text-white whitespace-nowrap shadow-xs">
-            Barchasi (7)
+      <!-- Quick Question Suggestions Pills -->
+      <div class="space-y-1.5">
+        <p class="text-[10px] font-bold uppercase text-slate-400 px-1">Tezkor savollar va mavzular:</p>
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+          <button onclick="askAiQuick('Mehnat shartnomasini bekor qilish tartibi va muddatlari qanday?')" class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold whitespace-nowrap hover:bg-indigo-100 transition">
+            📋 Mehnat shartnomasi
           </button>
-          <button onclick="filterChannelCategory('O\'quv')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
-            O'quv & Tayyorgarlik
+          <button onclick="askAiQuick('Nikoh shartnomasi qanday tuziladi va unda qanday shartlar bo‘lishi mumkin?')" class="px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold whitespace-nowrap hover:bg-purple-100 transition">
+            💍 Nikoh shartnomasi
           </button>
-          <button onclick="filterChannelCategory('Rasmiy')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
-            Rasmiy Davlat
+          <button onclick="askAiQuick('BMBA Y-2 vaziyatli keyslarni tahlil qilishda nimalarga e’tibor berish kerak?')" class="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold whitespace-nowrap hover:bg-amber-100 transition">
+            ⚖️ Y-2 Keyslarni yechish
           </button>
-          <button onclick="filterChannelCategory('Sud')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
-            Sud & Amaliyot
-          </button>
-          <button onclick="filterChannelCategory('Test')" class="channel-tab-btn px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 whitespace-nowrap">
-            Viktorinalar
+          <button onclick="askAiQuick('Huquqshunoslik milliy sertifikatidagi 40 ta qonun qaysilar?')" class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold whitespace-nowrap hover:bg-emerald-100 transition">
+            📜 40 ta Qonun ro'yxati
           </button>
         </div>
       </div>
 
-      <!-- Channels List Container -->
-      <div id="channelsListContainer" class="space-y-3 max-h-[65vh] overflow-y-auto pr-1"></div>
+      <!-- Chat Messages Container -->
+      <div id="aiTutorMessages" class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 min-h-[360px] max-h-[58vh] overflow-y-auto">
+        <!-- AI Welcome Message -->
+        <div class="flex items-start space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="space-y-1.5 max-w-[85%]">
+            <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-800 dark:text-slate-100 text-xs leading-relaxed">
+              <p class="font-bold text-indigo-600 dark:text-indigo-400 mb-1 flex items-center">
+                <i class="fa-solid fa-sparkles mr-1.5"></i> Assalomu alaykum!
+              </p>
+              Men sizning BMBA Huquqshunoslik Milliy Sertifikati bo'yicha shaxsiy <strong>AI Ustozingizman</strong>.
+              <br><br>
+              Spesifikatsiyadagi <strong>40 ta qonun</strong>, 8, 9, 10, 11-sinf darsliklari, vaziyatli keyslar va qonun moddalari bo'yicha istalgan savolingizni bering. Men sizga darhol asosli qonuniy javob beraman!
+            </div>
+            <span class="text-[9px] text-slate-400 pl-1">AI Ustoz · Hozir</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Input Form -->
+      <form id="aiTutorForm" onsubmit="handleAiTutorSubmit(event)" class="relative flex items-center space-x-2 pt-1">
+        <div class="relative flex-1">
+          <input type="text" id="aiTutorInput" placeholder="Huquqiy savolingizni yozing..." class="w-full pl-4 pr-10 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-xs font-medium focus:outline-none focus:border-indigo-500 shadow-sm transition">
+          <button type="button" onclick="clearAiInput()" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-xs hidden" id="btnAiClear">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <button type="submit" id="btnAiSend" class="w-11 h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-sm shadow-md transition active:scale-95 shrink-0">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
     </section>
 
     <!-- VIEW 12: FOYDALANUVCHI PROFILI (USER PROFILE & AUTH) -->
@@ -1580,8 +1587,9 @@
           <i class="fa-solid fa-check-double"></i>
           <span>2. A'zolikni Tasdiqlash & Kirish</span>
         </button>
-        <button onclick="openChannelsDirectory(); closeSubscriptionModal();" class="w-full py-2 text-center text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 font-bold">
-          🏛️ Barcha 7 ta huquqiy kanalni ko'rish
+        <button onclick="closeSubscriptionModal(); openAiTutorView();" class="w-full py-2 text-center text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>🤖 AI Ustozdan huquqiy maslahat olish</span>
         </button>
       </div>
     </div>
@@ -1593,8 +1601,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/exam_data.js?v=11"></script>
-  <script src="js/flashcards.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/exam_data.js?v=12"></script>
+  <script src="js/flashcards.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>

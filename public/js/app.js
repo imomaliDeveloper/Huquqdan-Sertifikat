@@ -90,7 +90,7 @@ function updateDailyStreak() {
 
 // Ko'rinishlarni almashtirish
 function switchView(viewId) {
-  const views = ["viewHome", "viewExam", "viewResult", "viewFlashcards", "viewLaws", "viewVariants", "viewBooks", "viewCases", "viewMistakes", "viewOctagon", "viewChannels", "viewProfile"];
+  const views = ["viewHome", "viewExam", "viewResult", "viewFlashcards", "viewLaws", "viewVariants", "viewBooks", "viewCases", "viewMistakes", "viewOctagon", "viewAiTutor", "viewProfile"];
   views.forEach(v => {
     const el = document.getElementById(v);
     if (el) el.classList.add("hidden");
@@ -2491,143 +2491,203 @@ async function verifyChannelSubscription(showAlert = true) {
   }
 }
 
-async function openChannelsDirectory() {
-  switchView("viewChannels");
-  await loadChannelsList();
+/* ==================== 11. AI USTOZ (CHAT & HUQUQIY REPETITOR) ==================== */
+
+let aiTutorHistory = [];
+
+function openAiTutorView() {
+  switchView("viewAiTutor");
+  const container = document.getElementById("aiTutorMessages");
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+  }
+  const input = document.getElementById("aiTutorInput");
+  if (input) {
+    input.focus();
+  }
 }
 
-async function loadChannelsList() {
-  const container = document.getElementById("channelsListContainer");
-  if (!container) return;
+function openChannelsDirectory() {
+  // Kanallar o'rniga rasmiy @Huquq_study kanalini ochish
+  window.open("https://t.me/Huquq_study", "_blank");
+}
 
-  if (allChannelsCache.length > 0) {
-    renderChannels(allChannelsCache);
-    return;
+function clearAiInput() {
+  const input = document.getElementById("aiTutorInput");
+  const clearBtn = document.getElementById("btnAiClear");
+  if (input) input.value = "";
+  if (clearBtn) clearBtn.classList.add("hidden");
+}
+
+function clearAiTutorChat() {
+  if (confirm("AI Ustoz bilan suhbat tarixini tozalashni xohlaysizmi?")) {
+    aiTutorHistory = [];
+    const container = document.getElementById("aiTutorMessages");
+    if (container) {
+      container.innerHTML = `
+        <div class="flex items-start space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="space-y-1.5 max-w-[85%]">
+            <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-800 dark:text-slate-100 text-xs leading-relaxed">
+              <p class="font-bold text-indigo-600 dark:text-indigo-400 mb-1 flex items-center">
+                <i class="fa-solid fa-sparkles mr-1.5"></i> Assalomu alaykum!
+              </p>
+              Men sizning BMBA Huquqshunoslik Milliy Sertifikati bo'yicha shaxsiy <strong>AI Ustozingizman</strong>.
+              <br><br>
+              Spesifikatsiyadagi <strong>40 ta qonun</strong>, 8, 9, 10, 11-sinf darsliklari, vaziyatli keyslar va qonun moddalari bo'yicha istalgan savolingizni bering. Men sizga darhol asosli qonuniy javob beraman!
+            </div>
+            <span class="text-[9px] text-slate-400 pl-1">AI Ustoz · Yangi suhbat</span>
+          </div>
+        </div>
+      `;
+    }
+    showToast("Suhbat tarixi tozalandi.");
   }
+}
 
-  container.innerHTML = `
-    <div class="p-8 text-center text-slate-400">
-      <i class="fa-solid fa-spinner fa-spin text-2xl text-sky-500 mb-2"></i>
-      <p class="text-xs">Kanallar yuklanmoqda...</p>
+function askAiQuick(questionText) {
+  const input = document.getElementById("aiTutorInput");
+  if (input) {
+    input.value = questionText;
+  }
+  handleAiTutorSubmit(new Event("submit"));
+}
+
+async function handleAiTutorSubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById("aiTutorInput");
+  const sendBtn = document.getElementById("btnAiSend");
+  const container = document.getElementById("aiTutorMessages");
+
+  if (!input || !container) return;
+  const question = input.value.trim();
+  if (!question) return;
+
+  const nowTime = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+
+  // 1. Foydalanuvchi xabarini ekranga chiqarish
+  const userBubble = document.createElement("div");
+  userBubble.className = "flex items-start justify-end space-x-2";
+  userBubble.innerHTML = `
+    <div class="space-y-1 max-w-[85%] text-right">
+      <div class="p-3.5 rounded-2xl rounded-tr-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs leading-relaxed text-left font-medium shadow-xs">
+        ${escapeHtml(question)}
+      </div>
+      <span class="text-[9px] text-slate-400 pr-1">${nowTime}</span>
     </div>
   `;
+  container.appendChild(userBubble);
+  input.value = "";
+  container.scrollTop = container.scrollHeight;
+
+  // 2. Loading indikatori
+  const loadingId = "aiLoading_" + Date.now();
+  const loadingBubble = document.createElement("div");
+  loadingBubble.id = loadingId;
+  loadingBubble.className = "flex items-start space-x-2.5 animate-pulse";
+  loadingBubble.innerHTML = `
+    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+      <i class="fa-solid fa-robot"></i>
+    </div>
+    <div class="space-y-1.5 max-w-[85%]">
+      <div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-500 text-xs flex items-center space-x-2">
+        <i class="fa-solid fa-spinner fa-spin text-indigo-500"></i>
+        <span>AI Ustoz qonun moddalarini tahlil qilmoqda...</span>
+      </div>
+    </div>
+  `;
+  container.appendChild(loadingBubble);
+  container.scrollTop = container.scrollHeight;
+
+  if (sendBtn) sendBtn.disabled = true;
 
   try {
-    const res = await fetch("/api/channels");
+    const res = await fetch("/api/ai/tutor-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: question,
+        history: aiTutorHistory
+      })
+    });
+
     const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      allChannelsCache = data;
-      renderChannels(allChannelsCache);
-    } else {
-      container.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">Kanallar topilmadi.</p>`;
-    }
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
+
+    const replyText = data.reply || "Savolingiz bo'yicha javob topilmadi. Qayta urinib ko'ring.";
+    const replySource = data.source || "AI Ustoz";
+    const replyTime = data.timestamp || nowTime;
+
+    // Tarixga qo'shish
+    aiTutorHistory.push({ role: "user", text: question });
+    aiTutorHistory.push({ role: "model", text: replyText });
+
+    // AI Ustoz javob xabari
+    const aiBubble = document.createElement("div");
+    aiBubble.className = "flex items-start space-x-2.5 animate-fade-in";
+    
+    // Markdown-ga o'xshash qatorlarni chiroyli HTML-ga o'girish
+    const formattedReply = replyText
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n•/g, '<br>•')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+
+    aiBubble.innerHTML = `
+      <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div class="space-y-1.5 max-w-[88%]">
+        <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-800 dark:text-slate-100 text-xs leading-relaxed shadow-xs">
+          ${formattedReply}
+        </div>
+        <div class="flex items-center space-x-2 text-[9px] text-slate-400 pl-1">
+          <span>${replySource} · ${replyTime}</span>
+          <button onclick="copyAiAnswer(this)" class="hover:text-indigo-500 font-semibold flex items-center ml-2">
+            <i class="fa-regular fa-copy mr-0.5"></i> Nusxa
+          </button>
+        </div>
+      </div>
+    `;
+    container.appendChild(aiBubble);
+    container.scrollTop = container.scrollHeight;
+
   } catch (err) {
-    container.innerHTML = `<p class="text-center text-xs text-rose-500 py-4">Yuklashda xatolik: ${err.message}</p>`;
-  }
-}
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
 
-function renderChannels(channelsToRender) {
-  const container = document.getElementById("channelsListContainer");
-  if (!container) return;
-
-  if (!channelsToRender || channelsToRender.length === 0) {
-    container.innerHTML = `
-      <div class="p-6 text-center text-slate-400">
-        <i class="fa-regular fa-folder-open text-2xl mb-1 text-slate-300"></i>
-        <p class="text-xs">Ushbu so'rov bo'yicha kanallar topilmadi.</p>
+    const errBubble = document.createElement("div");
+    errBubble.className = "flex items-start space-x-2.5";
+    errBubble.innerHTML = `
+      <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+        <i class="fa-solid fa-circle-exclamation"></i>
+      </div>
+      <div class="p-3 rounded-2xl rounded-tl-sm bg-rose-50 text-rose-700 text-xs">
+        Serverga ulanishda xatolik yuz berdi. Internet aloqasini tekshiring yoki birozdan so'ng qayta urinib ko'ring.
       </div>
     `;
-    return;
+    container.appendChild(errBubble);
+    container.scrollTop = container.scrollHeight;
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
   }
-
-  const isSub = isUserSubscribedToChannel();
-
-  container.innerHTML = channelsToRender.map((ch) => {
-    const isMain = ch.isMandatory;
-    const borderStyle = isMain 
-      ? 'border-2 border-sky-500 shadow-md bg-gradient-to-r from-sky-50/50 to-blue-50/50 dark:from-sky-950/20 dark:to-blue-950/20' 
-      : 'border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800';
-
-    return `
-      <div class="p-3.5 rounded-2xl ${borderStyle} transition space-y-2.5">
-        <div class="flex items-start justify-between">
-          <div class="flex items-center space-x-2.5">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr ${ch.color || 'from-sky-500 to-blue-600'} text-white flex items-center justify-center text-lg shadow-sm">
-              <i class="fa-solid ${ch.icon || 'fa-graduation-cap'}"></i>
-            </div>
-            <div>
-              <div class="flex items-center space-x-1.5 flex-wrap">
-                <h4 class="text-xs font-black text-slate-800 dark:text-white">${ch.name}</h4>
-                ${ch.verified ? '<i class="fa-solid fa-circle-check text-sky-500 text-[10px]" title="Tasdiqlangan"></i>' : ''}
-              </div>
-              <p class="text-[10px] text-sky-600 dark:text-sky-400 font-bold">${ch.username}</p>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${isMain ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
-            ${ch.badge || ch.category}
-          </span>
-        </div>
-
-        <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-          ${ch.description}
-        </p>
-
-        <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
-          <span class="text-[10px] font-semibold text-slate-400 flex items-center">
-            <i class="fa-solid fa-users mr-1"></i> ${ch.subscribers}
-          </span>
-          <div class="flex items-center space-x-1.5">
-            ${isMain && isSub ? `
-              <span class="text-[10px] text-emerald-600 font-bold flex items-center mr-1">
-                <i class="fa-solid fa-check mr-0.5"></i> A'zo bo'lingan
-              </span>
-            ` : ''}
-            <a href="${ch.url}" target="_blank" onclick="markChannelOpened()" class="py-1.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-[11px] flex items-center space-x-1 shadow-xs transition">
-              <span>Obuna bo'lish</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join("");
 }
 
-function filterChannelsList() {
-  const query = (document.getElementById("channelSearchInput")?.value || "").toLowerCase().trim();
-  let filtered = allChannelsCache;
-
-  if (currentChannelCategory !== 'all') {
-    filtered = filtered.filter(ch => (ch.category || "").toLowerCase().includes(currentChannelCategory.toLowerCase()));
-  }
-
-  if (query) {
-    filtered = filtered.filter(ch => 
-      (ch.name && ch.name.toLowerCase().includes(query)) ||
-      (ch.username && ch.username.toLowerCase().includes(query)) ||
-      (ch.description && ch.description.toLowerCase().includes(query))
-    );
-  }
-
-  renderChannels(filtered);
-}
-
-function filterChannelCategory(category) {
-  currentChannelCategory = category;
-
-  const tabs = document.querySelectorAll("#channelCategoryTabs .channel-tab-btn");
-  tabs.forEach(btn => {
-    btn.classList.remove("active", "bg-sky-600", "text-white", "shadow-xs");
-    btn.classList.add("bg-slate-100", "dark:bg-slate-800", "text-slate-600", "dark:text-slate-300");
+function copyAiAnswer(btn) {
+  const bubble = btn.closest(".space-y-1.5")?.querySelector(".p-3.5");
+  if (!bubble) return;
+  const text = bubble.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="fa-solid fa-check text-emerald-500 mr-0.5"></i> Nusxalandi!';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-regular fa-copy mr-0.5"></i> Nusxa';
+    }, 2000);
   });
+}
 
-  if (window.event?.target) {
-    const target = window.event.target.closest("button");
-    if (target) {
-      target.classList.add("active", "bg-sky-600", "text-white", "shadow-xs");
-      target.classList.remove("bg-slate-100", "dark:bg-slate-800", "text-slate-600", "dark:text-slate-300");
-    }
-  }
-
-  filterChannelsList();
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

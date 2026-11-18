@@ -286,6 +286,71 @@ Faqat JSON qaytaring:
   });
 });
 
+// ==================== AI USTOZ (CHAT & HUQUQIY MASLAHATCHI) API ====================
+
+app.post('/api/ai/tutor-chat', async (req, res) => {
+  const { message, history } = req.body;
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: "Savol matni kiritilmadi." });
+  }
+
+  const userQuery = message.trim();
+
+  if (genAI) {
+    try {
+      const systemInstruction = `Siz O'zbekiston Respublikasi BMBA Huquqshunoslik Milliy Sertifikati bo'yicha eng nufuzli, muloyim va bilimdon "AI Ustoz"isiz.
+Talabalar va abituriyentlar sizga huquqshunoslik, BMBA testlari, 40 ta qonun, 8-11 sinf maktab darsliklari va vaziyatli keyslar bo'yicha savol berishadi.
+QOIDALAR:
+1. Har doim o'zbek tilida, aniq, qonun moddalariga (masalan: O'zbekiston Respublikasi Konstitutsiyasi, Mehnat kodeksi, Fuqarolik kodeksi, Oila kodeksi va boshqalar) tayanib javob bering.
+2. Har bir javobingizda tegishli qonun nomi, modda raqami va uning mazmunini aniq keltiring.
+3. Agar abituriyent test topshirish bo'yicha uslub yoki mnemonika so'rasa, eslab qolish oson bo'lgan tushunarli maslahat bering.
+4. Javobni chiroyli va o'qishga qulay formatda taqdim eting (emoji, qalin shriftlar, ro'yxatlar).`;
+
+      let prompt = `${systemInstruction}\n\n`;
+      if (Array.isArray(history) && history.length > 0) {
+        prompt += "Oldingi suhbat:\n" + history.slice(-6).map(h => `${h.role === 'user' ? 'Talaba' : 'AI Ustoz'}: ${h.text}`).join("\n") + "\n\n";
+      }
+      prompt += `Talabaning yangi savoli: "${userQuery}"\nAI Ustoz javobi:`;
+
+      const aiResponse = await genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt
+      });
+
+      return res.json({
+        reply: aiResponse.text || "Savolingiz qonunchilik asosida o'rganildi. Iltimos, batafsilroq ma'lumot kiriting.",
+        source: "Gemini 3.8 AI Ustoz",
+        timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+      });
+    } catch (err) {
+      console.error('Gemini AI Ustoz chat xatolik:', err.message);
+    }
+  }
+
+  // Aqlli Lokal Fallback Javoblar
+  let fallbackReply = `Assalomu alaykum! Sizning "${userQuery}" mavzusidagi savolingiz qonunchilik bo'yicha tahlil qilindi:\n\n`;
+
+  const qLower = userQuery.toLowerCase();
+  if (qLower.includes("mehnat") || qLower.includes("shartnoma") || qLower.includes("ish haqi") || qLower.includes("ta'til")) {
+    fallbackReply += `📋 **Mehnat qonunchiligi (Yangi Mehnat kodeksi):**\n• Mehnat shartnomasini bekor qilish tartibi MK 155–173-moddalari bilan tartibga solinadi.\n• Ish beruvchi tashabbusi bilan bekor qilishda ogohlantirish muddatlari (shtat qisqarganda kamida 2 oy oldin, xodim malakasiga loyiq bo'lmaganda 1 oy oldin) qat'iy talab qilinadi.\n• Ishdan bo'shatish nafaqasi (173-modda) xodimning uzluksiz ish stajiga qarab o'rtacha oylik ish haqining 50% dan 200% gacha miqdorida to'lanadi.`;
+  } else if (qLower.includes("nikoh") || qLower.includes("oila") || qLower.includes("aliment") || qLower.includes("ajralish")) {
+    fallbackReply += `💍 **Oila huquqi (Oila kodeksi):**\n• Nikoh yoshi erkaklar va ayollar uchun qat'iy 18 yosh etib belgilangan (15-modda).\n• Nikoh shartnomasi (38–48-moddalar) faqat er-xotinning mulkiy huquq va majburiyatlarini belgilaydi va u notarial tartibda tasdiqlanishi shart.\n• Nikoh bekor qilinganidan keyin 300 kun ichida tug'ilgan bola sobiq erdan tug'ilgan hisoblanadi (60-modda).`;
+  } else if (qLower.includes("keys") || qLower.includes("y-2") || qLower.includes("vaziyat")) {
+    fallbackReply += `⚖️ **BMBA Y-2 Vaziyatli keyslarni yechish sirlari:**\n1. **Muammoni aniqlang**: Sudga murojaat qiluvchi da'vogar nimani talab qilmoqda?\n2. **Qonuniy asosni toping**: Holat qaysi sohaga (mehnat, fuqarolik, oila yoki ma'muriy) tegishli?\n3. **Muddat va foizlarni tekshiring**: Ko'pincha Y-2 savollari ogohlantirish muddati yoki to'lov foizlariga tayanadi.`;
+  } else if (qLower.includes("40") || qLower.includes("qonun") || qLower.includes("spesifikatsiya")) {
+    fallbackReply += `📜 **BMBA Spesifikatsiyasidagi 40 ta Qonun:**\n• Barcha 45 talik test savollari Davlat va huquq nazariyasi, Konstitutsiya hamda ushbu 40 ta qonun hujjati (MK, JK, FK, OK, Ma'muriy javobgarlik, Sudlar to'g'risida va h.k.) asosida tuziladi.\n• Bosh sahifadagi "40 ta Qonun" bo'limida barcha qonunlarning Lex.uz rasmiy matnlari jamlangan.`;
+  } else {
+    fallbackReply += `🔍 **Huquqiy maslahat:**\nUshbu masala O'zbekiston Respublikasining tegishli normativ-huquqiy hujjatlari hamda 8, 9, 10, 11-sinf "Davlat va huquq asoslari" darsliklari bo'yicha o'rganiladi.\n\n💡 *Tavsiya: Testlarda muvaffaqiyat qozonish uchun atamalar ta'rifini va Lex.uz rasmiy moddalarini sinchkovlik bilan tahlil qiling.*`;
+  }
+
+  return res.json({
+    reply: fallbackReply,
+    source: "BMBA AI Ustoz",
+    timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+  });
+});
+
 // ==================== 2. REYTING & LEADERBOARD API ====================
 
 app.get('/api/leaderboard', (req, res) => {
