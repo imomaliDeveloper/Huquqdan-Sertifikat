@@ -158,35 +158,57 @@ function renderQuestion() {
   if (!q) return;
 
   // Header elementlari
-  document.getElementById("currentQIndex").innerText = state.currentQuestion + 1;
-  document.getElementById("qBadgeType").innerText = q.type;
-  document.getElementById("qSectionName").innerText = q.section;
+  const qIdxEl = document.getElementById("currentQIndex");
+  if (qIdxEl) qIdxEl.innerText = state.currentQuestion + 1;
+  const qBadgeEl = document.getElementById("qBadgeType");
+  if (qBadgeEl) qBadgeEl.innerText = q.type;
+  const qSecEl = document.getElementById("qSectionName");
+  if (qSecEl) qSecEl.innerText = q.section;
 
   // Xatcho'p statusi
   const bmIcon = document.querySelector("#btnBookmark i");
-  if (state.bookmarks.has(q.num)) {
-    bmIcon.className = "fa-solid fa-bookmark text-amber-500";
-  } else {
-    bmIcon.className = "fa-regular fa-bookmark text-slate-400";
+  if (bmIcon) {
+    if (state.bookmarks.has(q.num)) {
+      bmIcon.className = "fa-solid fa-bookmark text-amber-500";
+    } else {
+      bmIcon.className = "fa-regular fa-bookmark text-slate-400";
+    }
   }
 
-  // Case Study / Vaziyat matni
-  const scBlock = document.getElementById("scenarioContainer");
-  if (q.type === "Y-2" && q.scenario) {
-    document.getElementById("scenarioText").innerText = q.scenario;
-    scBlock.classList.remove("hidden");
-  } else {
-    scBlock.classList.add("hidden");
+  // Case Study / Vaziyat matni (Y-2)
+  const scBlock = document.getElementById("caseScenarioBox") || document.getElementById("scenarioContainer");
+  const scText = document.getElementById("caseScenarioText") || document.getElementById("scenarioText");
+  if (scBlock) {
+    if (q.type === "Y-2" && q.scenario) {
+      if (scText) scText.innerText = q.scenario;
+      scBlock.classList.remove("hidden");
+    } else {
+      scBlock.classList.add("hidden");
+    }
   }
 
   // Savol matni
-  document.getElementById("qText").innerText = q.text;
+  const qTextEl = document.getElementById("questionText") || document.getElementById("qText");
+  if (qTextEl) {
+    qTextEl.innerText = q.text;
+  }
+
+  // Manbalar (Darslik kitob va Qonunchilik)
+  const bookEl = document.getElementById("qBookSource");
+  if (bookEl) {
+    bookEl.innerHTML = `<i class="fa-solid fa-book mr-1 text-indigo-500"></i> ${q.bookSource || 'BMBA 8-11 sinf darsligi'}`;
+  }
+  const lawEl = document.getElementById("qLawSource");
+  if (lawEl) {
+    lawEl.innerHTML = `<i class="fa-solid fa-scale-balanced mr-1 text-emerald-500"></i> ${q.lawSource || 'Spesifikatsiyadagi 40 ta Qonun'}`;
+  }
 
   // Variantlar / Javob kiritish qismi
   const optContainer = document.getElementById("optionsContainer");
+  if (!optContainer) return;
   optContainer.innerHTML = "";
 
-  if (q.type === "Y-1" || q.type === "Y-2") {
+  if ((q.type === "Y-1" || q.type === "Y-2") && Array.isArray(q.options)) {
     // 4 ta variant (A, B, C, D)
     q.options.forEach(opt => {
       const isSelected = state.userAnswers[q.num] === opt.key;
@@ -228,30 +250,26 @@ function renderQuestion() {
     optContainer.appendChild(openBox);
 
     const input = document.getElementById("openAnswerInput");
-    input.addEventListener("input", (e) => {
-      state.userAnswers[q.num] = e.target.value.trim();
-      updateGridMatrixCell(state.currentQuestion);
-    });
+    if (input) {
+      input.addEventListener("input", (e) => {
+        state.userAnswers[q.num] = e.target.value.trim();
+        updateGridMatrixCell(state.currentQuestion);
+      });
+    }
   }
 
-  // Manba (Darslik kitob va Qonunchilik)
-  const sourceDiv = document.createElement("div");
-  sourceDiv.className = "mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-500";
-  sourceDiv.innerHTML = `
-    <span class="flex items-center text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-book-open mr-1"></i> ${q.bookSource || 'BMBA 8-11 sinf darsligi'}</span>
-    <span class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold"><i class="fa-solid fa-scale-balanced mr-1"></i> ${q.lawSource || 'Spesifikatsiyadagi 40 ta Qonun'}</span>
-  `;
-  optContainer.appendChild(sourceDiv);
-
   // Pastki navigatsiya tugmalari holati
-  document.getElementById("btnPrev").disabled = state.currentQuestion === 0;
+  const prevBtn = document.getElementById("btnPrev");
+  if (prevBtn) prevBtn.disabled = state.currentQuestion === 0;
   const nextBtn = document.getElementById("btnNext");
-  if (state.currentQuestion === EXAM_DATA.totalQuestions - 1) {
-    nextBtn.innerHTML = 'Tugatish <i class="fa-solid fa-flag-checkered ml-1"></i>';
-    nextBtn.onclick = finishExamPrompt;
-  } else {
-    nextBtn.innerHTML = 'Keyingisi <i class="fa-solid fa-chevron-right ml-1"></i>';
-    nextBtn.onclick = nextQuestion;
+  if (nextBtn) {
+    if (state.currentQuestion === (EXAM_DATA.totalQuestions || 45) - 1) {
+      nextBtn.innerHTML = 'Tugatish <i class="fa-solid fa-flag-checkered ml-1"></i>';
+      nextBtn.onclick = finishExamPrompt;
+    } else {
+      nextBtn.innerHTML = 'Keyingisi <i class="fa-solid fa-chevron-right ml-1"></i>';
+      nextBtn.onclick = nextQuestion;
+    }
   }
 }
 
