@@ -2568,10 +2568,6 @@ async function verifyChannelSubscription(showAlert = true) {
     return true;
   }
 }
-    }
-    return true;
-  }
-}
 
 /* ==================== 11. AI USTOZ (CHATGPT KABI UNIVERSAL AI) ==================== */
 
