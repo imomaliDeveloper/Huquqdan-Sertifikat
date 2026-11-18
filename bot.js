@@ -369,12 +369,25 @@ function initBot() {
     return null;
   }
 
-  botInstance = new SimpleTelegramBot(token, webAppUrl, channelId);
-  botInstance.startPolling();
+  if (!botInstance) {
+    const currentAppUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : (process.env.WEB_APP_URL || 'https://huquqdan-sertifikat.vercel.app');
+    botInstance = new SimpleTelegramBot(token, currentAppUrl, channelId);
+  }
+
+  // Faqat lokal yoki VPS da polling yoqiladi, Vercel Serverless da webhook ishlatiladi
+  if (!process.env.VERCEL && !botInstance.isRunning) {
+    botInstance.startPolling();
+  }
+
   return botInstance;
 }
 
 function getBotInstance() {
+  if (!botInstance) {
+    return initBot();
+  }
   return botInstance;
 }
 

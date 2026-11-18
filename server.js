@@ -373,6 +373,44 @@ app.post('/api/payments/submit-receipt', (req, res) => {
   }
 });
 
+// ==================== TELEGRAM WEBHOOK API ====================
+
+// Telegram Webhook qabul qilish (24/7 Serverless)
+app.post('/api/webhook', async (req, res) => {
+  const bot = getBotInstance();
+  if (bot && req.body) {
+    try {
+      await bot.handleUpdate(req.body);
+    } catch (err) {
+      console.error('Webhook xatolik:', err.message);
+    }
+  }
+  res.status(200).send('OK');
+});
+
+// Webhookni bir marta sozlash (browser orqali ochiladi)
+app.get('/api/set-webhook', async (req, res) => {
+  const bot = getBotInstance();
+  if (!bot || !bot.token) {
+    return res.status(400).json({ error: "TELEGRAM_BOT_TOKEN topilmadi yoki kiritilmagan" });
+  }
+
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'huquqdan-sertifikat.vercel.app';
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const webhookUrl = `${proto}://${host}/api/webhook`;
+
+  try {
+    const tgRes = await bot.callApi('setWebhook', { url: webhookUrl });
+    res.json({
+      success: tgRes.ok,
+      webhookUrl: webhookUrl,
+      telegramResponse: tgRes
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Bosh sahifa yo'naltirish (Fallback)
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
