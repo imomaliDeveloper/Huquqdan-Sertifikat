@@ -27,8 +27,21 @@ if (geminiApiKey) {
 app.use(cors());
 app.use(express.json());
 
+// Brauzer keshini cheklash - yangilanishlar zudlik bilan ochilishi uchun
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path === '/index.html' || req.path.endsWith('.html') || req.path === '/sw.js') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
 // Statik fayllarni ulash
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  maxAge: 0
+}));
 app.use('/data', express.static(path.join(__dirname, 'data')));
 
 // API: 50 ta Variantlar ro'yxati
