@@ -2449,13 +2449,15 @@ function finishOctagonBattle() {
   }
 }
 
-// ==================== 11. FOYDALI KANALLAR VA MAJBURIY A'ZOLIK (@Huquq_study) ====================
+// ==================== 11. FOYDALI KANALLAR VA MAJBURIY A'ZOLIK (@Huquq_study & @General_Huquq) ====================
 
 let allChannelsCache = [];
 let currentChannelCategory = 'all';
 
 function isUserSubscribedToChannel() {
-  return localStorage.getItem('huquq_study_subscribed') === 'true';
+  const sub1 = localStorage.getItem('huquq_study_subscribed') === 'true';
+  const sub2 = localStorage.getItem('general_huquq_subscribed') === 'true';
+  return sub1 && sub2;
 }
 
 function updateHomeSubscriptionUI() {
@@ -2468,9 +2470,9 @@ function updateHomeSubscriptionUI() {
   if (isSub) {
     if (badge) {
       badge.className = "text-[9px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold";
-      badge.innerText = "✅ A'zolik Faol";
+      badge.innerText = "✅ 2 ta Kanal Faol";
     }
-    if (statusText) statusText.innerText = "@Huquq_study a'zoligingiz tasdiqlangan";
+    if (statusText) statusText.innerText = "@Huquq_study va @General_Huquq a'zoligingiz tasdiqlangan";
     if (statusBtn) {
       statusBtn.className = "px-2.5 py-1 rounded-xl bg-emerald-600 text-white font-bold text-[10px] shadow-xs";
       statusBtn.innerText = "Tasdiqlangan";
@@ -2479,9 +2481,9 @@ function updateHomeSubscriptionUI() {
   } else {
     if (badge) {
       badge.className = "text-[9px] bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 px-1.5 py-0.2 rounded font-bold";
-      badge.innerText = "Majburiy A'zolik";
+      badge.innerText = "2 ta Majburiy Kanal";
     }
-    if (statusText) statusText.innerText = "To'liq imkoniyatlar uchun kanalga a'zo bo'ling";
+    if (statusText) statusText.innerText = "To'liq imkoniyatlar uchun 2 ta rasmiy kanalga a'zo bo'ling";
     if (statusBtn) {
       statusBtn.className = "px-2.5 py-1 rounded-xl bg-sky-600 text-white font-bold text-[10px] shadow-xs";
       statusBtn.innerText = "Tekshirish";
@@ -2506,43 +2508,66 @@ function closeSubscriptionModal() {
   }
 }
 
-function markChannelOpened() {
-  localStorage.setItem('huquq_study_visited', 'true');
-  showToast("Kanal ochilmoqda. Qaytganingizda 'Tasdiqlash' tugmasini bosing!");
+function markChannelOpened(channelId) {
+  if (channelId === 'general_huquq') {
+    localStorage.setItem('general_huquq_visited', 'true');
+    showToast("@General_Huquq kanali ochilmoqda...");
+  } else {
+    localStorage.setItem('huquq_study_visited', 'true');
+    showToast("@Huquq_study kanali ochilmoqda...");
+  }
 }
 
 async function verifyChannelSubscription(showAlert = true) {
   try {
-    let userId = state.user.id || (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) || null;
+    let userId = state.currentUser?.id || state.user?.id || (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) || null;
     
     // Server orqali a'zolikni tekshirish
     const res = await fetch('/api/check-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: userId, channel: '@Huquq_study' })
+      body: JSON.stringify({ userId: userId })
     });
     const data = await res.json();
 
-    if (data.subscribed || localStorage.getItem('huquq_study_visited') === 'true' || !userId) {
+    const visited1 = localStorage.getItem('huquq_study_visited') === 'true';
+    const visited2 = localStorage.getItem('general_huquq_visited') === 'true';
+
+    if (data.subscribed || (visited1 && visited2) || !userId) {
       localStorage.setItem('huquq_study_subscribed', 'true');
+      localStorage.setItem('general_huquq_subscribed', 'true');
       updateHomeSubscriptionUI();
       closeSubscriptionModal();
       if (showAlert) {
-        showToast("🎉 @Huquq_study kanaliga a'zoligingiz tasdiqlandi!");
+        showToast("🎉 @Huquq_study va @General_Huquq kanallariga a'zoligingiz tasdiqlandi!");
       }
       return true;
     } else {
-      if (showAlert) {
-        showToast("⚠️ Iltimos, avval @Huquq_study kanaliga a'zo bo'ling!");
+      if (data.missing && data.missing.length > 0) {
+        const missingNames = data.missing.join(" va ");
+        if (showAlert) {
+          showToast(`⚠️ Iltimos, ${missingNames} kanaliga ham a'zo bo'ling!`);
+        }
+      } else if (!visited1 && !visited2) {
+        if (showAlert) showToast("⚠️ Iltimos, ikkala kanalga ham a'zo bo'ling!");
+      } else if (!visited1) {
+        if (showAlert) showToast("⚠️ Iltimos, 1-kanal (@Huquq_study)ga a'zo bo'ling!");
+      } else {
+        if (showAlert) showToast("⚠️ Iltimos, 2-kanal (@General_Huquq)ga a'zo bo'ling!");
       }
       return false;
     }
   } catch (err) {
     localStorage.setItem('huquq_study_subscribed', 'true');
+    localStorage.setItem('general_huquq_subscribed', 'true');
     updateHomeSubscriptionUI();
     closeSubscriptionModal();
     if (showAlert) {
       showToast("✅ A'zoligingiz muvaffaqiyatli tasdiqlandi!");
+    }
+    return true;
+  }
+}
     }
     return true;
   }

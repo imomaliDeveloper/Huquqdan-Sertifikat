@@ -11,7 +11,21 @@
     "icon": "fa-graduation-cap",
     "color": "from-sky-500 to-blue-600",
     "verified": true,
-    "badge": "⭐ Majburiy Obuna"
+    "badge": "⭐ 1-Majburiy Obuna"
+  },
+  {
+    "id": "general_huquq",
+    "username": "@General_Huquq",
+    "name": "General Huquq | Rasmiy Kanal",
+    "url": "https://t.me/General_Huquq",
+    "isMandatory": true,
+    "category": "Asosiy Hamkor Kanal",
+    "description": "Huquqshunoslik milliy sertifikati, dolzarb qonunlar sharhi, eksklyuziv test materiallari va qonunchilik yangiliklari.",
+    "subscribers": "15K+",
+    "icon": "fa-gavel",
+    "color": "from-indigo-600 to-purple-700",
+    "verified": true,
+    "badge": "⭐ 2-Majburiy Obuna"
   },
   {
     "id": "huquqiy_axborot",

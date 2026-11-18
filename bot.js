@@ -3,6 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const { askAiTutor } = require('./scripts/aiService');
 
+const MANDATORY_CHANNELS = [
+  { username: '@Huquq_study', name: "Huquq Study | Milliy Sertifikat", url: "https://t.me/Huquq_study" },
+  { username: '@General_Huquq', name: "General Huquq | Rasmiy Kanal", url: "https://t.me/General_Huquq" }
+];
+
 const botUserAiCounts = {};
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -77,18 +82,33 @@ class SimpleTelegramBot {
     }
   }
 
-  // Majburiy a'zolik talab qilinadigan xabar
+  // Foydalanuvchining barcha majburiy kanallarga a'zoligini tekshirish
+  async checkAllSubscriptions(userId) {
+    if (!this.token || this.token === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
+      return { ok: true, missing: [] };
+    }
+    const missing = [];
+    for (const ch of MANDATORY_CHANNELS) {
+      const isSub = await this.checkUserSubscription(userId, ch.username);
+      if (!isSub) {
+        missing.push(ch);
+      }
+    }
+    return { ok: missing.length === 0, missing };
+  }
+
+  // Majburiy a'zolik talab qilinadigan xabar (2 ta kanal)
   async sendSubscriptionGate(chatId, firstName = "O'quvchi") {
     const text = `Assalomu alaykum, *${firstName}*! ⚖️\n\n` +
-      `⚠️ *Botdan to'liq foydalanish uchun rasmiy kanalimizga a'zo bo'ling!*\n\n` +
-      `Platformadagi 50 ta BMBA varianti, 25 ta vaziyatli keys, xatolar tahlili va *Huquqiy Octagon (Duel)* janglaridan to'liq foydalanish uchun rasmiy kanalimizga obuna bo'lishingiz lozim.\n\n` +
-      `📢 Asosiy o'quv kanali: *@Huquq_study*\n` +
-      `_(Har kuni yangi testlar, rasmiy qonunlar tahlili va sertifikat yangiliklari!)_\n\n` +
-      `👇 Kanalga a'zo bo'lib, quyidagi *"✅ A'zolikni tekshirish"* tugmasini bosing:`;
+      `⚠️ *Botdan to'liq foydalanish uchun quyidagi 2 ta rasmiy kanalimizga a'zo bo'ling!*\n\n` +
+      `Platformadagi 50 ta BMBA varianti, 25 ta vaziyatli keys, AI Ustoz va *Huquqiy Octagon (Duel)* janglaridan to'liq foydalanish uchun har ikkala kanalga obuna bo'lishingiz lozim:\n\n` +
+      `1️⃣ *@Huquq_study* — Milliy sertifikat tayyorgarlik kanali\n` +
+      `2️⃣ *@General_Huquq* — Rasmiy qonunchilik va testlar kanali\n\n` +
+      `👇 Ikkala kanalga ham a'zo bo'lib, so'ng *"✅ A'zolikni tekshirish"* tugmasini bosing:`;
 
     const keyboard = [
       [{ text: "📢 1. @Huquq_study kanaliga a'zo bo'lish ↗️", url: "https://t.me/Huquq_study" }],
-      [{ text: "📢 2. @huquqiyaxborot (Adliya vazirligi) ↗️", url: "https://t.me/huquqiyaxborot" }],
+      [{ text: "📢 2. @General_Huquq kanaliga a'zo bo'lish ↗️", url: "https://t.me/General_Huquq" }],
       [{ text: "✅ A'zolikni tekshirish", callback_data: "check_subscription" }],
       [{ text: "📚 Barcha tavsiya etiladigan kanallar", callback_data: "cmd_all_channels" }]
     ];
@@ -313,8 +333,8 @@ class SimpleTelegramBot {
 
       // /start yoki /test
       if (text.startsWith('/start') || text === '/test') {
-        const isSubscribed = await this.checkUserSubscription(userId, '@Huquq_study');
-        if (!isSubscribed) {
+        const subCheck = await this.checkAllSubscriptions(userId);
+        if (!subCheck.ok) {
           return await this.sendSubscriptionGate(chatId, firstName);
         }
         return await this.sendMainMenu(chatId, firstName);
@@ -323,8 +343,8 @@ class SimpleTelegramBot {
       } else if (text === '/post_quiz') {
         await this.postNextQuizToChannel(chatId);
       } else if (text.trim()) {
-        const isSubscribed = await this.checkUserSubscription(userId, '@Huquq_study');
-        if (!isSubscribed) {
+        const subCheck = await this.checkAllSubscriptions(userId);
+        if (!subCheck.ok) {
           return await this.sendSubscriptionGate(chatId, firstName);
         }
 
@@ -382,14 +402,15 @@ class SimpleTelegramBot {
       const firstName = q.from?.first_name || "O'quvchi";
 
       if (q.data === 'check_subscription') {
-        const isSubscribed = await this.checkUserSubscription(userId, '@Huquq_study');
-        if (isSubscribed) {
-          await this.answerCallbackQuery(q.id, "✅ A'zoligingiz tasdiqlandi!");
+        const subCheck = await this.checkAllSubscriptions(userId);
+        if (subCheck.ok) {
+          await this.answerCallbackQuery(q.id, "✅ Ikkala kanalga a'zoligingiz muvaffaqiyatli tasdiqlandi!");
           await this.sendMainMenu(chatId, firstName, true);
         } else {
+          const missingChannels = subCheck.missing.map(m => m.username).join(" va ");
           await this.answerCallbackQuery(
             q.id,
-            "❌ Siz hali @Huquq_study kanaliga a'zo bo'lmadingiz! Iltimos, avval kanalga obuna bo'ling va so'ng tekshiring.",
+            `❌ Siz hali ${missingChannels} kanaliga a'zo bo'lmadingiz! Iltimos, ikkala kanalga ham obuna bo'ling.`,
             true
           );
         }

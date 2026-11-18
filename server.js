@@ -178,10 +178,9 @@ app.get('/api/channels', (req, res) => {
   }
 });
 
-// API: Majburiy a'zolikni tekshirish (@Huquq_study)
+// API: Majburiy a'zolikni tekshirish (@Huquq_study va @General_Huquq)
 app.post('/api/check-subscription', async (req, res) => {
   const { userId, channel } = req.body;
-  const targetChannel = channel || '@Huquq_study';
   const bot = getBotInstance();
 
   if (!bot) {
@@ -189,30 +188,37 @@ app.post('/api/check-subscription', async (req, res) => {
     return res.json({
       subscribed: true,
       message: "Lokal rejim: A'zolik tekshiruvi muvaffaqiyatli o'tdi",
-      channel: targetChannel
+      channels: ['@Huquq_study', '@General_Huquq']
     });
   }
 
   if (!userId) {
     return res.json({
       subscribed: false,
-      message: "Foydalanuvchi Telegram ID si aniqlanmadi",
-      channel: targetChannel
+      message: "Foydalanuvchi Telegram ID si aniqlanmadi"
     });
   }
 
   try {
-    const isSubscribed = await bot.checkUserSubscription(userId, targetChannel);
+    if (channel) {
+      const isSub = await bot.checkUserSubscription(userId, channel);
+      return res.json({
+        subscribed: isSub,
+        channel: channel,
+        message: isSub ? "A'zolik tasdiqlandi" : "Kanalga a'zo bo'linmagan"
+      });
+    }
+
+    const subCheck = await bot.checkAllSubscriptions(userId);
     return res.json({
-      subscribed: isSubscribed,
-      channel: targetChannel,
-      message: isSubscribed ? "A'zolik tasdiqlandi" : "Kanalga a'zo bo'linmagan"
+      subscribed: subCheck.ok,
+      missing: subCheck.missing ? subCheck.missing.map(m => m.username) : [],
+      message: subCheck.ok ? "Ikkala kanalga ham a'zolik tasdiqlandi" : "Kanallarga to'liq a'zo bo'linmagan"
     });
   } catch (err) {
     return res.json({
       subscribed: false,
-      error: err.message,
-      channel: targetChannel
+      error: err.message
     });
   }
 });
