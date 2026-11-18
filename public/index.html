@@ -96,16 +96,27 @@
         <i class="fa-solid fa-trophy text-amber-500 text-xs"></i>
       </button>
 
-      <!-- VIP Premium Trigger -->
-      <button onclick="openPremiumModal()" title="VIP A'zolik" class="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-extrabold text-[11px] shadow-sm flex items-center space-x-1 active:scale-95 transition">
+      <!-- 3 ta Tarif Trigger -->
+      <button onclick="openTariffsModal()" title="3 ta Tarif va Obuna" class="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-extrabold text-[11px] shadow-sm flex items-center space-x-1 active:scale-95 transition">
         <i class="fa-solid fa-crown text-[10px]"></i>
-        <span>VIP</span>
+        <span id="headerPlanBadge">TARIFLAR</span>
       </button>
 
-      <!-- User Badge -->
-      <div id="userBadge" class="hidden sm:flex items-center space-x-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
-        <i class="fa-regular fa-user text-emerald-500 text-xs"></i>
-        <span id="userName">O'quvchi</span>
+      <!-- Auth & User Profile Trigger -->
+      <div id="headerAuthContainer">
+        <!-- If guest: shows "Kirish" -->
+        <button onclick="openAuthModal()" id="btnHeaderLogin" class="px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shadow-xs flex items-center space-x-1 active:scale-95 transition">
+          <i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i>
+          <span>Kirish</span>
+        </button>
+
+        <!-- If logged in: shows User Profile -->
+        <button onclick="openProfileView()" id="btnHeaderProfile" class="hidden items-center space-x-1.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2.5 py-1 rounded-full transition">
+          <div class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <span id="userName" class="truncate max-w-[75px]">O'quvchi</span>
+        </button>
       </div>
     </div>
   </header>
@@ -149,7 +160,10 @@
                 <i class="fa-solid fa-layer-group"></i>
               </div>
               <div>
-                <h3 class="text-sm font-extrabold">50 ta Test Varianti (BMBA)</h3>
+                <div class="flex items-center space-x-2">
+                  <h3 class="text-sm font-extrabold">50 ta Test Varianti (BMBA)</h3>
+                  <span class="px-2 py-0.5 rounded-md bg-emerald-400 text-slate-900 font-extrabold text-[9px]">1–5 BEPUL</span>
+                </div>
                 <p class="text-[11px] text-emerald-100">Barcha 45 talik yangi variantlar katalogi</p>
               </div>
             </div>
@@ -157,13 +171,18 @@
           </div>
         </button>
 
-        <!-- Start Variant 1 Immediately -->
-        <button onclick="loadAndStartVariant(1)" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-emerald-500 active:scale-95 transition">
-          <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center text-lg mb-2">
-            <i class="fa-solid fa-play"></i>
+        <!-- Start Variant 1 Immediately: BEPUL MOCK TEST -->
+        <button onclick="loadAndStartVariant(1)" class="p-4 rounded-xl bg-white dark:bg-slate-800 border-2 border-emerald-500/80 dark:border-emerald-500 shadow-sm text-left hover:border-emerald-600 active:scale-95 transition relative overflow-hidden">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-play"></i>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-black text-[9px] uppercase tracking-wider animate-pulse">
+              100% Bepul Mock
+            </span>
           </div>
-          <h3 class="text-sm font-bold text-slate-800 dark:text-white">1-Variant (T-760)</h3>
-          <p class="text-[11px] text-slate-500 mt-0.5">Rasmiy BMBA varianti</p>
+          <h3 class="text-sm font-black text-slate-800 dark:text-white">Mock Imtihon (T-760)</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Rasmiy 45 talik sinov testi</p>
         </button>
 
         <!-- 4 ta Darslik Kitobi -->
@@ -277,19 +296,25 @@
         <i class="fa-solid fa-shield-halved absolute -right-3 -bottom-5 text-7xl text-white/10 pointer-events-none"></i>
       </div>
 
-      <!-- Monetization & VIP Access Banner (Card 9860 0366 7156 8792) -->
-      <div onclick="openPremiumModal()" class="p-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md cursor-pointer hover:opacity-95 active:scale-98 transition space-y-2">
+      <!-- 3 ta Maxsus Tarif Banner (START, STANDARD, VIP PRO) -->
+      <div onclick="openTariffsModal()" class="p-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-lg cursor-pointer hover:opacity-95 active:scale-98 transition space-y-2 border border-amber-300/40">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-lg">
-              <i class="fa-solid fa-crown text-yellow-200"></i>
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-xl text-yellow-200 shadow-inner">
+              <i class="fa-solid fa-crown"></i>
             </div>
             <div>
-              <h3 class="text-sm font-extrabold leading-tight">💎 VIP Obuna & Barcha 50 ta Variant</h3>
-              <p class="text-[11px] text-amber-100">AI Repetitor, barcha yechimlar va sertifikat kafolati</p>
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[9px] bg-white/20 text-yellow-100 px-2 py-0.5 rounded-full font-black uppercase">3 ta Maxsus Tarif</span>
+                <span class="text-[9px] bg-red-500 text-white px-1.5 py-0.2 rounded font-bold">-35% Chegirma</span>
+              </div>
+              <h3 class="text-sm font-black leading-tight mt-0.5">START · STANDARD · VIP PRO</h3>
+              <p class="text-[11px] text-amber-100">Barcha 50 ta variant, AI Repetitor va sertifikat</p>
             </div>
           </div>
-          <span class="px-3 py-1 rounded-full bg-white text-amber-700 font-extrabold text-xs shadow-sm">49 000 UZS</span>
+          <span class="px-3 py-1.5 rounded-xl bg-white text-amber-800 font-extrabold text-xs shadow-sm whitespace-nowrap">
+            Ko'rish <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
+          </span>
         </div>
       </div>
 
@@ -831,6 +856,126 @@
       <div id="channelsListContainer" class="space-y-3 max-h-[65vh] overflow-y-auto pr-1"></div>
     </section>
 
+    <!-- VIEW 12: FOYDALANUVCHI PROFILI (USER PROFILE & AUTH) -->
+    <section id="viewProfile" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center font-bold">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
+        </button>
+        <span class="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Mening Profilim</span>
+        <button onclick="handleLogout()" title="Chiqish" class="text-xs text-rose-500 hover:text-rose-700 font-bold flex items-center">
+          <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Chiqish
+        </button>
+      </div>
+
+      <!-- Profile Header Card -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-5 text-white shadow-xl border border-slate-700/60">
+        <div class="relative z-10 flex items-center space-x-3.5">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center text-2xl font-black shadow-lg border-2 border-white/20" id="profAvatar">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div class="space-y-0.5">
+            <h2 id="profName" class="text-base font-black tracking-wide">O'quvchi</h2>
+            <p id="profPhone" class="text-xs text-slate-300 font-mono">+998 (--) --- -- --</p>
+            <div class="flex items-center space-x-2 pt-1">
+              <span id="profRole" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-bold">
+                Abituriyent
+              </span>
+              <span id="profCity" class="px-2 py-0.5 rounded-md bg-white/10 text-slate-300 text-[10px] font-medium">
+                Toshkent
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Active Plan Card -->
+      <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border-2 border-amber-400/60 shadow-md space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Joriy Faol Tarif</span>
+              <h4 id="profPlanName" class="text-xs font-black text-slate-800 dark:text-white">START (Bepul Sinov)</h4>
+            </div>
+          </div>
+          <span id="profPlanBadge" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
+            Faol
+          </span>
+        </div>
+
+        <p id="profPlanDesc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          Sizda BMBA Mock imtihoni, 1-5 variantlar va 40 ta qonun bepul ochiq. Barcha 50 ta variant va AI Repetitor uchun tarifni yangilang.
+        </p>
+
+        <button onclick="openTariffsModal()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white font-extrabold text-xs shadow hover:opacity-95 active:scale-98 transition flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-gem text-yellow-200"></i>
+          <span>3 ta Maxsus Tarifni Ko'rish & VIP ga O'tish</span>
+        </button>
+      </div>
+
+      <!-- User Stats Grid -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">Mock Imtihonlar</div>
+          <div class="text-lg font-black text-emerald-600 mt-0.5" id="profExamsCount">0 ta</div>
+          <div class="text-[10px] text-slate-500">Muvaffaqiyatli topshirildi</div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">O'rtacha Natija</div>
+          <div class="text-lg font-black text-blue-600 mt-0.5" id="profAvgScore">0%</div>
+          <div class="text-[10px] text-slate-500">BMBA standartida</div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">Kunlik Ketma-ketlik</div>
+          <div class="text-lg font-black text-amber-500 mt-0.5" id="profStreakNum">1 kun</div>
+          <div class="text-[10px] text-slate-500">Doimiy tayyorgarlik</div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">Xatolar Banki</div>
+          <div class="text-lg font-black text-rose-600 mt-0.5" id="profMistakesNum">0 ta</div>
+          <div class="text-[10px] text-slate-500">Xatolar ustida ishlash</div>
+        </div>
+      </div>
+
+      <!-- Quick Action Menu -->
+      <div class="space-y-2 pt-1">
+        <button onclick="loadAndStartVariant(1)" class="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-100 font-bold text-xs flex items-center justify-between transition">
+          <span class="flex items-center space-x-2">
+            <i class="fa-solid fa-play text-emerald-600"></i>
+            <span>Bepul Mock Imtihonni Boshlash (T-760)</span>
+          </span>
+          <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+        </button>
+
+        <button onclick="openMistakesTrainer()" class="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-100 font-bold text-xs flex items-center justify-between transition">
+          <span class="flex items-center space-x-2">
+            <i class="fa-solid fa-brain text-rose-500"></i>
+            <span>Mening Xatolarim Tahlili</span>
+          </span>
+          <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+        </button>
+
+        <button onclick="openCertificateModal()" class="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-100 font-bold text-xs flex items-center justify-between transition">
+          <span class="flex items-center space-x-2">
+            <i class="fa-solid fa-award text-amber-500"></i>
+            <span>Mening BMBA Sertifikatim</span>
+          </span>
+          <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+        </button>
+      </div>
+
+      <button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-rose-300 dark:border-rose-800/80 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center justify-center space-x-2 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <span>Tizimdan chiqish</span>
+      </button>
+    </section>
+
   </main>
 
   <!-- ==================== MODALS ==================== -->
@@ -914,83 +1059,269 @@
   </div>
 
 
-  <!-- 3. MODAL: VIP Obuna & Monetizatsiya (Card: 9860 0366 7156 8792) -->
-  <div id="premiumModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+  <!-- MODAL: Kirish va Ro'yxatdan o'tish (Auth Modal) -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3 animate-fade-in">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
         <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center text-sm font-bold">
-            <i class="fa-solid fa-crown"></i>
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-user-shield"></i>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-slate-800 dark:text-white">VIP A'zolik & 50 ta Variant</h3>
-            <p class="text-[10px] text-amber-600 font-semibold">Bir martalik to'liq kirish</p>
+            <h3 class="text-sm font-black text-slate-800 dark:text-white" id="authModalTitle">Tizimga Kirish</h3>
+            <p class="text-[10px] text-slate-400">Huquq Milliy Sertifikat tizimi</p>
           </div>
         </div>
-        <button onclick="closePremiumModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+        <button onclick="closeAuthModal()" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Benefits list -->
-      <div class="space-y-2 text-xs">
-        <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-200">
-          <i class="fa-solid fa-circle-check text-emerald-500"></i>
-          <span>Barcha <strong>50 ta to'liq BMBA test variantlari</strong> (2 250 ta savol)</span>
-        </div>
-        <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-200">
-          <i class="fa-solid fa-circle-check text-emerald-500"></i>
-          <span><strong>Cheksiz AI Repetitor (Gemini 3.8)</strong> tahlillari</span>
-        </div>
-        <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-200">
-          <i class="fa-solid fa-circle-check text-emerald-500"></i>
-          <span>Barcha 40 ta qonun bo'yicha maxsus keyslar va sharhlar</span>
-        </div>
+      <!-- Auth Tabs: Kirish vs Ro'yxatdan o'tish -->
+      <div class="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl text-xs font-bold">
+        <button onclick="switchAuthTab('login')" id="tabBtnLogin" class="py-2 rounded-lg bg-white dark:bg-slate-800 text-emerald-600 shadow-xs transition">
+          Kirish
+        </button>
+        <button onclick="switchAuthTab('register')" id="tabBtnRegister" class="py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition">
+          Ro'yxatdan o'tish
+        </button>
       </div>
 
-      <!-- Payment Card Details -->
-      <div class="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Humo Karta</span>
-          <span class="text-xs font-bold text-amber-400">49 000 UZS</span>
+      <!-- FORM 1: LOGIN -->
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <i class="fa-solid fa-phone mr-1 text-emerald-600"></i> Telefon raqam yoki Login:
+          </label>
+          <input type="text" id="loginPhoneInput" required placeholder="+998 90 123 45 67" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <i class="fa-solid fa-lock mr-1 text-emerald-600"></i> Parol:
+          </label>
+          <div class="relative">
+            <input type="password" id="loginPassInput" required placeholder="Parolingizni kiriting" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium focus:outline-none focus:border-emerald-500 pr-9">
+            <button type="button" onclick="togglePassVisibility('loginPassInput', 'loginPassIcon')" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-xs">
+              <i class="fa-regular fa-eye" id="loginPassIcon"></i>
+            </button>
+          </div>
         </div>
 
-        <div class="font-mono text-lg font-extrabold tracking-widest text-emerald-400" id="cardNumberDisplay">
-          9860 0366 7156 8792
+        <div id="loginError" class="hidden p-2 rounded-lg bg-rose-50 text-rose-600 text-[11px] font-semibold"></div>
+
+        <button type="submit" id="btnLoginSubmit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-1.5 active:scale-98">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>Kirish</span>
+        </button>
+
+        <p class="text-center text-[11px] text-slate-400 pt-1">
+          Hisobingiz yo'qmi? 
+          <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="text-emerald-600 font-bold hover:underline">Ro'yxatdan o'tish</a>
+        </p>
+      </form>
+
+      <!-- FORM 2: REGISTER -->
+      <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="hidden space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <i class="fa-solid fa-user mr-1 text-emerald-600"></i> To'liq Ism va Familiya:
+          </label>
+          <input type="text" id="regNameInput" required placeholder="Masalan: Sardor Aliyev" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <i class="fa-solid fa-phone mr-1 text-emerald-600"></i> Telefon raqam:
+          </label>
+          <input type="text" id="regPhoneInput" required placeholder="+998 90 123 45 67" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium focus:outline-none focus:border-emerald-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <i class="fa-solid fa-user-graduate mr-1 text-emerald-600"></i> Rolingiz:
+            </label>
+            <select id="regRoleInput" class="w-full px-2 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium text-xs focus:outline-none focus:border-emerald-500">
+              <option value="Abituriyent">Abituriyent</option>
+              <option value="Talaba">Talaba</option>
+              <option value="O'qituvchi">O'qituvchi</option>
+              <option value="Yurist">Yurist</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <i class="fa-solid fa-location-dot mr-1 text-emerald-600"></i> Hudud:
+            </label>
+            <select id="regCityInput" class="w-full px-2 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium text-xs focus:outline-none focus:border-emerald-500">
+              <option value="Toshkent shahri">Toshkent sh.</option>
+              <option value="Samarqand">Samarqand</option>
+              <option value="Farg'ona">Farg'ona</option>
+              <option value="Andijon">Andijon</option>
+              <option value="Namangan">Namangan</option>
+              <option value="Buxoro">Buxoro</option>
+              <option value="Xorazm">Xorazm</option>
+              <option value="Qashqadaryo">Qashqadaryo</option>
+              <option value="Surxondaryo">Surxondaryo</option>
+              <option value="Jizzax">Jizzax</option>
+              <option value="Sirdaryo">Sirdaryo</option>
+              <option value="Navoiy">Navoiy</option>
+              <option value="Qoraqalpog'iston">Qoraqalpog'iston</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <i class="fa-solid fa-lock mr-1 text-emerald-600"></i> Yangi Parol:
+          </label>
+          <div class="relative">
+            <input type="password" id="regPassInput" required minlength="4" placeholder="Kamida 4 ta belgi" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-medium focus:outline-none focus:border-emerald-500 pr-9">
+            <button type="button" onclick="togglePassVisibility('regPassInput', 'regPassIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
+              <i class="fa-regular fa-eye" id="regPassIcon"></i>
+            </button>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-700/80">
-          <span class="text-[11px] text-slate-300">Huquq Sertifikat Markazi</span>
-          <button onclick="copyCardNumber()" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center space-x-1 shadow transition">
-            <i class="fa-regular fa-copy"></i>
-            <span id="copyBtnText">Nusxa olish</span>
+        <div id="registerError" class="hidden p-2 rounded-lg bg-rose-50 text-rose-600 text-[11px] font-semibold"></div>
+
+        <button type="submit" id="btnRegisterSubmit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-1.5 active:scale-98">
+          <i class="fa-solid fa-check"></i>
+          <span>Ro'yxatdan o'tish</span>
+        </button>
+
+        <p class="text-center text-[11px] text-slate-400 pt-1">
+          Allaqachon hisobingiz bormi? 
+          <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-emerald-600 font-bold hover:underline">Kirish</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 3. MODAL: 3 TA MAXSUS TARIF & OBUNA (START, STANDARD, VIP PRO) -->
+  <div id="premiumModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3 animate-fade-in">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-white">3 ta Maxsus Tarif</h3>
+            <p class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">BMBA Milliy Sertifikat Tayyorgarligi</p>
+          </div>
+        </div>
+        <button onclick="closePremiumModal()" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- 3 TARIFFS DISPLAY CARDS -->
+      <div class="space-y-3">
+        <!-- TARIFF 1: START (BEPUL) -->
+        <div class="p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-black text-[9px] uppercase">START</span>
+              <h4 class="text-xs font-black text-slate-800 dark:text-white">Bepul Sinov</h4>
+            </div>
+            <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">0 UZS</span>
+          </div>
+          <ul class="text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 text-[10px]"></i> <strong>BMBA Rasmiy Mock Imtihoni (MUTLAQO BEPUL)</strong></li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 text-[10px]"></i> 1–5 ta to'liq test varianti (bepul kirish)</li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 text-[10px]"></i> 40 ta qonunchilik katalogi va Lex.uz</li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 text-[10px]"></i> Flashcards trenajyori va reyting</li>
+          </ul>
+          <button onclick="selectTariff('tariff_start')" class="w-full py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-300 transition">
+            Bepul Foydalanish
+          </button>
+        </div>
+
+        <!-- TARIFF 2: STANDARD (49 000 UZS) -->
+        <div class="p-3.5 rounded-2xl border-2 border-blue-400/80 bg-blue-50/30 dark:bg-blue-950/20 space-y-2 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-black text-[9px] uppercase">STANDARD</span>
+              <h4 class="text-xs font-black text-slate-800 dark:text-white">Ommabop</h4>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-black text-blue-600 dark:text-blue-400">49 000 UZS</span>
+              <span class="block text-[9px] text-slate-400">1 oylik obuna</span>
+            </div>
+          </div>
+          <ul class="text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-blue-500 mr-1.5 text-[10px]"></i> Barcha <strong>50 ta BMBA rasmiy varianti</strong> (2 250 ta savol)</li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-blue-500 mr-1.5 text-[10px]"></i> Barcha <strong>25 ta Vaziyatli keyslar (Y-2)</strong> banki</li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-blue-500 mr-1.5 text-[10px]"></i> 4 ta yangi maktab darsligi (8-11 sinf PDF)</li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-blue-500 mr-1.5 text-[10px]"></i> Cheksiz Octagon 1v1 PvP duellari</li>
+            <li class="flex items-center"><i class="fa-solid fa-circle-check text-blue-500 mr-1.5 text-[10px]"></i> Rasmiy BMBA Milliy Sertifikati (PNG + QR kod)</li>
+          </ul>
+          <button onclick="selectTariff('tariff_standard')" class="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-xs transition">
+            STANDARD Tarifini Tanlash (49 000 UZS)
+          </button>
+        </div>
+
+        <!-- TARIFF 3: VIP PRO + AI REPETITOR (89 000 UZS) -->
+        <div class="p-4 rounded-2xl border-2 border-amber-400 ring-2 ring-amber-400/40 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-yellow-500/10 dark:bg-amber-950/30 space-y-2.5 relative overflow-hidden shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black text-[9px] uppercase shadow-xs">VIP PRO</span>
+              <span class="text-[9px] bg-red-500 text-white px-1.5 py-0.2 rounded font-black uppercase">Eng Tavsiya Etiladi</span>
+            </div>
+            <div class="text-right">
+              <span class="text-base font-black text-amber-600 dark:text-amber-400">89 000 UZS</span>
+              <span class="block text-[9px] text-slate-400 line-through">140 000 UZS</span>
+            </div>
+          </div>
+          <ul class="text-[11px] text-slate-700 dark:text-slate-200 space-y-1 font-medium">
+            <li class="flex items-center"><i class="fa-solid fa-crown text-amber-500 mr-1.5 text-[10px]"></i> <strong>STANDARD tarifidagi BARCHA imkoniyatlar</strong></li>
+            <li class="flex items-center"><i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1.5 text-[10px]"></i> <strong>Cheksiz Gemini 3.8 AI Repetitor tahlili</strong></li>
+            <li class="flex items-center"><i class="fa-solid fa-check-double text-amber-500 mr-1.5 text-[10px]"></i> Ochiq savollarni (36-45) sun'iy intellektda tekshirish</li>
+            <li class="flex items-center"><i class="fa-solid fa-bolt text-amber-500 mr-1.5 text-[10px]"></i> Nega xato bo'lganini qonun moddasi bilan tushuntirish</li>
+            <li class="flex items-center"><i class="fa-solid fa-comments text-amber-500 mr-1.5 text-[10px]"></i> Maxsus Telegram VIP yopiq guruhiga ulanish</li>
+            <li class="flex items-center"><i class="fa-solid fa-award text-amber-500 mr-1.5 text-[10px]"></i> <strong>100% BMBA A+ / A sertifikat kafolati</strong></li>
+          </ul>
+          <button onclick="selectTariff('tariff_vip')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 text-white font-black text-xs shadow-md transition flex items-center justify-center space-x-1.5 active:scale-98">
+            <i class="fa-solid fa-crown text-yellow-200"></i>
+            <span>VIP PRO ga Ulanish (89 000 UZS)</span>
           </button>
         </div>
       </div>
 
-      <!-- Steps to activate -->
-      <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-1">
-        <p class="font-bold flex items-center">
-          <i class="fa-solid fa-info-circle mr-1.5 text-amber-600"></i> Qanday faollashtiriladi?
-        </p>
-        <p class="text-[11px]">1. Yuqoridagi kartaga 49 000 so'm to'lang (Click, Payme, Uzum orqali).</p>
-        <p class="text-[11px]">2. To'lov chekini pastdagi tugma orqali adminga yuboring.</p>
-      </div>
+      <!-- PAYMENT CARD & DETAILS (DYNAMICALLY UPDATED) -->
+      <div id="tariffPaymentSection" class="p-4 rounded-xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white shadow-lg space-y-3 border border-slate-700">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tanlangan Tarif:</span>
+            <span id="selectedTariffLabel" class="text-xs font-black text-yellow-300">VIP PRO (89 000 UZS)</span>
+          </div>
+          <span class="text-xs font-bold text-amber-400" id="selectedTariffPrice">89 000 UZS</span>
+        </div>
 
-      <!-- Buttons -->
-      <div class="space-y-2.5">
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1">
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span>Humo / Uzcard karta:</span>
+            <span class="text-emerald-400 font-bold">Abduvali A.</span>
+          </div>
+          <div class="font-mono text-base sm:text-lg font-black tracking-widest text-emerald-400 flex items-center justify-between" id="cardNumberDisplay">
+            <span>9860 0366 7156 8792</span>
+            <button onclick="copyCardNumber()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] flex items-center space-x-1 shadow transition">
+              <i class="fa-regular fa-copy"></i>
+              <span id="copyBtnText">Nusxa</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Receipt submission form -->
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            <i class="fa-solid fa-receipt mr-1 text-emerald-600"></i> To'lov cheki yoki Telegram @username:
+        <div class="space-y-2 pt-1">
+          <label class="block text-[11px] font-bold text-slate-300">
+            <i class="fa-solid fa-receipt mr-1 text-emerald-400"></i> To'lov cheki yoki Telegram @username:
           </label>
           <div class="flex items-center space-x-2">
-            <input type="text" id="receiptTxInput" placeholder="Masalan: Click tranzaksiya № yoki @username" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500">
-            <button onclick="submitPaymentReceipt()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow whitespace-nowrap">
+            <input type="text" id="receiptTxInput" placeholder="Masalan: Click tranzaksiya № yoki @username" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <button onclick="submitPaymentReceipt()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow whitespace-nowrap active:scale-95 transition">
               Yuborish
             </button>
           </div>
-          <div id="receiptSubmitStatus" class="hidden text-[11px] font-semibold text-emerald-600"></div>
+          <div id="receiptSubmitStatus" class="hidden text-[11px] font-semibold text-emerald-400"></div>
         </div>
 
         <button onclick="openTelegramAdminContact()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow transition">
@@ -998,11 +1329,15 @@
           <span>Telegram orqali to'lov chekini yuborish</span>
         </button>
 
-        <div class="flex items-center space-x-2 pt-1">
-          <input type="text" id="promoCodeInput" placeholder="Promo-kod (masalan: BMBA2026)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
-          <button onclick="applyPromoCode()" class="px-4 py-2 bg-slate-800 text-white dark:bg-slate-700 font-bold text-xs rounded-xl hover:bg-slate-900">
+        <div class="flex items-center space-x-2 pt-1 border-t border-slate-800">
+          <input type="text" id="promoCodeInput" placeholder="Promo-kod (masalan: BMBA2026)" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-500 focus:outline-none">
+          <button onclick="applyPromoCode()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl">
             Kiritish
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
         </div>
       </div>
     </div>
@@ -1248,8 +1583,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/exam_data.js?v=10"></script>
-  <script src="js/flashcards.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
+  <script src="js/exam_data.js?v=11"></script>
+  <script src="js/flashcards.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>

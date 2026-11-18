@@ -23,6 +23,9 @@ const state = {
     name: tg?.initDataUnsafe?.user?.first_name || (tg?.initDataUnsafe?.user?.last_name ? `${tg.initDataUnsafe.user.first_name} ${tg.initDataUnsafe.user.last_name}` : "O'quvchi"),
     username: tg?.initDataUnsafe?.user?.username || ""
   },
+  currentUser: JSON.parse(localStorage.getItem("huquq_auth_user") || "null"),
+  userPlan: localStorage.getItem("huquq_user_plan") || (localStorage.getItem("huquq_premium_active") === "true" ? "tariff_vip" : "tariff_start"),
+  selectedTariff: "tariff_vip",
   currentQuestion: 0,
   userAnswers: {}, // { 1: "B", 36: "300 soat" }
   bookmarks: new Set(),
@@ -31,7 +34,7 @@ const state = {
   currentCard: 0,
   isCardFlipped: false,
   laws: [],
-  isPremium: localStorage.getItem("huquq_premium_active") === "true",
+  isPremium: localStorage.getItem("huquq_premium_active") === "true" || localStorage.getItem("huquq_user_plan") === "tariff_vip" || localStorage.getItem("huquq_user_plan") === "tariff_standard",
   streak: parseInt(localStorage.getItem("huquq_daily_streak") || "1"),
   currentDetailedResults: []
 };
@@ -45,9 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
     state.user.id = tgUser.id;
   }
 
-  // Foydalanuvchi ismini o'rnatish
-  const userNameElem = document.getElementById("userName");
-  if (userNameElem) userNameElem.innerText = state.user.name;
+  // Foydalanuvchi va Auth UI-ni yangilash
+  initAuthUI();
 
   // Kunlik streakni yangilash
   updateDailyStreak();
@@ -88,7 +90,7 @@ function updateDailyStreak() {
 
 // Ko'rinishlarni almashtirish
 function switchView(viewId) {
-  const views = ["viewHome", "viewExam", "viewResult", "viewFlashcards", "viewLaws", "viewVariants", "viewBooks", "viewCases", "viewMistakes", "viewOctagon", "viewChannels"];
+  const views = ["viewHome", "viewExam", "viewResult", "viewFlashcards", "viewLaws", "viewVariants", "viewBooks", "viewCases", "viewMistakes", "viewOctagon", "viewChannels", "viewProfile"];
   views.forEach(v => {
     const el = document.getElementById(v);
     if (el) el.classList.add("hidden");
@@ -756,18 +758,370 @@ function closeLeaderboardModal() {
   modal.classList.remove("flex");
 }
 
-/* ==================== 5. VIP OBUNA & MONETIZATSIYA (CARD: 9860 0366 7156 8792) ==================== */
+/* ==================== AUTH VA PROFIL MANTIQI ==================== */
+
+function initAuthUI() {
+  const user = state.currentUser;
+  const btnLogin = document.getElementById("btnHeaderLogin");
+  const btnProfile = document.getElementById("btnHeaderProfile");
+  const headerPlanBadge = document.getElementById("headerPlanBadge");
+  const userNameElem = document.getElementById("userName");
+
+  // Plan badge text
+  let planTitle = "TARIFLAR";
+  if (state.userPlan === "tariff_vip") planTitle = "VIP PRO";
+  else if (state.userPlan === "tariff_standard") planTitle = "STANDARD";
+  else if (state.userPlan === "tariff_start") planTitle = "START";
+  if (headerPlanBadge) headerPlanBadge.innerText = planTitle;
+
+  if (user) {
+    if (btnLogin) btnLogin.classList.add("hidden");
+    if (btnProfile) {
+      btnProfile.classList.remove("hidden");
+      btnProfile.classList.add("flex");
+    }
+    const shortName = (user.name || "O'quvchi").split(" ")[0];
+    if (userNameElem) userNameElem.innerText = shortName;
+  } else {
+    if (btnLogin) btnLogin.classList.remove("hidden");
+    if (btnProfile) {
+      btnProfile.classList.add("hidden");
+      btnProfile.classList.remove("flex");
+    }
+    if (userNameElem) userNameElem.innerText = "O'quvchi";
+  }
+
+  // Profil oynasi elementlarini yangilash
+  updateProfileViewData();
+}
+
+function updateProfileViewData() {
+  const user = state.currentUser || {
+    name: state.user?.name || "O'quvchi (Mehmon)",
+    phone: "Ro'yxatdan o'tilmagan",
+    role: "Abituriyent",
+    city: "O'zbekiston"
+  };
+
+  const nameEl = document.getElementById("profName");
+  const phoneEl = document.getElementById("profPhone");
+  const roleEl = document.getElementById("profRole");
+  const cityEl = document.getElementById("profCity");
+  const planNameEl = document.getElementById("profPlanName");
+  const planBadgeEl = document.getElementById("profPlanBadge");
+  const planDescEl = document.getElementById("profPlanDesc");
+  const avatarEl = document.getElementById("profAvatar");
+
+  if (nameEl) nameEl.innerText = user.name || "O'quvchi";
+  if (phoneEl) phoneEl.innerText = user.phone || "+998 (--) --- -- --";
+  if (roleEl) roleEl.innerText = user.role || "Abituriyent";
+  if (cityEl) cityEl.innerText = user.city || "Toshkent shahri";
+
+  if (avatarEl && user.name) {
+    const initials = user.name.split(" ").map(w => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+    avatarEl.innerText = initials || "HQ";
+  }
+
+  // Tarif ma'lumotlari
+  if (state.userPlan === "tariff_vip") {
+    if (planNameEl) planNameEl.innerText = "VIP PRO + AI REPETITOR";
+    if (planBadgeEl) {
+      planBadgeEl.innerText = "VIP Faol 💎";
+      planBadgeEl.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-xs";
+    }
+    if (planDescEl) planDescEl.innerText = "Barcha 50 ta variant, AI Repetitor tahlillari va VIP Telegram guruh siz uchun ochiq!";
+  } else if (state.userPlan === "tariff_standard") {
+    if (planNameEl) planNameEl.innerText = "STANDARD (Ommabop)";
+    if (planBadgeEl) {
+      planBadgeEl.innerText = "Faol ✅";
+      planBadgeEl.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-600 text-white";
+    }
+    if (planDescEl) planDescEl.innerText = "Barcha 50 ta variant, 25 ta vaziyatli keys va darsliklar ochiq.";
+  } else {
+    if (planNameEl) planNameEl.innerText = "START (Bepul Sinov)";
+    if (planBadgeEl) {
+      planBadgeEl.innerText = "Bepul";
+      planBadgeEl.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300";
+    }
+    if (planDescEl) planDescEl.innerText = "Sizda BMBA Mock imtihoni, 1-5 variantlar va 40 ta qonun bepul ochiq. Barcha 50 ta variant va AI uchun tarifni yangilang.";
+  }
+
+  // Statistika
+  const examsCount = localStorage.getItem("huquq_completed_exams_count") || "0";
+  const avgScore = localStorage.getItem("huquq_last_score_percent") || "0";
+  const mistakes = getStoredMistakes();
+
+  const profExams = document.getElementById("profExamsCount");
+  const profAvg = document.getElementById("profAvgScore");
+  const profStreak = document.getElementById("profStreakNum");
+  const profMistakes = document.getElementById("profMistakesNum");
+
+  if (profExams) profExams.innerText = `${examsCount} ta`;
+  if (profAvg) profAvg.innerText = `${avgScore}%`;
+  if (profStreak) profStreak.innerText = `${state.streak} kun`;
+  if (profMistakes) profMistakes.innerText = `${mistakes.length} ta`;
+}
+
+function openProfileView() {
+  if (!state.currentUser) {
+    openAuthModal();
+    return;
+  }
+  switchView("viewProfile");
+  updateProfileViewData();
+}
+
+function openAuthModal() {
+  const modal = document.getElementById("authModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById("authModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+}
+
+function switchAuthTab(tab) {
+  const tabLogin = document.getElementById("tabBtnLogin");
+  const tabRegister = document.getElementById("tabBtnRegister");
+  const formLogin = document.getElementById("loginForm");
+  const formRegister = document.getElementById("registerForm");
+  const modalTitle = document.getElementById("authModalTitle");
+  const loginErr = document.getElementById("loginError");
+  const regErr = document.getElementById("registerError");
+
+  if (loginErr) loginErr.classList.add("hidden");
+  if (regErr) regErr.classList.add("hidden");
+
+  if (tab === "login") {
+    if (modalTitle) modalTitle.innerText = "Tizimga Kirish";
+    if (tabLogin) {
+      tabLogin.className = "py-2 rounded-lg bg-white dark:bg-slate-800 text-emerald-600 shadow-xs transition";
+    }
+    if (tabRegister) {
+      tabRegister.className = "py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition";
+    }
+    if (formLogin) formLogin.classList.remove("hidden");
+    if (formRegister) formRegister.classList.add("hidden");
+  } else {
+    if (modalTitle) modalTitle.innerText = "Yangi Hisob Ochish";
+    if (tabRegister) {
+      tabRegister.className = "py-2 rounded-lg bg-white dark:bg-slate-800 text-emerald-600 shadow-xs transition";
+    }
+    if (tabLogin) {
+      tabLogin.className = "py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition";
+    }
+    if (formRegister) formRegister.classList.remove("hidden");
+    if (formLogin) formLogin.classList.add("hidden");
+  }
+}
+
+function togglePassVisibility(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (!input) return;
+  if (input.type === "password") {
+    input.type = "text";
+    if (icon) icon.className = "fa-regular fa-eye-slash";
+  } else {
+    input.type = "password";
+    if (icon) icon.className = "fa-regular fa-eye";
+  }
+}
+
+async function handleLoginSubmit(e) {
+  e.preventDefault();
+  const phone = (document.getElementById("loginPhoneInput")?.value || "").trim();
+  const password = (document.getElementById("loginPassInput")?.value || "").trim();
+  const errEl = document.getElementById("loginError");
+  const btn = document.getElementById("btnLoginSubmit");
+
+  if (!phone || !password) {
+    if (errEl) {
+      errEl.innerText = "Telefon raqam va parolni kiriting!";
+      errEl.classList.remove("hidden");
+    }
+    return;
+  }
+
+  if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Kirilmoqda...';
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      state.currentUser = data.user;
+      localStorage.setItem("huquq_auth_user", JSON.stringify(data.user));
+      if (data.user.plan) {
+        state.userPlan = data.user.plan;
+        localStorage.setItem("huquq_user_plan", data.user.plan);
+      }
+      initAuthUI();
+      closeAuthModal();
+      showToast(`Xush kelibsiz, ${data.user.name}! 👋`);
+    } else {
+      if (errEl) {
+        errEl.innerText = data.error || "Login yoki parol noto'g'ri!";
+        errEl.classList.remove("hidden");
+      }
+    }
+  } catch (err) {
+    // Offline/Local fallback
+    const fallbackUser = {
+      id: "u_" + Date.now(),
+      name: phone.includes("@") ? phone.split("@")[0] : "O'quvchi",
+      phone: phone,
+      role: "Abituriyent",
+      city: "Toshkent shahri",
+      plan: state.userPlan || "tariff_start"
+    };
+    state.currentUser = fallbackUser;
+    localStorage.setItem("huquq_auth_user", JSON.stringify(fallbackUser));
+    initAuthUI();
+    closeAuthModal();
+    showToast(`Xush kelibsiz, ${fallbackUser.name}! (Oflayn) 👋`);
+  } finally {
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>Kirish</span>';
+  }
+}
+
+async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const name = (document.getElementById("regNameInput")?.value || "").trim();
+  const phone = (document.getElementById("regPhoneInput")?.value || "").trim();
+  const role = (document.getElementById("regRoleInput")?.value || "Abituriyent").trim();
+  const city = (document.getElementById("regCityInput")?.value || "Toshkent shahri").trim();
+  const password = (document.getElementById("regPassInput")?.value || "").trim();
+  const errEl = document.getElementById("registerError");
+  const btn = document.getElementById("btnRegisterSubmit");
+
+  if (!name || !phone || !password) {
+    if (errEl) {
+      errEl.innerText = "Barcha maydonlarni to'ldiring!";
+      errEl.classList.remove("hidden");
+    }
+    return;
+  }
+
+  if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Ro\'yxatdan o\'tilmoqda...';
+
+  try {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, phone, password, role, city })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      state.currentUser = data.user;
+      localStorage.setItem("huquq_auth_user", JSON.stringify(data.user));
+      initAuthUI();
+      closeAuthModal();
+      showToast(`Tabriklaymiz, ${data.user.name}! Ro'yxatdan muvaffaqiyatli o'tdingiz 🎉`);
+    } else {
+      if (errEl) {
+        errEl.innerText = data.error || "Ro'yxatdan o'tishda xatolik!";
+        errEl.classList.remove("hidden");
+      }
+    }
+  } catch (err) {
+    // Offline / Local fallback
+    const fallbackUser = {
+      id: "u_" + Date.now(),
+      name,
+      phone,
+      role,
+      city,
+      plan: "tariff_start"
+    };
+    state.currentUser = fallbackUser;
+    localStorage.setItem("huquq_auth_user", JSON.stringify(fallbackUser));
+    initAuthUI();
+    closeAuthModal();
+    showToast(`Ro'yxatdan o'tildi, ${name}! 🎉`);
+  } finally {
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i><span>Ro\'yxatdan o\'tish</span>';
+  }
+}
+
+function handleLogout() {
+  if (confirm("Haqiqatan ham tizimdan chiqmoqchimisiz?")) {
+    state.currentUser = null;
+    localStorage.removeItem("huquq_auth_user");
+    initAuthUI();
+    showHome();
+    showToast("Tizimdan muvaffaqiyatli chiqildi. 👋");
+  }
+}
+
+/* ==================== 5. 3 TA TARIF VA OBUNA (START, STANDARD, VIP PRO) ==================== */
+
+function openTariffsModal() {
+  const modal = document.getElementById("premiumModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+}
+
+function closeTariffsModal() {
+  const modal = document.getElementById("premiumModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+}
 
 function openPremiumModal() {
-  const modal = document.getElementById("premiumModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+  openTariffsModal();
 }
 
 function closePremiumModal() {
-  const modal = document.getElementById("premiumModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  closeTariffsModal();
+}
+
+function selectTariff(tariffId) {
+  state.selectedTariff = tariffId;
+  const labelEl = document.getElementById("selectedTariffLabel");
+  const priceEl = document.getElementById("selectedTariffPrice");
+  const paymentSection = document.getElementById("tariffPaymentSection");
+
+  if (tariffId === "tariff_start") {
+    state.userPlan = "tariff_start";
+    localStorage.setItem("huquq_user_plan", "tariff_start");
+    initAuthUI();
+    showToast("START (Bepul) tarifi faol! BMBA Mock imtihoni mutlaqo bepul! 🎉");
+    closeTariffsModal();
+    return;
+  }
+
+  if (tariffId === "tariff_standard") {
+    if (labelEl) labelEl.innerText = "STANDARD (49 000 UZS)";
+    if (priceEl) priceEl.innerText = "49 000 UZS";
+    showToast("STANDARD tarifi tanlandi (49 000 UZS). To'lov ma'lumotlari quyida:");
+  } else if (tariffId === "tariff_vip") {
+    if (labelEl) labelEl.innerText = "VIP PRO + AI REPETITOR (89 000 UZS)";
+    if (priceEl) priceEl.innerText = "89 000 UZS";
+    showToast("VIP PRO tarifi tanlandi (89 000 UZS). To'lov ma'lumotlari quyida:");
+  }
+
+  if (paymentSection) {
+    paymentSection.scrollIntoView({ behavior: "smooth", block: "center" });
+    paymentSection.classList.add("ring-2", "ring-yellow-400");
+    setTimeout(() => paymentSection.classList.remove("ring-2", "ring-yellow-400"), 2000);
+  }
 }
 
 function copyCardNumber() {
@@ -1688,8 +2042,10 @@ async function submitPaymentReceipt() {
       body: JSON.stringify({
         transactionId: val,
         userContact: val,
-        userName: state.user?.name || "O'quvchi",
-        amount: "49 000 UZS"
+        userName: state.currentUser?.name || state.user?.name || "O'quvchi",
+        userPhone: state.currentUser?.phone || "",
+        tariffId: state.selectedTariff || "tariff_vip",
+        amount: state.selectedTariff === "tariff_standard" ? "49 000 UZS" : "89 000 UZS"
       })
     });
 

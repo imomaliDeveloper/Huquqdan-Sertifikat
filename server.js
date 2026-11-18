@@ -373,6 +373,105 @@ app.post('/api/payments/submit-receipt', (req, res) => {
   }
 });
 
+// ==================== TARIFFS & AUTH API ====================
+
+// API: 3 ta Tariflar ro'yxati
+app.get('/api/tariffs', (req, res) => {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'tariffs.json'), 'utf8'));
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Tariflarni yuklashda xatolik: " + err.message });
+  }
+});
+
+// API: Ro'yxatdan o'tish (Register)
+app.post('/api/auth/register', (req, res) => {
+  const { name, phone, password, role, city } = req.body;
+  if (!name || !phone || !password) {
+    return res.status(400).json({ error: "Ism, telefon raqam va parol kiritilishi shart!" });
+  }
+
+  try {
+    const usersPath = path.join(__dirname, 'data', 'users.json');
+    let users = [];
+    if (fs.existsSync(usersPath)) {
+      users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    }
+
+    const cleanPhone = phone.trim().replace(/\s+/g, '');
+    const existing = users.find(u => u.phone.replace(/\s+/g, '') === cleanPhone);
+    if (existing) {
+      return res.status(400).json({ error: "Ushbu telefon raqam bilan allaqachon ro'yxatdan o'tilgan!" });
+    }
+
+    const newUser = {
+      id: "USR-" + Date.now(),
+      name: name.trim(),
+      phone: cleanPhone,
+      password: password,
+      plan: "START",
+      role: role || "Abituriyent",
+      city: city || "O'zbekiston",
+      registeredAt: new Date().toISOString(),
+      testsCompleted: 0,
+      averageScore: "0%",
+      bestGrade: "C"
+    };
+
+    users.push(newUser);
+    fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), 'utf8');
+
+    const { password: _, ...userWithoutPass } = newUser;
+    res.json({ success: true, user: userWithoutPass, message: "Muvaffaqiyatli ro'yxatdan o'tdingiz!" });
+  } catch (err) {
+    res.status(500).json({ error: "Ro'yxatdan o'tishda xatolik: " + err.message });
+  }
+});
+
+// API: Kirish (Login)
+app.post('/api/auth/login', (req, res) => {
+  const { phone, password } = req.body;
+  if (!phone || !password) {
+    return res.status(400).json({ error: "Telefon raqam va parol kiritilishi shart!" });
+  }
+
+  try {
+    const usersPath = path.join(__dirname, 'data', 'users.json');
+    let users = [];
+    if (fs.existsSync(usersPath)) {
+      users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    }
+
+    const cleanPhone = phone.trim().replace(/\s+/g, '');
+    const user = users.find(u => u.phone.replace(/\s+/g, '') === cleanPhone && u.password === password);
+    if (!user) {
+      return res.status(401).json({ error: "Telefon raqam yoki parol noto'g'ri!" });
+    }
+
+    const { password: _, ...userWithoutPass } = user;
+    res.json({ success: true, user: userWithoutPass, message: "Xush kelibsiz!" });
+  } catch (err) {
+    res.status(500).json({ error: "Kirishda xatolik: " + err.message });
+  }
+});
+
+// API: Foydalanuvchi profilini olish
+app.get('/api/auth/profile/:id', (req, res) => {
+  try {
+    const usersPath = path.join(__dirname, 'data', 'users.json');
+    if (!fs.existsSync(usersPath)) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
+    const users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    const user = users.find(u => u.id === req.params.id);
+    if (!user) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
+
+    const { password: _, ...userWithoutPass } = user;
+    res.json(userWithoutPass);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ==================== TELEGRAM WEBHOOK API ====================
 
 // Telegram Webhook qabul qilish (24/7 Serverless)

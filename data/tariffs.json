@@ -1,0 +1,69 @@
+[
+  {
+    "id": "tariff_start",
+    "name": "START",
+    "badge": "Bepul Sinov · Mock Bepul",
+    "price": "0 UZS",
+    "period": "Umrbod bepul",
+    "isPopular": false,
+    "color": "from-slate-600 to-slate-800",
+    "borderColor": "border-slate-300 dark:border-slate-700",
+    "features": [
+      "BMBA Rasmiy Mock Imtihoni (MUTLAQO BEPUL)",
+      "1–5 ta to'liq test varianti (bepul kirish)",
+      "40 ta qonunchilik katalogi va Lex.uz havolalari",
+      "Muddatlar va foizlar Flashcards (10 ta)",
+      "Huquqiy Octagon (Kuniga 3 ta duel)",
+      "Umumiy milliy reytingda ishtirok"
+    ],
+    "limitations": [
+      "6–50 premium variantlar yopiq",
+      "25 ta vaziyatli keyslar banki yopiq",
+      "Gemini AI Repetitor tahlili yo'q"
+    ]
+  },
+  {
+    "id": "tariff_standard",
+    "name": "STANDARD",
+    "badge": "Ommabop Tayyorgarlik",
+    "price": "49 000 UZS",
+    "period": "1 oylik to'liq kirish",
+    "isPopular": false,
+    "color": "from-blue-600 to-indigo-700",
+    "borderColor": "border-blue-500",
+    "features": [
+      "Barcha 50 ta rasmiy BMBA varianti (to'liq ochiq)",
+      "Barcha 25 ta Vaziyatli keyslar (Y-2) banki",
+      "4 ta yangi maktab darsligi (8-11 sinf PDF o'qish)",
+      "Cheksiz Huquqiy Octagon (1v1 PvP duel jangi)",
+      "Mening xatolarim (Xatolar ustida ishlash bo'limi)",
+      "Rasmiy BMBA Milliy Sertifikati (Canvas PNG + QR kod)",
+      "Oflayn PWA rejimi (Internetsiz ham ishlaydi)"
+    ],
+    "limitations": [
+      "Gemini AI Repetitor tahlili kiritilmagan"
+    ]
+  },
+  {
+    "id": "tariff_vip",
+    "name": "VIP PRO + AI REPETITOR",
+    "badge": "🔥 ENG TAVSIYA ETILADI · 100% KAFOLAT",
+    "price": "89 000 UZS",
+    "oldPrice": "140 000 UZS",
+    "period": "Imtihongacha to'liq kafolatli kirish",
+    "isPopular": true,
+    "color": "from-amber-500 via-orange-500 to-yellow-600",
+    "borderColor": "border-amber-400 ring-2 ring-amber-400/50 shadow-xl",
+    "features": [
+      "STANDARD tarifidagi BARCHA imkoniyatlar",
+      "🤖 Cheksiz Gemini 3.8 AI Repetitor tahlili",
+      "Ochiq savollarni (36-45) sun'iy intellekt orqali semantik baholash",
+      "Nega xato qilinganini qonun moddasi bilan 0.5 soniyada tushuntirish",
+      "Kuchsiz mavzular (Weak Topics) chuqur tahlili va individual tavsiyalar",
+      "Maxsus Telegram VIP yopiq guruhiga ulanish",
+      "100% BMBA A+ / A sertifikatini qo'lga kiritish kafolati",
+      "24/7 shaxsiy yurist va ustoz yordami"
+    ],
+    "limitations": []
+  }
+]

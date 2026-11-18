@@ -1,4 +1,4 @@
-const CACHE_NAME = 'huquq-sertifikat-v10';
+const CACHE_NAME = 'huquq-sertifikat-v11';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   '/data/textbooks.json',
   '/data/cases_bank.json',
   '/data/channels.json',
+  '/data/tariffs.json',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
@@ -18,7 +19,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('SW: Yangi versiya keshlanmoqda (v10)');
+      console.log('SW: Yangi versiya keshlanmoqda (v11)');
       return cache.addAll(STATIC_ASSETS).catch(err => {
         console.warn('SW keshida ayrim tashqi fayllar olinmadi:', err);
       });

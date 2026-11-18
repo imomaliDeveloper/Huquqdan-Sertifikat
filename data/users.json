@@ -1,0 +1,15 @@
+[
+  {
+    "id": "USR-1001",
+    "name": "Imomali",
+    "phone": "+998901234567",
+    "password": "123",
+    "plan": "VIP",
+    "role": "Abituriyent",
+    "city": "Toshkent shahri",
+    "registeredAt": "2026-11-18T10:00:00.000Z",
+    "testsCompleted": 12,
+    "averageScore": "92%",
+    "bestGrade": "A+"
+  }
+]
