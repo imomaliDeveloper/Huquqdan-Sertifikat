@@ -450,7 +450,7 @@ class SimpleTelegramBot {
       `• Rasmiy QR-kodli elektron sertifikat generatsiyasi\n\n` +
       `💳 <b>To'lov rekviziti (Humo karta):</b>\n` +
       `<code>9860 0366 7156 8792</code>\n` +
-      `<i>Qabul qiluvchi: Imomali M.</i>\n\n` +
+      `<i>Qabul qiluvchi: Imomali Mamatqulov</i>\n\n` +
       `To'lov qilgach, chekni Mini App orqali yuboring yoki adminga murojaat qiling: @Imomali_Mamatkulov`;
 
     const keyboard = [
