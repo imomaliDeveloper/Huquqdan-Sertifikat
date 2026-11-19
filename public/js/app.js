@@ -16,14 +16,31 @@ if (tg) {
   tg.expand();
 }
 
+// Telegram foydalanuvchisini avtomatik tanish
+let initialUser = JSON.parse(localStorage.getItem("huquq_auth_user") || "null");
+if (!initialUser && tg?.initDataUnsafe?.user) {
+  const tUser = tg.initDataUnsafe.user;
+  const fullName = [tUser.first_name, tUser.last_name].filter(Boolean).join(' ') || tUser.username || "O'quvchi";
+  initialUser = {
+    id: `TG-${tUser.id}`,
+    tgId: tUser.id,
+    name: fullName,
+    username: tUser.username ? `@${tUser.username}` : null,
+    role: "Abituriyent",
+    plan: localStorage.getItem("huquq_user_plan") || "tariff_start",
+    city: "Telegram"
+  };
+  localStorage.setItem("huquq_auth_user", JSON.stringify(initialUser));
+}
+
 // App State
 const state = {
   user: {
-    id: tg?.initDataUnsafe?.user?.id || 1001,
-    name: tg?.initDataUnsafe?.user?.first_name || (tg?.initDataUnsafe?.user?.last_name ? `${tg.initDataUnsafe.user.first_name} ${tg.initDataUnsafe.user.last_name}` : "O'quvchi"),
-    username: tg?.initDataUnsafe?.user?.username || ""
+    id: tg?.initDataUnsafe?.user?.id || initialUser?.tgId || 1001,
+    name: tg?.initDataUnsafe?.user?.first_name || (tg?.initDataUnsafe?.user?.last_name ? `${tg.initDataUnsafe.user.first_name} ${tg.initDataUnsafe.user.last_name}` : (initialUser?.name || "O'quvchi")),
+    username: tg?.initDataUnsafe?.user?.username || initialUser?.username || ""
   },
-  currentUser: JSON.parse(localStorage.getItem("huquq_auth_user") || "null"),
+  currentUser: initialUser,
   userPlan: localStorage.getItem("huquq_user_plan") || (localStorage.getItem("huquq_premium_active") === "true" ? "tariff_vip" : "tariff_start"),
   selectedTariff: "tariff_vip",
   currentQuestion: 0,
@@ -41,11 +58,25 @@ const state = {
 
 // DOM yuklanganda
 document.addEventListener("DOMContentLoaded", () => {
-  // Telegram WebApp foydalanuvchisini aniqlash
+  // Telegram WebApp foydalanuvchisini aniqlash va kiritish
   if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
     const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-    state.user.name = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+    const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || "O'quvchi";
+    state.user.name = fullName;
     state.user.id = tgUser.id;
+
+    if (!state.currentUser) {
+      state.currentUser = {
+        id: `TG-${tgUser.id}`,
+        tgId: tgUser.id,
+        name: fullName,
+        username: tgUser.username ? `@${tgUser.username}` : null,
+        role: "Abituriyent",
+        plan: state.userPlan || "tariff_start",
+        city: "Telegram"
+      };
+      localStorage.setItem("huquq_auth_user", JSON.stringify(state.currentUser));
+    }
   }
 
   // Foydalanuvchi va Auth UI-ni yangilash
@@ -62,14 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Kanallarga a'zolik holatini yangilash
   updateHomeSubscriptionUI();
-
-  // Majburiy ro'yxatdan o'tish: agar foydalanuvchi hisobiga kirmagan bo'lsa
-  if (!state.currentUser) {
-    setTimeout(() => {
-      switchAuthTab('register');
-      openAuthModal();
-    }, 600);
-  }
 });
 
 // Kunlik Streak (Daily Streak) hisoblash
@@ -99,11 +122,28 @@ function updateDailyStreak() {
 // Majburiy ro'yxatdan o'tish tekshiruvi (Har bir bo'limga kirish uchun)
 function checkAuthRequired(featureName) {
   if (!state.currentUser) {
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+      const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+      const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || "O'quvchi";
+      state.currentUser = {
+        id: `TG-${tgUser.id}`,
+        tgId: tgUser.id,
+        name: fullName,
+        username: tgUser.username ? `@${tgUser.username}` : null,
+        role: "Abituriyent",
+        plan: state.userPlan || "tariff_start",
+        city: "Telegram"
+      };
+      localStorage.setItem("huquq_auth_user", JSON.stringify(state.currentUser));
+      initAuthUI();
+      return true;
+    }
+
     const msg = featureName 
-      ? `🔒 "${featureName}" bo'limiga kirish uchun ro'yxatdan o'tish majburiy!`
-      : "🔒 Platforma imkoniyatlaridan foydalanish uchun ro'yxatdan o'tish majburiy!";
+      ? `🔒 "${featureName}" bo'limiga kirish uchun ro'yxatdan o'ting!`
+      : "🔒 Platforma imkoniyatlaridan foydalanish uchun hisobingizga kiring!";
     showToast(msg);
-    switchAuthTab('register');
+    switchAuthTab('login');
     openAuthModal();
     return false;
   }
