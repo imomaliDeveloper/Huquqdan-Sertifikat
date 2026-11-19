@@ -2318,7 +2318,7 @@ function exitOctagonPrompt() {
   showHome();
 }
 
-function startOctagonBattle() {
+async function startOctagonBattle() {
   // Yangi jangni sozlash
   octagonState.playerHp = 100;
   octagonState.opponentHp = 100;
@@ -2326,15 +2326,11 @@ function startOctagonBattle() {
   octagonState.isRoundLocked = false;
   if (octagonState.timerInterval) clearInterval(octagonState.timerInterval);
 
-  // Tasodifiy raqib
-  const randOpp = octagonState.opponentsList[Math.floor(Math.random() * octagonState.opponentsList.length)];
-  octagonState.opponentName = randOpp;
-
   // UI nomlarini o'rnatish
   const pName = document.getElementById("octPlayerName");
   if (pName) pName.innerText = state.user?.name || "Siz";
   const oName = document.getElementById("octOpponentName");
-  if (oName) oName.innerText = randOpp;
+  if (oName) oName.innerText = "Raqib qidirilmoqda...";
 
   // Modallarni yashirish va HUD ni yangilash
   const resModal = document.getElementById("octResultModal");
@@ -2344,50 +2340,90 @@ function startOctagonBattle() {
 
   updateOctagonHpBars();
 
-  // EXAM_DATA dan 5 ta savol saralab olish
-  const pool = (EXAM_DATA && EXAM_DATA.questions && EXAM_DATA.questions.length > 0)
-    ? EXAM_DATA.questions.filter(q => q.options && q.options.length >= 2)
-    : [];
-
-  // Agar mavjud bo'lmasa, namunaviy tezkor savollar
-  if (pool.length >= 5) {
-    octagonState.battleQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
-  } else {
-    octagonState.battleQuestions = [
-      {
-        text: "Davlat boshqaruv shakliga ko'ra qanday asosiy turlarga bo'linadi?",
-        options: [{key:"A", text:"Monarxiya va Respublika"}, {key:"B", text:"Unitar va Federatsiya"}, {key:"C", text:"Demokratik va Diktatura"}, {key:"D", text:"Prezidentlik va Parlament"}],
-        correct: "A",
-        section: "Davlat va huquq nazariyasi"
-      },
-      {
-        text: "Yangi Konstitutsiyaga ko'ra shaxs sud qarorisiz ko'pi bilan necha soat ushlab turilishi mumkin?",
-        options: [{key:"A", text:"24 soat"}, {key:"B", text:"48 soat"}, {key:"C", text:"72 soat"}, {key:"D", text:"12 soat"}],
-        correct: "B",
-        section: "Konstitutsiyaviy huquq"
-      },
-      {
-        text: "Yangi Mehnat kodeksiga ko'ra yillik asosiy eng kam mehnat ta'tili necha kalendar kuni?",
-        options: [{key:"A", text:"15 ish kuni"}, {key:"B", text:"21 kalendar kuni"}, {key:"C", text:"24 kalendar kuni"}, {key:"D", text:"30 kalendar kuni"}],
-        correct: "B",
-        section: "Mehnat huquqi"
-      },
-      {
-        text: "Meros ochilgan kundan e'tiboran necha oy ichida qabul qilinishi shart?",
-        options: [{key:"A", text:"1 oy"}, {key:"B", text:"3 oy"}, {key:"C", text:"6 oy"}, {key:"D", text:"1 yil"}],
-        correct: "C",
-        section: "Fuqarolik huquqi"
-      },
-      {
-        text: "Oila kodeksiga ko'ra 1 nafar voyaga yetmagan bola uchun oylik qancha aliment undiriladi?",
-        options: [{key:"A", text:"1/4 qismi"}, {key:"B", text:"1/3 qismi"}, {key:"C", text:"1/2 qismi"}, {key:"D", text:"1/6 qismi"}],
-        correct: "A",
-        section: "Oila huquqi"
+  // 1. HAQIQIY BOT VA PLATFORMA ISHTIROKCHILARI ICHIDAN RAQIB TANLASH
+  let chosenOpponentName = "Advokat Aliyev (Toshkent)";
+  try {
+    const oppRes = await fetch("/api/duel/opponents");
+    if (oppRes.ok) {
+      const oppList = await oppRes.json();
+      if (Array.isArray(oppList) && oppList.length > 0) {
+        const myName = (state.user?.name || "").toLowerCase().trim();
+        const available = oppList.filter(o => (o.name || "").toLowerCase().trim() !== myName);
+        const candidates = available.length > 0 ? available : oppList;
+        const picked = candidates[Math.floor(Math.random() * candidates.length)];
+        chosenOpponentName = picked.title || picked.name || chosenOpponentName;
       }
-    ];
+    }
+  } catch (err) {
+    console.warn("Duel opponents fetch fallback:", err);
+    if (octagonState.opponentsList && octagonState.opponentsList.length > 0) {
+      chosenOpponentName = octagonState.opponentsList[Math.floor(Math.random() * octagonState.opponentsList.length)];
+    }
   }
 
-  showToast(`🥊 Jang boshlandi! Raqib: ${randOpp}`);
+  octagonState.opponentName = chosenOpponentName;
+  if (oName) oName.innerText = chosenOpponentName;
+
+  // 2. DUELDA BIR XIL SAVOLLAR TAKRORLANMASLIGI UCHUN 800+ TA QONUN TESTIDAN DINAMIK 5 TA YANGI SAVOL OLISH
+  let dynamicQuestions = [];
+  try {
+    const qRes = await fetch("/api/duel/questions");
+    if (qRes.ok) {
+      const fetched = await qRes.json();
+      if (Array.isArray(fetched) && fetched.length >= 5) {
+        dynamicQuestions = fetched.slice(0, 5);
+      }
+    }
+  } catch (err) {
+    console.warn("Duel questions fetch fallback:", err);
+  }
+
+  // Oflayn yoki fallback holatida
+  if (!dynamicQuestions || dynamicQuestions.length < 5) {
+    const pool = (EXAM_DATA && EXAM_DATA.questions && EXAM_DATA.questions.length > 0)
+      ? EXAM_DATA.questions.filter(q => q.options && q.options.length >= 2)
+      : [];
+    if (pool.length >= 5) {
+      dynamicQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+    } else {
+      dynamicQuestions = [
+        {
+          text: "Davlat boshqaruv shakliga ko'ra qanday asosiy turlarga bo'linadi?",
+          options: [{key:"A", text:"Monarxiya va Respublika"}, {key:"B", text:"Unitar va Federatsiya"}, {key:"C", text:"Demokratik va Diktatura"}, {key:"D", text:"Prezidentlik va Parlament"}],
+          correct: "A",
+          section: "Davlat va huquq nazariyasi"
+        },
+        {
+          text: "Yangi Konstitutsiyaga ko'ra shaxs sud qarorisiz ko'pi bilan necha soat ushlab turilishi mumkin?",
+          options: [{key:"A", text:"24 soat"}, {key:"B", text:"48 soat"}, {key:"C", text:"72 soat"}, {key:"D", text:"12 soat"}],
+          correct: "B",
+          section: "Konstitutsiyaviy huquq"
+        },
+        {
+          text: "Yangi Mehnat kodeksiga ko'ra yillik asosiy eng kam mehnat ta'tili necha kalendar kuni?",
+          options: [{key:"A", text:"15 ish kuni"}, {key:"B", text:"21 kalendar kuni"}, {key:"C", text:"24 kalendar kuni"}, {key:"D", text:"30 kalendar kuni"}],
+          correct: "B",
+          section: "Mehnat huquqi"
+        },
+        {
+          text: "Meros ochilgan kundan e'tiboran necha oy ichida qabul qilinishi shart?",
+          options: [{key:"A", text:"1 oy"}, {key:"B", text:"3 oy"}, {key:"C", text:"6 oy"}, {key:"D", text:"1 yil"}],
+          correct: "C",
+          section: "Fuqarolik huquqi"
+        },
+        {
+          text: "Oila kodeksiga ko'ra 1 nafar voyaga yetmagan bola uchun oylik qancha aliment undiriladi?",
+          options: [{key:"A", text:"1/4 qismi"}, {key:"B", text:"1/3 qismi"}, {key:"C", text:"1/2 qismi"}, {key:"D", text:"1/6 qismi"}],
+          correct: "A",
+          section: "Oila huquqi"
+        }
+      ];
+    }
+  }
+
+  octagonState.battleQuestions = dynamicQuestions;
+
+  showToast(`🥊 Jang boshlandi! Raqib: ${chosenOpponentName}`);
   loadOctagonRound(0);
 }
 
@@ -2492,7 +2528,8 @@ function handleOctagonAnswer(selectedKey, clickedBtn) {
   if (octagonState.timerInterval) clearInterval(octagonState.timerInterval);
 
   const q = octagonState.activeQuestion;
-  const isCorrect = (selectedKey === q.correct);
+  const correctVal = (q.correct || q.correctKey || "A").toString().trim().toUpperCase();
+  const isCorrect = (selectedKey.toString().trim().toUpperCase() === correctVal);
   const impact = document.getElementById("octCombatImpact");
 
   // Variantlarni ranglash
@@ -2501,7 +2538,8 @@ function handleOctagonAnswer(selectedKey, clickedBtn) {
     const buttons = container.querySelectorAll("button");
     buttons.forEach(btn => {
       btn.disabled = true;
-      if (btn.innerText.includes(q.correct)) {
+      const keySpan = btn.querySelector("span");
+      if (keySpan && keySpan.innerText.trim().toUpperCase() === correctVal) {
         btn.classList.add("bg-emerald-100", "dark:bg-emerald-950", "border-emerald-500", "text-emerald-800", "dark:text-emerald-200");
       }
     });

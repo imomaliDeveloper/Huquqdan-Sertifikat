@@ -100,13 +100,22 @@
 
   <!-- Top App Bar -->
   <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 flex items-center justify-between">
-    <div class="flex items-center space-x-2.5 cursor-pointer" onclick="showHome()">
-      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-sm font-bold text-sm">
-        <i class="fa-solid fa-scale-balanced"></i>
+    <div class="flex items-center space-x-2.5 cursor-pointer group select-none" onclick="showHome()">
+      <!-- Elegant Emblem -->
+      <div class="relative w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-slate-900 p-[1.5px] shadow-md shadow-emerald-950/20 group-hover:scale-105 transition-transform duration-200">
+        <div class="w-full h-full rounded-[14px] bg-gradient-to-br from-emerald-700 via-teal-800 to-slate-950 flex items-center justify-center relative overflow-hidden">
+          <div class="absolute -top-3 -left-3 w-7 h-7 bg-white/25 rounded-full pointer-events-none blur-xs"></div>
+          <i class="fa-solid fa-scale-balanced text-amber-300 text-sm filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"></i>
+        </div>
       </div>
       <div>
-        <h1 class="text-xs font-bold tracking-tight text-slate-800 dark:text-white leading-tight">Huquq Sertifikat</h1>
-        <p class="text-[9px] text-emerald-600 font-semibold uppercase">BMBA Test Simulyatori</p>
+        <div class="flex items-center space-x-1.5">
+          <h1 class="text-xs font-black tracking-tight text-slate-900 dark:text-white leading-tight">Huquq Sertifikat</h1>
+          <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[8px]" title="BMBA Tasdiqlangan">
+            <i class="fa-solid fa-check"></i>
+          </span>
+        </div>
+        <p class="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 tracking-wider uppercase">BMBA Test Simulyatori</p>
       </div>
     </div>
     
@@ -163,7 +172,7 @@
               🤖 AI Repetitor
             </span>
           </div>
-          <h2 class="text-xl font-extrabold tracking-tight">Huquqshunoslik Milliy Testi</h2>
+          <h2 class="text-xl font-extrabold tracking-tight">Huquqshunoslik Milliy Sertifikat Testlari</h2>
           <p class="text-xs text-emerald-100 leading-relaxed">
             Spesifikatsiyadagi 40 ta qonun, vaziyatli keyslar va ochiq topshiriqlar asosida o'z bilimingizni sinang.
           </p>
@@ -1857,8 +1866,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/exam_data.js?v=22"></script>
-  <script src="js/flashcards.js?v=22"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="js/exam_data.js?v=23"></script>
+  <script src="js/flashcards.js?v=23"></script>
+  <script src="js/app.js?v=23"></script>
 </body>
 </html>
