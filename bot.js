@@ -625,16 +625,19 @@ class SimpleTelegramBot {
       currentQuestionIndex: 0
     });
 
-    let lawIdx = settings.currentLawIndex || 1;
-    let qIdx = settings.currentQuestionIndex || 0;
+    // 40 ta qonundan tasodifiy xilma-xil qonun tanlanadi (faqat konstitutsiya emas!)
+    const totalLaws = 40;
+    let randomLawIdx = Math.floor(Math.random() * totalLaws) + 1;
+    if (settings.currentLawIndex && settings.currentLawIndex === randomLawIdx) {
+      randomLawIdx = (randomLawIdx % totalLaws) + 1;
+    }
 
-    let lawFile = path.join('law_variants', `law_var_${lawIdx}.json`);
+    let lawFile = path.join('law_variants', `law_var_${randomLawIdx}.json`);
     let lawData = safeRead(lawFile, null);
 
     if (!lawData || !lawData.questions || !lawData.questions.length) {
-      lawIdx = 1;
-      qIdx = 0;
-      lawFile = path.join('law_variants', `law_var_1.json`);
+      randomLawIdx = (randomLawIdx % totalLaws) + 1;
+      lawFile = path.join('law_variants', `law_var_${randomLawIdx}.json`);
       lawData = safeRead(lawFile, null);
     }
 
@@ -644,28 +647,11 @@ class SimpleTelegramBot {
     }
     if (!questions.length) return null;
 
-    if (qIdx >= questions.length) {
-      lawIdx = (lawIdx % 40) + 1;
-      qIdx = 0;
-      lawFile = path.join('law_variants', `law_var_${lawIdx}.json`);
-      const nextData = safeRead(lawFile, null);
-      if (nextData && nextData.questions && nextData.questions.length) {
-        lawData = nextData;
-        questions = nextData.questions;
-      }
-    }
+    const randomQIdx = Math.floor(Math.random() * questions.length);
+    const q = questions[randomQIdx];
 
-    const q = questions[qIdx % questions.length];
-
-    // Indekslarni keyingi savol uchun oldinga siljitish
-    let nextQIdx = qIdx + 1;
-    let nextLawIdx = lawIdx;
-    if (nextQIdx >= questions.length) {
-      nextQIdx = 0;
-      nextLawIdx = (lawIdx % 40) + 1;
-    }
-    settings.currentLawIndex = nextLawIdx;
-    settings.currentQuestionIndex = nextQIdx;
+    settings.currentLawIndex = randomLawIdx;
+    settings.currentQuestionIndex = randomQIdx;
     safeWrite('autopost_settings.json', settings);
 
     const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
@@ -673,9 +659,13 @@ class SimpleTelegramBot {
     if (q.correctKey && map[q.correctKey] !== undefined) correctIdx = map[q.correctKey];
     else if (q.correct && map[q.correct] !== undefined) correctIdx = map[q.correct];
 
-    const opts = (q.options || []).map(o => {
+    const prefixes = ['A) ', 'B) ', 'C) ', 'D) '];
+    const opts = (q.options || []).map((o, idx) => {
       let txt = (typeof o === 'string' ? o : o.text) || '';
-      return txt.length > 95 ? txt.substring(0, 92) + '...' : txt;
+      txt = txt.replace(/^[A-D][).:\s-]+/i, '').trim();
+      const prefix = prefixes[idx] || '';
+      const full = prefix + txt;
+      return full.length > 95 ? full.substring(0, 92) + '...' : full;
     }).slice(0, 4);
 
     let qText = q.text || '';
@@ -752,16 +742,20 @@ class SimpleTelegramBot {
             await this.sendMessage(ch,
               `🏛 <b>HUQUQSHUNOSLIK MILLIY SERTIFIKATI (BMBA)</b>\n\n` +
               `Yuqoridagi savolni yechib, o'z bilimingizni sinab ko'ring! 👆\n\n` +
+              `📢 <b>Bizning rasmiy kanallarimizga obuna bo'ling:</b>\n` +
+              `1️⃣ @Huquq_study — Milliy sertifikatga tayyorlovchi asosiy kanal\n` +
+              `2️⃣ @General_Huquq — Qonunchilik va rasmiy tahlillar kanali\n\n` +
               `🔥 <b>Rasmiy platformamizda:</b>\n` +
               `• 📜 40 ta qonundan 800 ta saralangan test\n` +
               `• 🎯 50 ta to'liq yangi formatdagi imtihon varianti\n` +
               `• 🥊 Jonli Huquqiy Duel (Octagon)\n` +
-              `• 🤖 AI Repetitor bilan savol-javob\n\n` +
+              `• 🤖 AI Repetitor bilan tezkor tahlil\n\n` +
               `<i>O'z darajangizni aniqlash va imtihonga 100% tayyorlanish uchun pastdagi ilovani oching:</i> 👇`, {
               reply_markup: {
                 inline_keyboard: [
                   [{ text: "🚀 Testni boshlash (Mini App)", web_app: { url: this.appUrl } }],
                   [{ text: "🥊 Do'stlar bilan Duel", web_app: { url: `${this.appUrl}#octagon` } }],
+                  [{ text: "📢 @Huquq_study", url: "https://t.me/Huquq_study" }, { text: "📢 @General_Huquq", url: "https://t.me/General_Huquq" }],
                   [{ text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" }]
                 ]
               }
@@ -844,16 +838,20 @@ class SimpleTelegramBot {
             await this.sendMessage(ch,
               `🏛 <b>HUQUQSHUNOSLIK MILLIY SERTIFIKATI (BMBA)</b>\n\n` +
               `Yuqoridagi savolni yechib, o'z bilimingizni sinab ko'ring! 👆\n\n` +
+              `📢 <b>Bizning rasmiy kanallarimizga obuna bo'ling:</b>\n` +
+              `1️⃣ @Huquq_study — Milliy sertifikatga tayyorlovchi asosiy kanal\n` +
+              `2️⃣ @General_Huquq — Qonunchilik va rasmiy tahlillar kanali\n\n` +
               `🔥 <b>Rasmiy platformamizda:</b>\n` +
               `• 📜 40 ta qonundan 800 ta saralangan test\n` +
               `• 🎯 50 ta to'liq yangi formatdagi imtihon varianti\n` +
               `• 🥊 Jonli Huquqiy Duel (Octagon)\n` +
-              `• 🤖 AI Repetitor bilan savol-javob\n\n` +
+              `• 🤖 AI Repetitor bilan tezkor tahlil\n\n` +
               `<i>O'z darajangizni aniqlash va imtihonga 100% tayyorlanish uchun pastdagi ilovani oching:</i> 👇`, {
               reply_markup: {
                 inline_keyboard: [
                   [{ text: "🚀 Testni boshlash (Mini App)", web_app: { url: this.appUrl } }],
                   [{ text: "🥊 Do'stlar bilan Duel", web_app: { url: `${this.appUrl}#octagon` } }],
+                  [{ text: "📢 @Huquq_study", url: "https://t.me/Huquq_study" }, { text: "📢 @General_Huquq", url: "https://t.me/General_Huquq" }],
                   [{ text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" }]
                 ]
               }
@@ -1108,9 +1106,18 @@ class SimpleTelegramBot {
             `<code>/yangi_test O'zbekiston Konstitutsiyasi nechanchi yilda qabul qilingan? | 1991 | 1992 | 1993 | 1994 | 2 | O'zbekiston Konstitutsiyasi 1992-yil 8-dekabrda qabul qilingan.</code>`
           );
         }
+        const prefixes = ['A) ', 'B) ', 'C) ', 'D) '];
+        const rawOpts = [parts[1], parts[2], parts[3], parts[4]].filter(Boolean);
+        const formattedOpts = rawOpts.map((o, idx) => {
+          let t = (o || '').replace(/^[A-D][).:\s-]+/i, '').trim();
+          const p = prefixes[idx] || '';
+          const full = p + t;
+          return full.length > 95 ? full.substring(0, 92) + '...' : full;
+        });
+
         const customQ = {
           text: `⚖️ Maxsus Savol\n\n${parts[0]}`,
-          options: [parts[1], parts[2], parts[3], parts[4]].filter(Boolean),
+          options: formattedOpts,
           correctIndex: (parseInt(parts[5]) - 1) || 0,
           explanation: parts[6] || "",
           lawName: "Huquqiy Sinov"
