@@ -242,7 +242,7 @@ function renderQuestion() {
   if (!optContainer) return;
   optContainer.innerHTML = "";
 
-  if ((q.type === "Y-1" || q.type === "Y-2") && Array.isArray(q.options)) {
+  if (Array.isArray(q.options) && q.options.length > 0) {
     // 4 ta variant (A, B, C, D)
     q.options.forEach(opt => {
       const isSelected = state.userAnswers[q.num] === opt.key;
@@ -457,8 +457,9 @@ async function finishExam() {
     const userAns = state.userAnswers[q.num];
     let isCorrect = false;
 
-    if (q.type === "Y-1" || q.type === "Y-2") {
-      isCorrect = userAns === q.correct;
+    const correctVal = q.correct || q.correctKey;
+    if (q.type === "Y-1" || q.type === "Y-2" || (Array.isArray(q.options) && q.options.length > 0)) {
+      isCorrect = Boolean(userAns && correctVal && userAns.toString().trim().toUpperCase() === correctVal.toString().trim().toUpperCase());
     } else {
       // Ochiq savol tekshiruvi (O)
       if (userAns) {
@@ -480,12 +481,12 @@ async function finishExam() {
 
     resultsDetailed.push({
       num: q.num,
-      type: q.type,
+      type: q.type || (q.options ? "Y-1" : "O"),
       section: q.section,
       text: q.text,
       options: q.options || [],
       userAns: userAns || "Javob berilmadi",
-      correctAns: q.type === "O" ? q.canonicalAnswer : q.correct,
+      correctAns: (q.type === "O" && !q.options) ? q.canonicalAnswer : (q.correct || q.correctKey),
       isCorrect: isCorrect,
       explanation: q.explanation,
       bookSource: q.bookSource || "8-11 sinf darsliklari",
@@ -1350,6 +1351,9 @@ function renderLawsList(list) {
     const card = document.createElement("div");
     card.className = "p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-400 transition space-y-2.5";
 
+    // Faqat 1-variant (Konstitutsiya) oddiy tarifda bepul, qolgan 39 ta variant faqat VIP PRO uchun
+    const isLocked = (law.id > 1) && !state.isPremium;
+
     card.innerHTML = `
       <div class="flex items-start justify-between gap-2">
         <div class="space-y-1">
@@ -1357,7 +1361,14 @@ function renderLawsList(list) {
             <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
               ${law.category || 'Qonunchilik'}
             </span>
-            <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-md ${
+              isLocked 
+                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' 
+                : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+            }">
+              ${isLocked ? '<i class="fa-solid fa-lock text-[9px] mr-1"></i> 🔒 Premium' : '<i class="fa-solid fa-circle-check text-[9px] mr-1"></i> Bepul Namunaviy'}
+            </span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300">
               <i class="fa-solid fa-list-check mr-1"></i> 20 ta test
             </span>
             <span class="text-[10px] text-slate-400">
@@ -1368,8 +1379,10 @@ function renderLawsList(list) {
             ${law.id}. ${law.name}
           </h4>
         </div>
-        <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-black text-slate-600 dark:text-slate-300 shrink-0">
-          #${law.id}
+        <span class="w-7 h-7 rounded-lg ${
+          isLocked ? 'bg-amber-100 dark:bg-amber-950 text-amber-600' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+        } flex items-center justify-center text-xs font-black shrink-0">
+          ${isLocked ? '<i class="fa-solid fa-lock text-xs"></i>' : `#${law.id}`}
         </span>
       </div>
 
@@ -1378,14 +1391,28 @@ function renderLawsList(list) {
           <i class="fa-solid fa-arrow-up-right-from-square text-[10px] mr-1"></i> Lex.uz da o'qish
         </a>
 
-        <button onclick="startLawVariantExam(${law.id})" id="btnStartLaw_${law.id}" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-sm active:scale-95 transition flex items-center space-x-1.5">
-          <i class="fa-solid fa-play text-[10px]"></i>
-          <span>Variantni Boshlash</span>
+        <button onclick="handleLawVariantClick(${law.id}, ${isLocked})" id="btnStartLaw_${law.id}" class="px-3.5 py-1.5 rounded-xl ${
+          isLocked 
+            ? 'bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm active:scale-95 transition flex items-center space-x-1.5'
+            : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-sm active:scale-95 transition flex items-center space-x-1.5'
+        }">
+          <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-play'} text-[10px]"></i>
+          <span>${isLocked ? 'Qulflangan' : 'Variantni Boshlash'}</span>
         </button>
       </div>
     `;
     container.appendChild(card);
   });
+}
+
+function handleLawVariantClick(lawId, isLocked) {
+  if (!checkAuthRequired("Qonunchilik Testi")) return;
+  if (isLocked) {
+    openPremiumModal();
+    showToast("🔒 Ushbu qonun testi VIP PRO tarifida ochiq! Cheksiz barcha 40 ta variantni yechish uchun faollashtiring.");
+    return;
+  }
+  startLawVariantExam(lawId);
 }
 
 function filterLaws() {
@@ -1413,6 +1440,12 @@ function filterLaws() {
 async function startLawVariantExam(lawId) {
   if (!checkAuthRequired("Qonunchilik Test Varianti")) return;
 
+  const isLocked = (lawId > 1) && !state.isPremium;
+  if (isLocked) {
+    handleLawVariantClick(lawId, true);
+    return;
+  }
+
   const btn = document.getElementById(`btnStartLaw_${lawId}`);
   let oldBtnText = "";
   if (btn) {
@@ -1430,7 +1463,19 @@ async function startLawVariantExam(lawId) {
         EXAM_DATA.title = variantData.title;
         EXAM_DATA.totalQuestions = variantData.totalQuestions || variantData.questions.length;
         EXAM_DATA.timeMinutes = variantData.timeMinutes || 25;
-        EXAM_DATA.questions = variantData.questions;
+        // Barcha savollarni 100% 4 variantli Y-1 test formatiga moslashtirish
+        EXAM_DATA.questions = variantData.questions.map((q, idx) => ({
+          num: idx + 1,
+          type: "Y-1",
+          text: q.text,
+          options: q.options || [],
+          correct: q.correct || q.correctKey || "A",
+          correctKey: q.correct || q.correctKey || "A",
+          section: variantData.lawName || variantData.category || "Qonunchilik",
+          explanation: q.explanation || "To'g'ri javob qonun talablariga mos keladi.",
+          bookSource: "BMBA Qonunchilik burchagi",
+          lawSource: `${variantData.lawName || 'Qonun'} (${q.article || 'Modda'})`
+        }));
 
         startExam();
         showToast(`⚖️ ${variantData.lawName || variantData.title} testi boshlandi! (20 ta savol, 25 daqiqa)`);

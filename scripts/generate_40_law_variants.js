@@ -332,15 +332,22 @@ lawsList.forEach(law => {
     lexUrl: law.url,
     totalQuestions: qList.length,
     timeMinutes: 25,
+    isPremium: law.id > 1,
+    badge: law.id === 1 ? "Bepul Namunaviy" : "🔒 Premium",
     title: `${law.id}-qonun: ${law.name} bo‘yicha 20 talik Test`,
     description: `BMBA milliy sertifikatiga tayyorgarlik uchun maxsus tuzilgan 20 talik qonunchilik testi. Manba: ${law.name} (Lex.uz havolasi mavjud).`,
     questions: qList.map((q, idx) => ({
       num: idx + 1,
+      type: "Y-1",
       text: q.text,
       options: q.options,
+      correct: q.correctKey,
       correctKey: q.correctKey,
+      section: law.name || law.category || "Qonunchilik",
       explanation: q.explanation,
-      article: q.article || `${law.name}`
+      article: q.article || `${law.name}`,
+      bookSource: "BMBA Qonunchilik burchagi",
+      lawSource: `${law.name} (${q.article || 'Modda'})`
     }))
   };
 

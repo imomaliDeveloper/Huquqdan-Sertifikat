@@ -181,7 +181,8 @@ app.get('/api/law-variants', (req, res) => {
       totalQuestions: 20,
       timeMinutes: 25,
       lexUrl: l.url,
-      badge: l.id <= 3 ? "Bepul sinov" : "20 talik Test"
+      isPremium: l.id > 1,
+      badge: l.id === 1 ? "Bepul Namunaviy" : "🔒 Premium"
     }));
     res.json(list);
   } catch (err) {

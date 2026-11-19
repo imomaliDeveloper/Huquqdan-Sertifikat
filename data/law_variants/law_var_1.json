@@ -32,7 +32,12 @@
       ],
       "correctKey": "A",
       "explanation": "Yangi tahrirdagi Konstitutsiyaning 1-moddasiga binoan O‘zbekiston — boshqaruvning respublika shakliga ega bo‘lgan suveren, demokratik, huquqiy, ijtimoiy va dunyoviy davlatdir.",
-      "article": "1-modda"
+      "article": "1-modda",
+      "type": "Y-1",
+      "correct": "A",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (1-modda)"
     },
     {
       "num": 2,
@@ -57,7 +62,12 @@
       ],
       "correctKey": "B",
       "explanation": "Konstitutsiyaning 7-moddasiga ko‘ra, xalq davlat hokimiyatining birdan-bir manbaidir.",
-      "article": "7-modda"
+      "article": "7-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (7-modda)"
     },
     {
       "num": 3,
@@ -82,7 +92,12 @@
       ],
       "correctKey": "A",
       "explanation": "13-moddaga muvofiq, O‘zbekiston Respublikasida inson, uning hayoti, erkinligi, sha’ni, qadr-qimmati va boshqa ajralmas huquqlari oliy qadriyat hisoblanadi.",
-      "article": "13-modda"
+      "article": "13-modda",
+      "type": "Y-1",
+      "correct": "A",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (13-modda)"
     },
     {
       "num": 4,
@@ -107,7 +122,12 @@
       ],
       "correctKey": "B",
       "explanation": "25-moddaga ko‘ra, yashash huquqi har bir insonning ajralmas huquqidir va u qonun bilan muhofaza qilinadi. Inson hayotiga suiqasd qilish eng og‘ir jinoyatdir. O‘zbekiston Respublikasida o‘lim jazosi taqiqlanadi.",
-      "article": "25-modda"
+      "article": "25-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (25-modda)"
     },
     {
       "num": 5,
@@ -132,7 +152,12 @@
       ],
       "correctKey": "B",
       "explanation": "27-modda: Hech kim sudning qarorisiz qirq sakkiz soatdan ortiq muddat ushlab turilishi mumkin emas.",
-      "article": "27-modda"
+      "article": "27-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (27-modda)"
     },
     {
       "num": 6,
@@ -157,7 +182,12 @@
       ],
       "correctKey": "B",
       "explanation": "Jinoyat sodir etganlikda ayblanayotgan shaxs uning aybi qonunda nazarda tutilgan tartibda oshkora sud muhokamasi yo‘li bilan isbotlanmaguncha va sudning qonuniy kuchga kirgan hukmi bilan aniqlanmaguncha aybsiz hisoblanadi.",
-      "article": "28-modda"
+      "article": "28-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (28-modda)"
     },
     {
       "num": 7,
@@ -182,7 +212,12 @@
       ],
       "correctKey": "B",
       "explanation": "65-modda: O‘zbekiston iqtisodiyotining negizini xilma-xil shakllardagi mulk tashkil etadi. Davlat barcha mulk shakllarining teng huquqliligini va huquqiy jihatdan himoya qilinishini ta'minlaydi.",
-      "article": "65-modda"
+      "article": "65-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (65-modda)"
     },
     {
       "num": 8,
@@ -207,7 +242,12 @@
       ],
       "correctKey": "A",
       "explanation": "76-modda: O‘zbekiston Respublikasining Oliy Majlisi oliy davlat vakillik organi bo‘lib, u ikki palatadan — Qonunchilik palatasi va Senatdan iborat.",
-      "article": "76-modda"
+      "article": "76-modda",
+      "type": "Y-1",
+      "correct": "A",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (76-modda)"
     },
     {
       "num": 9,
@@ -232,7 +272,12 @@
       ],
       "correctKey": "C",
       "explanation": "106-moddaga muvofiq, O‘zbekiston Respublikasi Prezidenti yetti yil muddatga saylanadi.",
-      "article": "106-modda"
+      "article": "106-modda",
+      "type": "Y-1",
+      "correct": "C",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (106-modda)"
     },
     {
       "num": 10,
@@ -257,7 +302,12 @@
       ],
       "correctKey": "C",
       "explanation": "Qonunchilik palatasi bir yuz ellik deputatdan iborat bo‘lib, ular qonunga muvofiq saylanadi.",
-      "article": "88-modda"
+      "article": "88-modda",
+      "type": "Y-1",
+      "correct": "C",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (88-modda)"
     },
     {
       "num": 11,
@@ -282,7 +332,12 @@
       ],
       "correctKey": "C",
       "explanation": "Senat a'zolari (senatorlar) hududiy vakillardan har bir hududdan 4 nafardan (jami 56 nafar) va Prezident tomonidan tayinlanadigan 9 nafar, jami 65 nafardan iborat.",
-      "article": "89-modda"
+      "article": "89-modda",
+      "type": "Y-1",
+      "correct": "C",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (89-modda)"
     },
     {
       "num": 12,
@@ -307,7 +362,12 @@
       ],
       "correctKey": "B",
       "explanation": "Oliy Majlis oliy davlat vakillik organi bo‘lib, qonun chiqaruvchi hokimiyatni amalga oshiradi.",
-      "article": "76-modda"
+      "article": "76-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (76-modda)"
     },
     {
       "num": 13,
@@ -332,7 +392,12 @@
       ],
       "correctKey": "B",
       "explanation": "115-modda: Bosh vazir O‘zbekiston Respublikasi Hukumati faoliyatini tashkil etadi va unga rahbarlik qiladi.",
-      "article": "115-modda"
+      "article": "115-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (115-modda)"
     },
     {
       "num": 14,
@@ -357,7 +422,12 @@
       ],
       "correctKey": "C",
       "explanation": "Sudyalar o‘ttiz besh yoshdan kichik bo‘lmagan, oliy yuridik ma'lumotga va yuridik ixtisosligi bo‘yicha kamida besh yillik ish stajiga ega bo‘lgan fuqarolar orasidan tayinlanadi.",
-      "article": "132-modda"
+      "article": "132-modda",
+      "type": "Y-1",
+      "correct": "C",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (132-modda)"
     },
     {
       "num": 15,
@@ -382,7 +452,12 @@
       ],
       "correctKey": "B",
       "explanation": "133-moddaga asosan fuqarolar va yuridik shaxslar sud tomonidan o‘zlariga nisbatan qo‘llanilgan qonunning Konstitutsiyaga muvofiqligini tekshirish to‘g‘risida Konstitutsiyaviy sudga shikoyat qilishga haqli.",
-      "article": "133-modda"
+      "article": "133-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (133-modda)"
     },
     {
       "num": 16,
@@ -407,7 +482,12 @@
       ],
       "correctKey": "A",
       "explanation": "Yangi Konstitutsiyaga ilk bor alohida XXIV bob — 'Advokatura' bobi kiritildi (141, 142-moddalar).",
-      "article": "141–142-moddalar"
+      "article": "141–142-moddalar",
+      "type": "Y-1",
+      "correct": "A",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (141–142-moddalar)"
     },
     {
       "num": 17,
@@ -432,7 +512,12 @@
       ],
       "correctKey": "B",
       "explanation": "120-modda: Viloyatlar, tumanlar va shaharlarda davlat hokimiyatining vakillik organlari Xalq deputatlari Kengashlaridir.",
-      "article": "120-modda"
+      "article": "120-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (120-modda)"
     },
     {
       "num": 18,
@@ -457,7 +542,12 @@
       ],
       "correctKey": "A",
       "explanation": "Qoraqalpog‘iston Respublikasining oliy davlat vakillik organi Jo‘qorg‘i Kengesdir.",
-      "article": "85-modda"
+      "article": "85-modda",
+      "type": "Y-1",
+      "correct": "A",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (85-modda)"
     },
     {
       "num": 19,
@@ -482,7 +572,12 @@
       ],
       "correctKey": "B",
       "explanation": "154-modda: Konstitutsiyaga o‘zgartishlar referendum o‘tkazish orqali yoki palatalar a'zolarining kamida 2/3 qismi ma'qullashi bilan kiritiladi.",
-      "article": "154-modda"
+      "article": "154-modda",
+      "type": "Y-1",
+      "correct": "B",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (154-modda)"
     },
     {
       "num": 20,
@@ -507,7 +602,14 @@
       ],
       "correctKey": "A",
       "explanation": "4-modda: O‘zbekiston Respublikasining davlat tili o‘zbek tilidir.",
-      "article": "4-modda"
+      "article": "4-modda",
+      "type": "Y-1",
+      "correct": "A",
+      "section": "O‘zbekiston Respublikasi Konstitutsiyasi",
+      "bookSource": "BMBA Qonunchilik burchagi",
+      "lawSource": "O‘zbekiston Respublikasi Konstitutsiyasi (4-modda)"
     }
-  ]
+  ],
+  "isPremium": false,
+  "badge": "Bepul Namunaviy"
 }
