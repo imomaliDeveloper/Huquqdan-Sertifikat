@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "intervalHours": 2,
+  "targetChannels": [
+    "@Huquq_study",
+    "@General_Huquq"
+  ],
+  "lastPostedAt": null,
+  "totalPosted": 0,
+  "currentLawIndex": 1,
+  "currentQuestionIndex": 0
+}

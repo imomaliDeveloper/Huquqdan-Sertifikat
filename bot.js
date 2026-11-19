@@ -308,14 +308,17 @@ class SimpleTelegramBot {
         { text: "📥 To'lov cheklari", callback_data: "admin_receipts" }
       ],
       [
+        { text: "📢 Avto-Test Sozlamalari (Interval)", callback_data: "autopost_menu" },
+        { text: "🎯 Kanalga test tashlash (Hozir)", callback_data: "autopost_send_now" }
+      ],
+      [
         { text: "⏰ O'quvchilarga eslatma yuborish (Nazorat)", callback_data: "admin_send_reminders" }
       ],
       [
         { text: "📢 Barchaga xabar tarqatish", callback_data: "admin_broadcast_help" },
-        { text: "🎯 Kanalga test tashlash", callback_data: "admin_post_quiz" }
+        { text: "🔄 Statistikani yangilash", callback_data: "admin_panel" }
       ],
       [
-        { text: "🔄 Statistikani yangilash", callback_data: "admin_panel" },
         { text: "🏠 Asosiy menyu", callback_data: "cmd_home" }
       ]
     ];
@@ -588,87 +591,287 @@ class SimpleTelegramBot {
     });
   }
 
-  // Telegram Kanalga Rasmiy Viktorina tashlash
-  async sendQuizToChannel(quizData, targetChatId = null) {
-    const target = targetChatId || this.channelId;
-    if (!target) {
-      return { ok: false, error: "Kanal ID sozlanmagan" };
-    }
-
-    let qText = quizData.text || '';
-    if (qText.length > 290) {
-      qText = qText.substring(0, 287) + '...';
-    }
-
-    let explanation = quizData.explanation || '';
-    if (explanation.length > 195) {
-      explanation = explanation.substring(0, 192) + '...';
-    }
-
-    const pollRes = await this.callApi('sendPoll', {
-      chat_id: target,
-      question: qText,
-      options: quizData.options,
-      is_anonymous: false,
-      type: 'quiz',
-      correct_option_id: quizData.correctIndex || 0,
-      explanation: explanation,
-      explanation_parse_mode: 'HTML'
+  // 40 ta qonundan navbatdagi savolni olish (800 ta test)
+  getNextQuizQuestion() {
+    let settings = safeRead('autopost_settings.json', {
+      enabled: true,
+      intervalHours: 2,
+      targetChannels: ["@Huquq_study", "@General_Huquq"],
+      lastPostedAt: null,
+      totalPosted: 0,
+      currentLawIndex: 1,
+      currentQuestionIndex: 0
     });
 
-    if (pollRes.ok) {
-      await this.sendMessage(target, `💡 <b>Huquqshunoslik Milliy Test Tizimi</b>\nYuqoridagi savolni yechib, bilimingizni tekshiring!\n\nTo'liq 40 ta qonun va 50 ta variantni yechish uchun pastdagi ilovani oching 👇`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "📲 Mini Appda to'liq testni yechish", web_app: { url: this.appUrl } }]
-          ]
-        }
-      });
+    let lawIdx = settings.currentLawIndex || 1;
+    let qIdx = settings.currentQuestionIndex || 0;
+
+    let lawFile = path.join('law_variants', `law_var_${lawIdx}.json`);
+    let lawData = safeRead(lawFile, null);
+
+    if (!lawData || !lawData.questions || !lawData.questions.length) {
+      lawIdx = 1;
+      qIdx = 0;
+      lawFile = path.join('law_variants', `law_var_1.json`);
+      lawData = safeRead(lawFile, null);
     }
 
-    return pollRes;
+    let questions = (lawData && lawData.questions) ? lawData.questions : [];
+    if (!questions.length) {
+      questions = safeRead('questions_bank.json', []);
+    }
+    if (!questions.length) return null;
+
+    if (qIdx >= questions.length) {
+      lawIdx = (lawIdx % 40) + 1;
+      qIdx = 0;
+      lawFile = path.join('law_variants', `law_var_${lawIdx}.json`);
+      const nextData = safeRead(lawFile, null);
+      if (nextData && nextData.questions && nextData.questions.length) {
+        lawData = nextData;
+        questions = nextData.questions;
+      }
+    }
+
+    const q = questions[qIdx % questions.length];
+
+    // Indekslarni keyingi savol uchun oldinga siljitish
+    let nextQIdx = qIdx + 1;
+    let nextLawIdx = lawIdx;
+    if (nextQIdx >= questions.length) {
+      nextQIdx = 0;
+      nextLawIdx = (lawIdx % 40) + 1;
+    }
+    settings.currentLawIndex = nextLawIdx;
+    settings.currentQuestionIndex = nextQIdx;
+    safeWrite('autopost_settings.json', settings);
+
+    const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+    let correctIdx = 0;
+    if (q.correctKey && map[q.correctKey] !== undefined) correctIdx = map[q.correctKey];
+    else if (q.correct && map[q.correct] !== undefined) correctIdx = map[q.correct];
+
+    const opts = (q.options || []).map(o => {
+      let txt = (typeof o === 'string' ? o : o.text) || '';
+      return txt.length > 95 ? txt.substring(0, 92) + '...' : txt;
+    }).slice(0, 4);
+
+    let qText = q.text || '';
+    const lawTitle = lawData && lawData.lawName ? `⚖️ ${lawData.lawName}\n\n` : '';
+    if ((lawTitle + qText).length > 295) {
+      qText = qText.substring(0, 290 - lawTitle.length) + '...';
+    }
+    qText = lawTitle + qText;
+
+    let explanation = q.explanation || '';
+    if (explanation.length > 195) {
+      explanation = explanation.substring(0, 190) + '...';
+    }
+
+    return {
+      text: qText,
+      options: opts,
+      correctIndex: correctIdx,
+      explanation: explanation,
+      lawName: (lawData && lawData.lawName) ? lawData.lawName : "Qonunchilik"
+    };
   }
 
-  async postNextQuizToChannel(chatNotifyId = null) {
+  // Telegram Kanallarga Viktorina tashlash
+  async postNextQuizToChannel(chatNotifyId = null, forceNow = false) {
     try {
-      const bankPath = path.join(__dirname, 'data', 'questions_bank.json');
-      let questions = safeRead('questions_bank.json', []);
-      if (!questions.length) {
-        // Law variants dan olamiz
-        const var1 = safeRead(path.join('law_variants', 'law_var_1.json'), {});
-        questions = var1.questions || [];
-      }
-      if (!questions.length) return;
-
-      const q = questions[this.lastPostedIndex % questions.length];
-      this.lastPostedIndex++;
-
-      const opts = (q.options || []).map(o => (typeof o === 'string' ? o : o.text));
-      let correctIdx = 0;
-      if (q.correctKey) {
-        const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
-        correctIdx = map[q.correctKey] || 0;
-      }
-
-      const res = await this.sendQuizToChannel({
-        text: q.text,
-        options: opts,
-        correctIndex: correctIdx,
-        explanation: q.explanation || ""
+      let settings = safeRead('autopost_settings.json', {
+        enabled: true,
+        intervalHours: 2,
+        targetChannels: ["@Huquq_study", "@General_Huquq"],
+        lastPostedAt: null,
+        totalPosted: 0,
+        currentLawIndex: 1,
+        currentQuestionIndex: 0
       });
 
-      if (res.ok) {
+      if (!forceNow && !settings.enabled) {
         if (chatNotifyId) {
-          await this.sendMessage(chatNotifyId, `✅ Kanalga muvaffaqiyatli test tashlandi!`);
+          await this.sendMessage(chatNotifyId, "ℹ️ Avto-test tizimi hozirda to'xtatilgan (O'chiq).");
         }
-      } else {
+        return { ok: false, error: "Tizim o'chiq" };
+      }
+
+      const q = this.getNextQuizQuestion();
+      if (!q || !q.options || q.options.length < 2) {
         if (chatNotifyId) {
-          await this.sendMessage(chatNotifyId, `⚠️ Xatolik: ${res.description || res.error}`);
+          await this.sendMessage(chatNotifyId, "⚠️ Test savollari bazasini yuklashda xatolik yuz berdi.");
+        }
+        return { ok: false, error: "Savol topilmadi" };
+      }
+
+      const channels = (settings.targetChannels && settings.targetChannels.length)
+        ? settings.targetChannels
+        : ["@Huquq_study", "@General_Huquq"];
+
+      let successCount = 0;
+      let failDetails = [];
+
+      for (const ch of channels) {
+        try {
+          const pollRes = await this.callApi('sendPoll', {
+            chat_id: ch,
+            question: q.text,
+            options: q.options,
+            is_anonymous: false,
+            type: 'quiz',
+            correct_option_id: q.correctIndex,
+            explanation: q.explanation,
+            explanation_parse_mode: 'HTML'
+          });
+
+          if (pollRes.ok) {
+            successCount++;
+            await this.sendMessage(ch,
+              `💡 <b>Huquqshunoslik Milliy Sertifikat Test Tizimi</b>\n` +
+              `Yuqoridagi savolni yechib, bilimingizni sinang!\n\n` +
+              `🏛 BMBA spesifikatsiyasidagi barcha <b>40 ta qonun</b> va <b>50 ta variant</b>ni to'liq ishlash uchun pastdagi ilovani oching 👇`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "📲 Mini Appda to'liq ishlash", web_app: { url: this.appUrl } }],
+                  [{ text: "🥊 Huquqiy Duelga kirish", web_app: { url: `${this.appUrl}#octagon` } }]
+                ]
+              }
+            });
+          } else {
+            failDetails.push(`${ch}: ${pollRes.description || 'Xatolik'}`);
+          }
+        } catch (e) {
+          failDetails.push(`${ch}: ${e.message}`);
+        }
+        await new Promise(r => setTimeout(r, 250));
+      }
+
+      // Sozlamalarni yangilash
+      settings.lastPostedAt = new Date().toISOString();
+      settings.totalPosted = (settings.totalPosted || 0) + 1;
+      safeWrite('autopost_settings.json', settings);
+
+      if (chatNotifyId) {
+        if (successCount > 0) {
+          await this.sendMessage(chatNotifyId,
+            `✅ <b>Test muvaffaqiyatli kanal(lar)ga tashlandi!</b>\n\n` +
+            `• Yuborilgan kanallar: <b>${channels.join(', ')}</b>\n` +
+            `• Muvaffaqiyatli: <b>${successCount} ta</b>\n` +
+            `• Mavzu: <i>${q.lawName}</i>\n` +
+            (failDetails.length ? `• Ogohlantirish: <code>${failDetails.join('; ')}</code>` : ``)
+          );
+        } else {
+          await this.sendMessage(chatNotifyId,
+            `⚠️ <b>Test yuborilmadi!</b>\nSabab:\n${failDetails.join('\n')}\n\n` +
+            `<i>(Bot ushbu kanallarda administrator ekanligiga va xabar yozish huquqiga egaligiga ishonch hosil qiling)</i>`
+          );
         }
       }
+
+      return { ok: successCount > 0, successCount, failDetails, question: q };
     } catch (err) {
-      console.error('postNextQuizToChannel xatolik:', err);
+      console.error("postNextQuizToChannel xatolik:", err);
+      if (chatNotifyId) {
+        await this.sendMessage(chatNotifyId, `⚠️ Xatolik: ${err.message}`);
+      }
+      return { ok: false, error: err.message };
     }
+  }
+
+  // Cron va interval bo'yicha tekshirish
+  async checkAndPostScheduledQuiz() {
+    try {
+      const settings = safeRead('autopost_settings.json', {
+        enabled: true,
+        intervalHours: 2,
+        targetChannels: ["@Huquq_study", "@General_Huquq"],
+        lastPostedAt: null,
+        totalPosted: 0
+      });
+
+      if (!settings.enabled) {
+        return { status: "skipped", reason: "disabled" };
+      }
+
+      const now = Date.now();
+      const lastTime = settings.lastPostedAt ? new Date(settings.lastPostedAt).getTime() : 0;
+      const intervalMs = (settings.intervalHours || 2) * 60 * 60 * 1000;
+      const diffMs = now - lastTime;
+
+      if (diffMs >= intervalMs || !settings.lastPostedAt) {
+        const res = await this.postNextQuizToChannel(null, true);
+        return { status: "posted", result: res };
+      } else {
+        const remainingMinutes = Math.round((intervalMs - diffMs) / 60000);
+        return { status: "waiting", remainingMinutes: remainingMinutes };
+      }
+    } catch (err) {
+      console.error("checkAndPostScheduledQuiz error:", err);
+      return { status: "error", error: err.message };
+    }
+  }
+
+  // Admin Avto-Test Sozlamalari Menyusi
+  async sendAutopostMenu(chatId) {
+    const settings = safeRead('autopost_settings.json', {
+      enabled: true,
+      intervalHours: 2,
+      targetChannels: ["@Huquq_study", "@General_Huquq"],
+      lastPostedAt: null,
+      totalPosted: 0,
+      currentLawIndex: 1
+    });
+
+    const statusBadge = settings.enabled ? "🟢 FAOL (Avtomatik)" : "🔴 TO'XTATILGAN (Pauza)";
+    const lastStr = settings.lastPostedAt
+      ? new Date(settings.lastPostedAt).toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })
+      : "Hali tashlanmagan";
+
+    const channelsStr = (settings.targetChannels || []).join(', ') || "Tanlanmagan";
+
+    const text =
+      `📢 <b>KANALLARGA AVTOMATIK TEST TASHLASH SOZLAMALARI</b> ⚙️\n\n` +
+      `• <b>Tizim holati:</b> ${statusBadge}\n` +
+      `• <b>Joriy interval:</b> Har <b>${settings.intervalHours || 2} soatda</b>\n` +
+      `• <b>Biriktirilgan kanallar:</b> <code>${channelsStr}</code>\n` +
+      `• <b>So'nggi test vaqti:</b> <i>${lastStr}</i>\n` +
+      `• <b>Jami tashlangan testlar:</b> <b>${settings.totalPosted || 0} ta</b>\n` +
+      `• <b>Savollar manbasi:</b> 40 ta qonun bazasi (800 ta rasmiy test)\n\n` +
+      `<i>Intervalni yoki kanallarni o'zgartirish uchun quyidagi tugmalarni bosing:</i>`;
+
+    const toggleBtn = settings.enabled
+      ? { text: "🔴 Tizimni To'xtatish", callback_data: "autopost_toggle" }
+      : { text: "🟢 Tizimni Yoqish", callback_data: "autopost_toggle" };
+
+    const keyboard = [
+      [toggleBtn],
+      [
+        { text: (settings.intervalHours === 1 ? "✅ 1 soat" : "⏱ 1 soat"), callback_data: "autopost_interval_1" },
+        { text: (settings.intervalHours === 2 ? "✅ 2 soat (Standart)" : "⏱ 2 soat"), callback_data: "autopost_interval_2" },
+        { text: (settings.intervalHours === 3 ? "✅ 3 soat" : "⏱ 3 soat"), callback_data: "autopost_interval_3" }
+      ],
+      [
+        { text: (settings.intervalHours === 4 ? "✅ 4 soat" : "⏱ 4 soat"), callback_data: "autopost_interval_4" },
+        { text: (settings.intervalHours === 6 ? "✅ 6 soat" : "⏱ 6 soat"), callback_data: "autopost_interval_6" },
+        { text: (settings.intervalHours === 12 ? "✅ 12 soat" : "⏱ 12 soat"), callback_data: "autopost_interval_12" }
+      ],
+      [
+        { text: "📢 Ikkala kanal", callback_data: "autopost_chan_both" },
+        { text: "1️⃣ @Huquq_study", callback_data: "autopost_chan_1" },
+        { text: "2️⃣ @General_Huquq", callback_data: "autopost_chan_2" }
+      ],
+      [
+        { text: "🎯 Hozir test tashlash (Darhol)", callback_data: "autopost_send_now" }
+      ],
+      [
+        { text: "🔙 Admin panelga qaytish", callback_data: "admin_panel" }
+      ]
+    ];
+
+    return await this.sendMessage(chatId, text, {
+      reply_markup: { inline_keyboard: keyboard }
+    });
   }
 
   // Polling loop (Lokal ishlatilganda)
@@ -770,6 +973,13 @@ class SimpleTelegramBot {
         }
         await this.sendMessage(chatId, `⏳ O'quvchilarga eslatmalar yuborilmoqda, biroz kuting...`);
         return await this.sendDailyRetentionReminders(chatId);
+      }
+
+      if (text === '/autopost' || text === '/interval') {
+        if (!isUserAdmin(userId)) {
+          return await this.sendMessage(chatId, `🔒 Bu buyruq faqat adminlar uchun.`);
+        }
+        return await this.sendAutopostMenu(chatId);
       }
 
       // /start yoki /test
@@ -953,6 +1163,50 @@ class SimpleTelegramBot {
         if (!isUserAdmin(userId)) return;
         await this.sendMessage(chatId, `⏳ O'quvchilarga motivatsion eslatmalar yuborilmoqda, biroz kuting...`);
         await this.sendDailyRetentionReminders(chatId);
+      } else if (q.data === 'autopost_menu') {
+        await this.answerCallbackQuery(q.id);
+        if (!isUserAdmin(userId)) return;
+        await this.sendAutopostMenu(chatId);
+      } else if (q.data === 'autopost_toggle') {
+        if (!isUserAdmin(userId)) return;
+        const s = safeRead('autopost_settings.json', { enabled: true, intervalHours: 2 });
+        s.enabled = !s.enabled;
+        safeWrite('autopost_settings.json', s);
+        await this.answerCallbackQuery(q.id, s.enabled ? "🟢 Avto-test tizimi yoqildi!" : "🔴 Avto-test tizimi to'xtatildi!");
+        await this.sendAutopostMenu(chatId);
+      } else if (q.data.startsWith('autopost_interval_')) {
+        if (!isUserAdmin(userId)) return;
+        const h = parseInt(q.data.replace('autopost_interval_', '')) || 2;
+        const s = safeRead('autopost_settings.json', { enabled: true, intervalHours: 2 });
+        s.intervalHours = h;
+        safeWrite('autopost_settings.json', s);
+        await this.answerCallbackQuery(q.id, `⏱ Interval har ${h} soatga sozlandi!`);
+        await this.sendAutopostMenu(chatId);
+      } else if (q.data === 'autopost_chan_both') {
+        if (!isUserAdmin(userId)) return;
+        const s = safeRead('autopost_settings.json', {});
+        s.targetChannels = ["@Huquq_study", "@General_Huquq"];
+        safeWrite('autopost_settings.json', s);
+        await this.answerCallbackQuery(q.id, "✅ Ikkala kanal tanlandi!");
+        await this.sendAutopostMenu(chatId);
+      } else if (q.data === 'autopost_chan_1') {
+        if (!isUserAdmin(userId)) return;
+        const s = safeRead('autopost_settings.json', {});
+        s.targetChannels = ["@Huquq_study"];
+        safeWrite('autopost_settings.json', s);
+        await this.answerCallbackQuery(q.id, "✅ Faqat @Huquq_study tanlandi!");
+        await this.sendAutopostMenu(chatId);
+      } else if (q.data === 'autopost_chan_2') {
+        if (!isUserAdmin(userId)) return;
+        const s = safeRead('autopost_settings.json', {});
+        s.targetChannels = ["@General_Huquq"];
+        safeWrite('autopost_settings.json', s);
+        await this.answerCallbackQuery(q.id, "✅ Faqat @General_Huquq tanlandi!");
+        await this.sendAutopostMenu(chatId);
+      } else if (q.data === 'autopost_send_now' || q.data === 'admin_post_quiz') {
+        await this.answerCallbackQuery(q.id, "Test kanalga tashlanmoqda...");
+        if (!isUserAdmin(userId)) return;
+        await this.postNextQuizToChannel(chatId, true);
       } else if (q.data === 'admin_broadcast_help') {
         await this.answerCallbackQuery(q.id);
         if (!isUserAdmin(userId)) return;
@@ -963,10 +1217,6 @@ class SimpleTelegramBot {
           `<i>Masalan:</i>\n` +
           `<code>/broadcast Assalomu alaykum! Platformaga yangi 40 ta qonun testlari qo'shildi!</code>`
         );
-      } else if (q.data === 'admin_post_quiz') {
-        await this.answerCallbackQuery(q.id, "Kanalga test yuborilmoqda...");
-        if (!isUserAdmin(userId)) return;
-        await this.postNextQuizToChannel(chatId);
       } else {
         await this.answerCallbackQuery(q.id);
       }

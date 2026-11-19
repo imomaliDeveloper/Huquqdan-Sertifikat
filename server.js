@@ -709,6 +709,33 @@ app.all('/api/cron/reminders', async (req, res) => {
   }
 });
 
+// Kanallarga avtomatik test tashlash (Cron va avto-interval tekshiruvi)
+app.all('/api/cron/channel-quiz', async (req, res) => {
+  const bot = getBotInstance();
+  if (!bot) {
+    return res.status(503).json({ error: "TELEGRAM_BOT_TOKEN topilmadi yoki bot ulanmagan" });
+  }
+
+  try {
+    const force = req.query.force === 'true' || req.query.now === 'true';
+    let result;
+    if (force) {
+      result = await bot.postNextQuizToChannel(null, true);
+    } else {
+      result = await bot.checkAndPostScheduledQuiz();
+    }
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      result
+    });
+  } catch (err) {
+    console.error("Channel quiz cron error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Bosh sahifa yo'naltirish (Fallback)
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
