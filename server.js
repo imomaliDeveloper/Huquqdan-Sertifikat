@@ -736,6 +736,37 @@ app.all('/api/cron/channel-quiz', async (req, res) => {
   }
 });
 
+// Yagona Master Cron Runner (Vercel Hobby 1-cron limiti uchun)
+app.all('/api/cron/runner', async (req, res) => {
+  const bot = getBotInstance();
+  if (!bot) {
+    return res.status(503).json({ error: "Bot ulanmagan" });
+  }
+
+  const results = {};
+  try {
+    // 1. Kanalga avtomatik test tashlashni tekshirish
+    results.channelQuiz = await bot.checkAndPostScheduledQuiz();
+
+    // 2. Kunlik eslatmalar (Har kuni UTC 14:00 = Toshkent 19:00 da)
+    const currentUtcHour = new Date().getUTCHours();
+    if (currentUtcHour === 14 || req.query.reminders === 'true') {
+      results.dailyReminders = await bot.sendDailyRetentionReminders();
+    } else {
+      results.dailyReminders = { status: "waiting_evening_time", currentUtcHour };
+    }
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      results
+    });
+  } catch (err) {
+    console.error("Cron runner error:", err);
+    res.status(500).json({ error: err.message, results });
+  }
+});
+
 // Bosh sahifa yo'naltirish (Fallback)
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
