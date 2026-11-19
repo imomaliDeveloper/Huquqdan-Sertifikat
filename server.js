@@ -164,6 +164,46 @@ app.get('/api/laws', (req, res) => {
   }
 });
 
+// API: 40 ta Qonunchilik Variantlari ro'yxati (Har bir qonun uchun 1 ta variant, 20 ta test)
+app.get('/api/law-variants', (req, res) => {
+  try {
+    const lawsFile = path.join(__dirname, 'data', 'laws_list.json');
+    if (!fs.existsSync(lawsFile)) {
+      return res.status(404).json({ error: "Qonunlar ro'yxati topilmadi" });
+    }
+    const laws = JSON.parse(fs.readFileSync(lawsFile, 'utf8'));
+    const list = laws.map(l => ({
+      id: l.id,
+      lawId: l.id,
+      title: `${l.id}-qonun: ${l.name}`,
+      shortName: l.name,
+      category: l.category,
+      totalQuestions: 20,
+      timeMinutes: 25,
+      lexUrl: l.url,
+      badge: l.id <= 3 ? "Bepul sinov" : "20 talik Test"
+    }));
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: "Qonun variantlarini yuklashda xatolik: " + err.message });
+  }
+});
+
+// API: Qonun varianti bo'yicha 20 talik to'liq test savollari
+app.get('/api/law-variants/:id', (req, res) => {
+  const lId = parseInt(req.params.id) || 1;
+  try {
+    const file = path.join(__dirname, 'data', 'law_variants', `law_var_${lId}.json`);
+    if (fs.existsSync(file)) {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      return res.json(data);
+    }
+    res.status(404).json({ error: `${lId}-qonun varianti topilmadi` });
+  } catch (err) {
+    res.status(500).json({ error: "Qonun variantini yuklashda xatolik: " + err.message });
+  }
+});
+
 // API: Tavsiya etiladigan rasmiy va o'quv kanallar ro'yxati
 app.get('/api/channels', (req, res) => {
   try {

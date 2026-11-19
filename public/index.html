@@ -248,13 +248,18 @@
           <p class="text-[11px] text-slate-500 mt-0.5">Ochiq testlar trenajyori (64 ta)</p>
         </button>
 
-        <!-- 40 Laws Directory -->
-        <button onclick="openLawsDirectory()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-blue-500 active:scale-95 transition">
-          <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center text-lg mb-2">
-            <i class="fa-solid fa-book-bookmark"></i>
+        <!-- 40 Laws & 40 Test Variants -->
+        <button onclick="openLawsDirectory()" class="p-4 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 text-white shadow-md text-left hover:opacity-95 active:scale-95 transition relative overflow-hidden group">
+          <div class="flex items-center justify-between mb-2">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur text-white flex items-center justify-center text-lg shadow-inner">
+              <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px] uppercase shadow-xs">
+              40 ta Variant
+            </span>
           </div>
-          <h3 class="text-sm font-bold text-slate-800 dark:text-white">40 ta Qonun</h3>
-          <p class="text-[11px] text-slate-500 mt-0.5">Spesifikatsiya va Lex.uz</p>
+          <h3 class="text-sm font-black tracking-wide">40 ta Qonun Testi</h3>
+          <p class="text-[11px] text-blue-100 mt-0.5">Har biri 20 talik test (800 ta)</p>
         </button>
 
         <!-- 25 ta Vaziyatli Keyslar Banki (Y-2) -->
@@ -421,7 +426,7 @@
         <div class="flex items-center space-x-2">
           <span id="qBadgeType" class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Y-1</span>
           <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
-            Savol: <span id="currentQIndex" class="text-emerald-600">1</span> / 45
+            Savol: <span id="currentQIndex" class="text-emerald-600">1</span> / <span id="totalQCount">45</span>
           </span>
         </div>
 
@@ -512,7 +517,7 @@
           <h2 class="text-lg font-bold">Imtihon Natijasi</h2>
           <div class="flex justify-center items-baseline space-x-1">
             <span id="resScore" class="text-4xl font-extrabold text-emerald-300">0</span>
-            <span class="text-sm text-emerald-100">/ 45 ball</span>
+            <span id="resMaxScore" class="text-sm text-emerald-100">/ 45 ball</span>
           </div>
           <p id="resPercent" class="text-xs text-emerald-100 font-medium">0% to'g'ri bajarildi</p>
         </div>
@@ -606,21 +611,65 @@
       </div>
     </section>
 
-    <!-- VIEW 5: 40 TA QONUN RO'YXATI -->
+    <!-- VIEW 5: 40 TA QONUN RO'YXATI VA 40 TA TEST VARIANTI -->
     <section id="viewLaws" class="hidden space-y-4">
       <div class="flex items-center justify-between">
         <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
           <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
         </button>
-        <span class="text-xs font-bold text-blue-600">Spesifikatsiyadagi 40 ta Qonun</span>
+        <div class="text-right">
+          <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 block">40 ta Qonun Testlari</span>
+          <span class="text-[9px] text-slate-400">40 ta variant · 800 ta test</span>
+        </div>
       </div>
 
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
-        <input type="text" id="lawSearchInput" oninput="filterLaws()" placeholder="Qonun nomi yoki mavzuni qidiring..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500">
+      <!-- Banner -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white shadow-md space-y-1.5">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-sm shadow-inner">
+            <i class="fa-solid fa-scale-balanced text-yellow-300"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-black tracking-wide">40 ta Qonunchilik Test Varianti</h3>
+            <p class="text-[10px] text-indigo-100">BMBA milliy sertifikati spesifikatsiyasidagi barcha qonunlar</p>
+          </div>
+        </div>
+        <p class="text-[11px] text-blue-50 leading-relaxed pt-0.5">
+          Har bir qonun uchun alohida <strong>20 talik variant test</strong> (vaqti: 25 daqiqa). Qonunni tanlab, bilimingizni sinab ko'ring!
+        </p>
       </div>
 
-      <div id="lawsListContainer" class="space-y-2 max-h-[70vh] overflow-y-auto pr-1"></div>
+      <!-- Search & Category Filters -->
+      <div class="space-y-2">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+          <input type="text" id="lawSearchInput" oninput="filterLaws()" placeholder="Qonun nomi, kodeks yoki raqamini qidiring..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-indigo-500 shadow-xs">
+        </div>
+
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+          <button onclick="filterLawsCategory('all')" id="btnLawCat_all" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold whitespace-nowrap shadow-xs">
+            Barchasi (40 ta)
+          </button>
+          <button onclick="filterLawsCategory('Kodekslar')" id="btnLawCat_Kodekslar" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap hover:bg-slate-200 transition">
+            Kodekslar (7 ta)
+          </button>
+          <button onclick="filterLawsCategory('Davlat ramzlari')" id="btnLawCat_Davlat ramzlari" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap hover:bg-slate-200 transition">
+            Davlat ramzlari (3 ta)
+          </button>
+          <button onclick="filterLawsCategory('Sud va huquqni muhofaza')" id="btnLawCat_Sud va huquqni muhofaza" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap hover:bg-slate-200 transition">
+            Sud & Huquq (6 ta)
+          </button>
+          <button onclick="filterLawsCategory('Davlat hokimiyati')" id="btnLawCat_Davlat hokimiyati" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap hover:bg-slate-200 transition">
+            Davlat hokimiyati
+          </button>
+          <button onclick="filterLawsCategory('Inson huquqlari')" id="btnLawCat_Inson huquqlari" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap hover:bg-slate-200 transition">
+            Inson huquqlari
+          </button>
+        </div>
+      </div>
+
+      <!-- Laws & Variants List -->
+      <div id="lawsListContainer" class="space-y-2.5 max-h-[62vh] overflow-y-auto pr-1"></div>
     </section>
 
     <!-- VIEW 6: 50 TA VARIANTLAR KATALOGI -->
@@ -1712,8 +1761,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/exam_data.js?v=19"></script>
-  <script src="js/flashcards.js?v=19"></script>
-  <script src="js/app.js?v=19"></script>
+  <script src="js/exam_data.js?v=20"></script>
+  <script src="js/flashcards.js?v=20"></script>
+  <script src="js/app.js?v=20"></script>
 </body>
 </html>

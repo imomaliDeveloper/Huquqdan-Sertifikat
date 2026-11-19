@@ -1,0 +1,513 @@
+{
+  "id": "LAW-VAR-1",
+  "lawId": 1,
+  "lawName": "O‘zbekiston Respublikasi Konstitutsiyasi",
+  "category": "Asosiy qonun",
+  "lexUrl": "https://lex.uz/docs/6445145",
+  "totalQuestions": 20,
+  "timeMinutes": 25,
+  "title": "1-qonun: O‘zbekiston Respublikasi Konstitutsiyasi bo‘yicha 20 talik Test",
+  "description": "BMBA milliy sertifikatiga tayyorgarlik uchun maxsus tuzilgan 20 talik qonunchilik testi. Manba: O‘zbekiston Respublikasi Konstitutsiyasi (Lex.uz havolasi mavjud).",
+  "questions": [
+    {
+      "num": 1,
+      "text": "O‘zbekiston Respublikasi Konstitutsiyasining 1-moddasiga ko‘ra O‘zbekiston qanday davlat deb e'lon qilingan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Suveren, demokratik, huquqiy, ijtimoiy va dunyoviy respublika"
+        },
+        {
+          "key": "B",
+          "text": "Unitar, sotsialistik, federativ va erkin davlat"
+        },
+        {
+          "key": "C",
+          "text": "Prezidentlik boshqaruvidagi parlamentar davlat"
+        },
+        {
+          "key": "D",
+          "text": "Mustaqil, konfederativ va demokratik respublika"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "Yangi tahrirdagi Konstitutsiyaning 1-moddasiga binoan O‘zbekiston — boshqaruvning respublika shakliga ega bo‘lgan suveren, demokratik, huquqiy, ijtimoiy va dunyoviy davlatdir.",
+      "article": "1-modda"
+    },
+    {
+      "num": 2,
+      "text": "Konstitutsiyaga muvofiq, davlat hokimiyatining birdan-bir manbai kim?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Oliy Majlis palatalari"
+        },
+        {
+          "key": "B",
+          "text": "O‘zbekiston xalqi"
+        },
+        {
+          "key": "C",
+          "text": "O‘zbekiston Respublikasi Prezidenti"
+        },
+        {
+          "key": "D",
+          "text": "Konstitutsiyaviy sud"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "Konstitutsiyaning 7-moddasiga ko‘ra, xalq davlat hokimiyatining birdan-bir manbaidir.",
+      "article": "7-modda"
+    },
+    {
+      "num": 3,
+      "text": "Konstitutsiyaga ko‘ra O‘zbekiston Respublikasida insonning qaysi huquqi eng oliy qadriyat hisoblanadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Inson, uning hayoti, erkinligi, sha’ni va qadr-qimmati"
+        },
+        {
+          "key": "B",
+          "text": "Davlat suvereniteti va hududiy daxlsizlik"
+        },
+        {
+          "key": "C",
+          "text": "Iqtisodiy barqarorlik va mulk huquqi"
+        },
+        {
+          "key": "D",
+          "text": "Jamoat xavfsizligi va qonuniylik"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "13-moddaga muvofiq, O‘zbekiston Respublikasida inson, uning hayoti, erkinligi, sha’ni, qadr-qimmati va boshqa ajralmas huquqlari oliy qadriyat hisoblanadi.",
+      "article": "13-modda"
+    },
+    {
+      "num": 4,
+      "text": "Yangi tahrirdagi Konstitutsiyaga ko‘ra O‘zbekiston Respublikasida o‘lim jazosi qanday tartibda qo‘llaniladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "O‘ta og‘ir jinoyatlar uchun sud hukmi bilan"
+        },
+        {
+          "key": "B",
+          "text": "O‘lim jazosi mutlaqo taqiqlanadi"
+        },
+        {
+          "key": "C",
+          "text": "Faqat harbiy holat davrida qo‘llanilishi mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Konstitutsiyaviy sud ruxsati bilan"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "25-moddaga ko‘ra, yashash huquqi har bir insonning ajralmas huquqidir va u qonun bilan muhofaza qilinadi. Inson hayotiga suiqasd qilish eng og‘ir jinoyatdir. O‘zbekiston Respublikasida o‘lim jazosi taqiqlanadi.",
+      "article": "25-modda"
+    },
+    {
+      "num": 5,
+      "text": "Shaxsni sud qarorisiz 48 soatdan ortiq muddat ushlab turish mumkin emasligi qoidasi (Habeas corpus) Konstitutsiyaning nechanchi moddasida mustahkamlangan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "21-modda"
+        },
+        {
+          "key": "B",
+          "text": "27-modda"
+        },
+        {
+          "key": "C",
+          "text": "35-modda"
+        },
+        {
+          "key": "D",
+          "text": "45-modda"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "27-modda: Hech kim sudning qarorisiz qirq sakkiz soatdan ortiq muddat ushlab turilishi mumkin emas.",
+      "article": "27-modda"
+    },
+    {
+      "num": 6,
+      "text": "Konstitutsiyaning 28-moddasiga binoan aybsizlik prezumpsiyasining asosiy mazmuni nima?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Gumon qilinuvchi o‘z aybsizligini isbotlashga majbur"
+        },
+        {
+          "key": "B",
+          "text": "Shaxs sudning qonuniy kuchga kirgan hukmi bilan aybi isbotlanmaguncha aybsiz hisoblanadi"
+        },
+        {
+          "key": "C",
+          "text": "Tergov organi shaxsni aybdor deb e'lon qilishi mumkin"
+        },
+        {
+          "key": "D",
+          "text": "Sudlanuvchi faqat advokat orqali oqlanishi mumkin"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "Jinoyat sodir etganlikda ayblanayotgan shaxs uning aybi qonunda nazarda tutilgan tartibda oshkora sud muhokamasi yo‘li bilan isbotlanmaguncha va sudning qonuniy kuchga kirgan hukmi bilan aniqlanmaguncha aybsiz hisoblanadi.",
+      "article": "28-modda"
+    },
+    {
+      "num": 7,
+      "text": "O‘zbekiston Respublikasida barcha mulk shakllarining teng huquqliligi va daxlsizligi nechanchi moddada belgilangan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "55-modda"
+        },
+        {
+          "key": "B",
+          "text": "65-modda"
+        },
+        {
+          "key": "C",
+          "text": "72-modda"
+        },
+        {
+          "key": "D",
+          "text": "80-modda"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "65-modda: O‘zbekiston iqtisodiyotining negizini xilma-xil shakllardagi mulk tashkil etadi. Davlat barcha mulk shakllarining teng huquqliligini va huquqiy jihatdan himoya qilinishini ta'minlaydi.",
+      "article": "65-modda"
+    },
+    {
+      "num": 8,
+      "text": "Konstitutsiyaga ko‘ra O‘zbekiston Respublikasi Oliy Majlisi qanday palatalardan iborat?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Qonunchilik palatasi (quyi) va Senat (yuqori)"
+        },
+        {
+          "key": "B",
+          "text": "Milliy Kengash va Davlat Dumasi"
+        },
+        {
+          "key": "C",
+          "text": "Xalq deputatlari palatasi va Oqsoqollar kengashi"
+        },
+        {
+          "key": "D",
+          "text": "Vakillar palatasi va Umumrespublika Kengashi"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "76-modda: O‘zbekiston Respublikasining Oliy Majlisi oliy davlat vakillik organi bo‘lib, u ikki palatadan — Qonunchilik palatasi va Senatdan iborat.",
+      "article": "76-modda"
+    },
+    {
+      "num": 9,
+      "text": "Yangi Konstitutsiyaga binoan O‘zbekiston Respublikasi Prezidentining vakolat muddati necha yil?",
+      "options": [
+        {
+          "key": "A",
+          "text": "4 yil"
+        },
+        {
+          "key": "B",
+          "text": "5 yil"
+        },
+        {
+          "key": "C",
+          "text": "7 yil"
+        },
+        {
+          "key": "D",
+          "text": "6 yil"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "106-moddaga muvofiq, O‘zbekiston Respublikasi Prezidenti yetti yil muddatga saylanadi.",
+      "article": "106-modda"
+    },
+    {
+      "num": 10,
+      "text": "Qonunchilik palatasi deputatlarining umumiy soni nechta qilib belgilangan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "100 nafar"
+        },
+        {
+          "key": "B",
+          "text": "120 nafar"
+        },
+        {
+          "key": "C",
+          "text": "150 nafar"
+        },
+        {
+          "key": "D",
+          "text": "65 nafar"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "Qonunchilik palatasi bir yuz ellik deputatdan iborat bo‘lib, ular qonunga muvofiq saylanadi.",
+      "article": "88-modda"
+    },
+    {
+      "num": 11,
+      "text": "Yangi tahrirdagi Konstitutsiyaga ko‘ra Senat a'zolari (senatorlar) soni nechta etib belgilandi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "100 nafar"
+        },
+        {
+          "key": "B",
+          "text": "84 nafar"
+        },
+        {
+          "key": "C",
+          "text": "65 nafar"
+        },
+        {
+          "key": "D",
+          "text": "50 nafar"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "Senat a'zolari (senatorlar) hududiy vakillardan har bir hududdan 4 nafardan (jami 56 nafar) va Prezident tomonidan tayinlanadigan 9 nafar, jami 65 nafardan iborat.",
+      "article": "89-modda"
+    },
+    {
+      "num": 12,
+      "text": "Konstitutsiyaga ko‘ra qonun chiqaruvchi oliy hokimiyatni qaysi organ amalga oshiradi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Vazirlar Mahkamasi"
+        },
+        {
+          "key": "B",
+          "text": "Oliy Majlis"
+        },
+        {
+          "key": "C",
+          "text": "Prezident devoni"
+        },
+        {
+          "key": "D",
+          "text": "Konstitutsiyaviy sud"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "Oliy Majlis oliy davlat vakillik organi bo‘lib, qonun chiqaruvchi hokimiyatni amalga oshiradi.",
+      "article": "76-modda"
+    },
+    {
+      "num": 13,
+      "text": "Vazirlar Mahkamasiga kim rahbarlik qiladi va uning faoliyatini tashkil etadi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Prezident"
+        },
+        {
+          "key": "B",
+          "text": "Bosh vazir"
+        },
+        {
+          "key": "C",
+          "text": "Senat Raisi"
+        },
+        {
+          "key": "D",
+          "text": "Moliya vaziri"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "115-modda: Bosh vazir O‘zbekiston Respublikasi Hukumati faoliyatini tashkil etadi va unga rahbarlik qiladi.",
+      "article": "115-modda"
+    },
+    {
+      "num": 14,
+      "text": "Sudyalar necha yoshga to‘lganda ilk bor sudyalik lavozimiga tayinlanishi mumkin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "25 yosh"
+        },
+        {
+          "key": "B",
+          "text": "30 yosh"
+        },
+        {
+          "key": "C",
+          "text": "35 yosh"
+        },
+        {
+          "key": "D",
+          "text": "40 yosh"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "Sudyalar o‘ttiz besh yoshdan kichik bo‘lmagan, oliy yuridik ma'lumotga va yuridik ixtisosligi bo‘yicha kamida besh yillik ish stajiga ega bo‘lgan fuqarolar orasidan tayinlanadi.",
+      "article": "132-modda"
+    },
+    {
+      "num": 15,
+      "text": "Fuqarolarning konstitutsiyaviy odil sudlovga bevosita murojaat qilish (Konstitutsiyaviy shikoyat) huquqi nechanchi moddada mustahkamlangan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "55-modda"
+        },
+        {
+          "key": "B",
+          "text": "133-modda"
+        },
+        {
+          "key": "C",
+          "text": "124-modda"
+        },
+        {
+          "key": "D",
+          "text": "98-modda"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "133-moddaga asosan fuqarolar va yuridik shaxslar sud tomonidan o‘zlariga nisbatan qo‘llanilgan qonunning Konstitutsiyaga muvofiqligini tekshirish to‘g‘risida Konstitutsiyaviy sudga shikoyat qilishga haqli.",
+      "article": "133-modda"
+    },
+    {
+      "num": 16,
+      "text": "Advokatura institutining mustaqilligi va maqomi Konstitutsiyaning qaysi bobida belgilangan?",
+      "options": [
+        {
+          "key": "A",
+          "text": "XXIV bob (Advokatura)"
+        },
+        {
+          "key": "B",
+          "text": "XVIII bob (Prokuratura)"
+        },
+        {
+          "key": "C",
+          "text": "XX bob (Sud hokimiyati)"
+        },
+        {
+          "key": "D",
+          "text": "XI bob (Ijtimoiy huquqlar)"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "Yangi Konstitutsiyaga ilk bor alohida XXIV bob — 'Advokatura' bobi kiritildi (141, 142-moddalar).",
+      "article": "141–142-moddalar"
+    },
+    {
+      "num": 17,
+      "text": "Viloyatlar, tumanlar va shaharlarda davlat hokimiyatining vakillik organi nima deb ataladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Hokimiyatlar"
+        },
+        {
+          "key": "B",
+          "text": "Xalq deputatlari Kengashlari"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar yig‘inlari"
+        },
+        {
+          "key": "D",
+          "text": "Mahalliy Boshqarmalar"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "120-modda: Viloyatlar, tumanlar va shaharlarda davlat hokimiyatining vakillik organlari Xalq deputatlari Kengashlaridir.",
+      "article": "120-modda"
+    },
+    {
+      "num": 18,
+      "text": "Qoraqalpog‘iston Respublikasining oliy davlat vakillik organi qaysi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Jo‘qorg‘i Kenges"
+        },
+        {
+          "key": "B",
+          "text": "Vazirlar Kengashi"
+        },
+        {
+          "key": "C",
+          "text": "Oliy Majlis filiali"
+        },
+        {
+          "key": "D",
+          "text": "Qoraqalpog‘iston Senati"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "Qoraqalpog‘iston Respublikasining oliy davlat vakillik organi Jo‘qorg‘i Kengesdir.",
+      "article": "85-modda"
+    },
+    {
+      "num": 19,
+      "text": "Konstitutsiyaga o‘zgartish va qo‘shimchalar kiritish qanday tartibda amalga oshiriladi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Faqat Prezident farmoni bilan"
+        },
+        {
+          "key": "B",
+          "text": "Referendum orqali yoki Oliy Majlis palatalari deputatlari va senatorlari umumiy sonining kamida uchdan ikki qismi ovozi bilan"
+        },
+        {
+          "key": "C",
+          "text": "Oddiy ko‘pchilik ovozi bilan qabul qilinadigan qonun orqali"
+        },
+        {
+          "key": "D",
+          "text": "Konstitutsiyaviy sudning yakuniy qarori bilan"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "154-modda: Konstitutsiyaga o‘zgartishlar referendum o‘tkazish orqali yoki palatalar a'zolarining kamida 2/3 qismi ma'qullashi bilan kiritiladi.",
+      "article": "154-modda"
+    },
+    {
+      "num": 20,
+      "text": "Konstitutsiyaga binoan O‘zbekiston Respublikasining davlat tili qaysi?",
+      "options": [
+        {
+          "key": "A",
+          "text": "O‘zbek tili"
+        },
+        {
+          "key": "B",
+          "text": "O‘zbek va rus tillari"
+        },
+        {
+          "key": "C",
+          "text": "Turkiy tillar oilasi"
+        },
+        {
+          "key": "D",
+          "text": "Davlat tili belgilanmagan"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "4-modda: O‘zbekiston Respublikasining davlat tili o‘zbek tilidir.",
+      "article": "4-modda"
+    }
+  ]
+}

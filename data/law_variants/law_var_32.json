@@ -1,0 +1,513 @@
+{
+  "id": "LAW-VAR-32",
+  "lawId": 32,
+  "lawName": "“Mudofaa to‘g‘risida”gi qonun",
+  "category": "Xavfsizlik",
+  "lexUrl": "https://lex.uz/docs/40014",
+  "totalQuestions": 20,
+  "timeMinutes": 25,
+  "title": "32-qonun: “Mudofaa to‘g‘risida”gi qonun bo‘yicha 20 talik Test",
+  "description": "BMBA milliy sertifikatiga tayyorgarlik uchun maxsus tuzilgan 20 talik qonunchilik testi. Manba: “Mudofaa to‘g‘risida”gi qonun (Lex.uz havolasi mavjud).",
+  "questions": [
+    {
+      "num": 1,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra qonunning maqsadi va asosiy vazifalari qanday qonuniy asosda belgilanadi? (1-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 1-modda"
+    },
+    {
+      "num": 2,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra qo‘llanilish sohasi va amal qilish doirasi qanday qonuniy asosda belgilanadi? (2-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 2-modda"
+    },
+    {
+      "num": 3,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra asosiy prinsiplari va ustuvor qoidalari qanday qonuniy asosda belgilanadi? (3-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 3-modda"
+    },
+    {
+      "num": 4,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra asosiy tushunchalar va yuridik atamalar qanday qonuniy asosda belgilanadi? (4-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        }
+      ],
+      "correctKey": "D",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 4-modda"
+    },
+    {
+      "num": 5,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra davlat siyosatining asosiy yo‘nalishlari qanday qonuniy asosda belgilanadi? (5-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 5-modda"
+    },
+    {
+      "num": 6,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra vakolatli davlat organining huquqlari qanday qonuniy asosda belgilanadi? (6-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 6-modda"
+    },
+    {
+      "num": 7,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra vakolatli organning asosiy majburiyatlari qanday qonuniy asosda belgilanadi? (7-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 7-modda"
+    },
+    {
+      "num": 8,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra subyektlarning huquqiy kafolatlari qanday qonuniy asosda belgilanadi? (8-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        }
+      ],
+      "correctKey": "D",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 8-modda"
+    },
+    {
+      "num": 9,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra faoliyatni amalga oshirish shartlari qanday qonuniy asosda belgilanadi? (9-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 9-modda"
+    },
+    {
+      "num": 10,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra belgilangan me'yoriy muddatlar va talablar qanday qonuniy asosda belgilanadi? (10-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 10-modda"
+    },
+    {
+      "num": 11,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra cheklovlar va taqiqlangan harakatlar qanday qonuniy asosda belgilanadi? (11-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 11-modda"
+    },
+    {
+      "num": 12,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra maxsus litsenziyalash va ruxsat berish tartibi qanday qonuniy asosda belgilanadi? (12-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        }
+      ],
+      "correctKey": "D",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 12-modda"
+    },
+    {
+      "num": 13,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra hujjatlarni ko‘rib chiqish va rasmiylashtirish muddati qanday qonuniy asosda belgilanadi? (13-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 13-modda"
+    },
+    {
+      "num": 14,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra davlat nazorati va monitoring mexanizmi qanday qonuniy asosda belgilanadi? (14-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 14-modda"
+    },
+    {
+      "num": 15,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra murojaatlarni qabul qilish va hal etish qoidalari qanday qonuniy asosda belgilanadi? (15-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 15-modda"
+    },
+    {
+      "num": 16,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra nizolarni sudgacha va sudda hal etish tartibi qanday qonuniy asosda belgilanadi? (16-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        }
+      ],
+      "correctKey": "D",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 16-modda"
+    },
+    {
+      "num": 17,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra qonun talablarini buzganlik uchun yuridik javobgarlik qanday qonuniy asosda belgilanadi? (17-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "A",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 17-modda"
+    },
+    {
+      "num": 18,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra moddiy va ma'naviy zararni qoplash majburiyati qanday qonuniy asosda belgilanadi? (18-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "B",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 18-modda"
+    },
+    {
+      "num": 19,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra xalqaro shartnomalar va milliy qonunchilik nisbati qanday qonuniy asosda belgilanadi? (19-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        },
+        {
+          "key": "D",
+          "text": "Qonunchilikda belgilangan muddatlar va javobgarlik normalariga muvofiq bo‘lishi"
+        }
+      ],
+      "correctKey": "C",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 19-modda"
+    },
+    {
+      "num": 20,
+      "text": "“Mudofaa to‘g‘risida”gi qonunga ko‘ra qonunning kuchga kirishi va o‘tish qoidalari qanday qonuniy asosda belgilanadi? (20-modda)",
+      "options": [
+        {
+          "key": "A",
+          "text": "“Mudofaa to‘g‘risida”gi qonunda belgilangan qonuniy tartib va talablarga to‘liq rioya qilish"
+        },
+        {
+          "key": "B",
+          "text": "Vakolatli davlat organining qarori va qat'iy me'yoriy talablariga tayanish"
+        },
+        {
+          "key": "C",
+          "text": "Fuqarolar va yuridik shaxslarning qonuniy manfaatlari hamda huquqlarini kafolatlash"
+        },
+        {
+          "key": "D",
+          "text": "To‘g‘ri javob: “Mudofaa to‘g‘risida”gi qonun talablari asosida qonuniylik, adolat va shaffoflik prinsipi ta'minlanadi."
+        }
+      ],
+      "correctKey": "D",
+      "explanation": "“Mudofaa to‘g‘risida”gi qonunning tegishli qoidalariga muvofiq ushbu masala qat'iy normativ asosda tartibga solinadi va huquqiy kafolatga ega.",
+      "article": "“Mudofaa to‘g‘risida”gi qonun, 20-modda"
+    }
+  ]
+}

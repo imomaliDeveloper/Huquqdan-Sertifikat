@@ -142,7 +142,10 @@ function startExam() {
   state.currentQuestion = 0;
   state.userAnswers = {};
   state.bookmarks.clear();
-  state.timerSeconds = 90 * 60;
+  state.timerSeconds = (EXAM_DATA.timeMinutes || 90) * 60;
+
+  const totalEl = document.getElementById("totalQCount");
+  if (totalEl) totalEl.innerText = EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45);
 
   switchView("viewExam");
   startTimer();
@@ -189,6 +192,8 @@ function renderQuestion() {
   // Header elementlari
   const qIdxEl = document.getElementById("currentQIndex");
   if (qIdxEl) qIdxEl.innerText = state.currentQuestion + 1;
+  const totalEl = document.getElementById("totalQCount");
+  if (totalEl) totalEl.innerText = EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45);
   const qBadgeEl = document.getElementById("qBadgeType");
   if (qBadgeEl) qBadgeEl.innerText = q.type;
   const qSecEl = document.getElementById("qSectionName");
@@ -323,7 +328,8 @@ function toggleBookmark() {
 }
 
 function nextQuestion() {
-  if (state.currentQuestion < EXAM_DATA.totalQuestions - 1) {
+  const total = EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45);
+  if (state.currentQuestion < total - 1) {
     state.currentQuestion++;
     renderQuestion();
   }
@@ -371,7 +377,8 @@ function renderGridMatrix() {
   if (!container) return;
   container.innerHTML = "";
 
-  for (let i = 0; i < EXAM_DATA.totalQuestions; i++) {
+  const totalCount = EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45);
+  for (let i = 0; i < totalCount; i++) {
     const qNum = i + 1;
     const btn = document.createElement("button");
     btn.id = `gridCell_${i}`;
@@ -415,8 +422,9 @@ function getGridCellClass(index) {
 /* ==================== 3. IMTIHONNI YAKUNLASH VA NATIJALAR ==================== */
 
 function finishExamPrompt() {
+  const totalCount = EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45);
   const answeredCount = Object.keys(state.userAnswers).filter(k => state.userAnswers[k] && state.userAnswers[k].toString().trim().length > 0).length;
-  const unanswered = EXAM_DATA.totalQuestions - answeredCount;
+  const unanswered = Math.max(0, totalCount - answeredCount);
 
   let msg = `Testni yakunlaysizmi?\n\nJavob berilgan: ${answeredCount} ta\nJavobsiz: ${unanswered} ta`;
   if (unanswered > 0) {
@@ -487,9 +495,10 @@ async function finishExam() {
 
   state.currentDetailedResults = resultsDetailed;
   state.lastScore = correctCount;
-  state.lastTotal = EXAM_DATA.totalQuestions;
+  const totalQ = EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45);
+  state.lastTotal = totalQ;
 
-  const percentage = Math.round((correctCount / EXAM_DATA.totalQuestions) * 100);
+  const percentage = Math.round((correctCount / totalQ) * 100);
   state.lastPercentage = percentage;
 
   // Darajani aniqlash (BMBA shkalasi)
@@ -507,7 +516,9 @@ async function finishExam() {
 
   // UI Natija ekrani
   document.getElementById("resScore").innerText = correctCount;
-  document.getElementById("resPercent").innerText = `${percentage}% to'g'ri bajarildi (${correctCount} ta to'g'ri, ${45 - correctCount} ta xato)`;
+  const maxScoreEl = document.getElementById("resMaxScore");
+  if (maxScoreEl) maxScoreEl.innerText = `/ ${totalQ} ball`;
+  document.getElementById("resPercent").innerText = `${percentage}% to'g'ri bajarildi (${correctCount} ta to'g'ri, ${totalQ - correctCount} ta xato)`;
   document.getElementById("resBadgeLevel").innerText = level;
 
   // 1. Sohalar bo'yicha diagnostika va kuchsiz mavzularni chizish
@@ -1270,70 +1281,172 @@ function prevCard() {
   }
 }
 
-/* ==================== 7. 40 TA QONUN RO'YXATI ==================== */
+/* ==================== 7. 40 TA QONUN RO'YXATI VA 40 TA VARIANT ==================== */
 
-function openLawsDirectory() {
+let currentLawCategoryFilter = 'all';
+
+async function openLawsDirectory() {
   if (!checkAuthRequired("40 ta Qonun")) return;
   switchView("viewLaws");
+  currentLawCategoryFilter = 'all';
+  updateLawFilterPillsUI('all');
+
+  if (!state.laws || state.laws.length === 0) {
+    await fetchLawsList();
+  }
   renderLawsList(state.laws);
 }
 
-function fetchLawsList() {
-  fetch("/data/laws_list.json")
-    .then(res => res.json())
-    .then(data => {
-      state.laws = data;
-    })
-    .catch(() => {
-      // Offline fallback
-      state.laws = [
-        { id: 1, name: "O‘zbekiston Respublikasi Konstitutsiyasi", category: "Asosiy qonun", url: "https://lex.uz/docs/6445145" },
-        { id: 8, name: "Fuqarolik kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/111189" },
-        { id: 11, name: "Jinoyat kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/111453" },
-        { id: 14, name: "Mehnat kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/6257288" },
-        { id: 19, name: "Oila kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/104720" }
-      ];
-    });
+async function fetchLawsList() {
+  try {
+    const res = await fetch("/data/laws_list.json");
+    if (res.ok) {
+      state.laws = await res.json();
+      return;
+    }
+  } catch (err) {
+    console.warn("fetchLawsList error:", err);
+  }
+  if (!state.laws || state.laws.length === 0) {
+    // Offline fallback
+    state.laws = [
+      { id: 1, name: "O‘zbekiston Respublikasi Konstitutsiyasi", category: "Asosiy qonun", url: "https://lex.uz/docs/6445145" },
+      { id: 8, name: "Fuqarolik kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/111189" },
+      { id: 11, name: "Jinoyat kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/111453" },
+      { id: 14, name: "Mehnat kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/6257288" },
+      { id: 19, name: "Oila kodeksi", category: "Kodekslar", url: "https://lex.uz/docs/104720" }
+    ];
+  }
+}
+
+function filterLawsCategory(cat) {
+  currentLawCategoryFilter = cat || 'all';
+  updateLawFilterPillsUI(currentLawCategoryFilter);
+  filterLaws();
+}
+
+function updateLawFilterPillsUI(activeCat) {
+  const catButtons = document.querySelectorAll("[id^='btnLawCat_']");
+  catButtons.forEach(btn => {
+    btn.className = "px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap hover:bg-slate-200 transition";
+  });
+  const activeBtn = document.getElementById(`btnLawCat_${activeCat}`);
+  if (activeBtn) {
+    activeBtn.className = "px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold whitespace-nowrap shadow-xs";
+  }
 }
 
 function renderLawsList(list) {
   const container = document.getElementById("lawsListContainer");
+  if (!container) return;
   container.innerHTML = "";
 
   if (!list || list.length === 0) {
-    container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Hech qanday qonun topilmadi</div>`;
+    container.innerHTML = `<div class="text-center py-8 text-xs text-slate-400"><i class="fa-solid fa-folder-open text-2xl block mb-2 text-slate-300"></i>Hech qanday qonun topilmadi</div>`;
     return;
   }
 
   list.forEach(law => {
-    const item = document.createElement("a");
-    item.href = law.url;
-    item.target = "_blank";
-    item.className = "p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:border-blue-500 block transition";
+    const card = document.createElement("div");
+    card.className = "p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-400 transition space-y-2.5";
 
-    item.innerHTML = `
-      <div class="pr-2">
-        <span class="text-[10px] font-semibold text-blue-600 bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded-full">${law.category}</span>
-        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 mt-1">${law.id}. ${law.name}</h4>
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-2">
+        <div class="space-y-1">
+          <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+              ${law.category || 'Qonunchilik'}
+            </span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+              <i class="fa-solid fa-list-check mr-1"></i> 20 ta test
+            </span>
+            <span class="text-[10px] text-slate-400">
+              <i class="fa-regular fa-clock mr-0.5"></i> 25 daqiqa
+            </span>
+          </div>
+          <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100 leading-snug">
+            ${law.id}. ${law.name}
+          </h4>
+        </div>
+        <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-black text-slate-600 dark:text-slate-300 shrink-0">
+          #${law.id}
+        </span>
       </div>
-      <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400"></i>
+
+      <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60 gap-2">
+        <a href="${law.url}" target="_blank" rel="noopener noreferrer" class="text-[11px] text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center font-medium">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] mr-1"></i> Lex.uz da o'qish
+        </a>
+
+        <button onclick="startLawVariantExam(${law.id})" id="btnStartLaw_${law.id}" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-sm active:scale-95 transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-play text-[10px]"></i>
+          <span>Variantni Boshlash</span>
+        </button>
+      </div>
     `;
-    container.appendChild(item);
+    container.appendChild(card);
   });
 }
 
 function filterLaws() {
   const query = (document.getElementById("lawSearchInput")?.value || "").toLowerCase().trim();
-  if (!query) {
-    renderLawsList(state.laws);
-    return;
+  let list = state.laws || [];
+
+  if (currentLawCategoryFilter && currentLawCategoryFilter !== 'all') {
+    list = list.filter(law => {
+      if (!law.category) return false;
+      return law.category.toLowerCase().includes(currentLawCategoryFilter.toLowerCase());
+    });
   }
-  const filtered = state.laws.filter(law => 
-    law.name.toLowerCase().includes(query) || 
-    (law.category && law.category.toLowerCase().includes(query)) ||
-    law.id.toString() === query
-  );
-  renderLawsList(filtered);
+
+  if (query) {
+    list = list.filter(law => 
+      law.name.toLowerCase().includes(query) || 
+      (law.category && law.category.toLowerCase().includes(query)) ||
+      law.id.toString() === query
+    );
+  }
+
+  renderLawsList(list);
+}
+
+async function startLawVariantExam(lawId) {
+  if (!checkAuthRequired("Qonunchilik Test Varianti")) return;
+
+  const btn = document.getElementById(`btnStartLaw_${lawId}`);
+  let oldBtnText = "";
+  if (btn) {
+    oldBtnText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i> Yuklanmoqda...';
+    btn.disabled = true;
+  }
+
+  try {
+    const res = await fetch(`/api/law-variants/${lawId}`);
+    if (res.ok) {
+      const variantData = await res.json();
+      if (variantData && variantData.questions && variantData.questions.length > 0) {
+        EXAM_DATA.id = variantData.id || `LAW-${lawId}`;
+        EXAM_DATA.title = variantData.title;
+        EXAM_DATA.totalQuestions = variantData.totalQuestions || variantData.questions.length;
+        EXAM_DATA.timeMinutes = variantData.timeMinutes || 25;
+        EXAM_DATA.questions = variantData.questions;
+
+        startExam();
+        showToast(`⚖️ ${variantData.lawName || variantData.title} testi boshlandi! (20 ta savol, 25 daqiqa)`);
+        return;
+      }
+    }
+    throw new Error("Variant ma'lumotlari topilmadi");
+  } catch (err) {
+    console.error("startLawVariantExam error:", err);
+    showToast("❌ Ushbu qonun testi variantini yuklab bo'lmadi. Internet aloqasini tekshiring.", "error");
+  } finally {
+    if (btn) {
+      btn.innerHTML = oldBtnText;
+      btn.disabled = false;
+    }
+  }
 }
 
 /* ==================== 8. 50 TA VARIANTLAR BOSHQARUVI ==================== */
