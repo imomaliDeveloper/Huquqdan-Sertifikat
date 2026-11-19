@@ -303,6 +303,9 @@ class SimpleTelegramBot {
         { text: "📥 To'lov cheklari", callback_data: "admin_receipts" }
       ],
       [
+        { text: "⏰ O'quvchilarga eslatma yuborish (Nazorat)", callback_data: "admin_send_reminders" }
+      ],
+      [
         { text: "📢 Barchaga xabar tarqatish", callback_data: "admin_broadcast_help" },
         { text: "🎯 Kanalga test tashlash", callback_data: "admin_post_quiz" }
       ],
@@ -406,6 +409,101 @@ class SimpleTelegramBot {
       `• Muvaffaqiyatli yetkazildi: <b>${successCount} ta</b>\n` +
       `• Yetkazib bo'lmadi (bloklaganlar): <b>${failCount} ta</b>`
     );
+  }
+
+  // O'quvchilarga kunlik eslatma yuborish (Retention & Re-engagement)
+  async sendDailyRetentionReminders(triggeredByChatId = null) {
+    try {
+      const users = safeRead('users.json', []);
+      const tgUsers = users.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
+
+      if (!tgUsers.length) {
+        if (triggeredByChatId) {
+          await this.sendMessage(triggeredByChatId, "ℹ️ Eslatma yuborish uchun Telegram o'quvchilari topilmadi.");
+        }
+        return { total: 0, sent: 0, skipped: 0, failed: 0 };
+      }
+
+      let sentCount = 0;
+      let skippedCount = 0;
+      let failCount = 0;
+      const now = Date.now();
+
+      for (const u of tgUsers) {
+        const targetId = u.tgId || (u.id ? u.id.replace('TG-', '') : null);
+        if (!targetId) continue;
+
+        // Oxirgi faollik vaqtini tekshirish
+        const lastActiveTime = u.lastActive ? new Date(u.lastActive).getTime() : 0;
+        const diffHours = lastActiveTime > 0 ? (now - lastActiveTime) / (1000 * 60 * 60) : 999;
+
+        // Agar oxirgi 10 soat ichida faol bo'lgan bo'lsa va test ishlagan bo'lsa, o'tkazib yuboramiz
+        if (diffHours < 10 && u.testsCompleted && u.testsCompleted > 0) {
+          skippedCount++;
+          continue;
+        }
+
+        const firstName = u.name ? u.name.split(' ')[0] : "O'quvchi";
+
+        let reminderText = "";
+        if (diffHours >= 72 || !u.lastActive) {
+          // 3 kundan ortiq kirmagan o'quvchilar uchun
+          reminderText =
+            `👋 <b>Assalomu alaykum, ${firstName}!</b> ⚖️\n\n` +
+            `🎯 <b>Huquqshunoslik Milliy Sertifikat imtihoni har kuni yaqinlashmoqda!</b>\n\n` +
+            `Bir necha kundan beri test yechmadingiz. Do'stlaringiz va raqiblaringiz esa har kuni 40 ta qonun bo'yicha bilimlarini oshirib, umumiy reytingda oldinga intilmoqda! 🔥\n\n` +
+            `Bugun kamida <b>1 ta qonun varianti</b>ni yechib, bilimingizni mustahkamlang va o'rningizni boy bermang! 🚀`;
+        } else {
+          // 24 soat atrofida faol bo'lmagan o'quvchilar uchun
+          reminderText =
+            `🔔 <b>Kunlik Eslatma | BMBA Huquq Testlari</b> ⚖️\n\n` +
+            `Assalomu alaykum, <b>${firstName}</b>! Bugun hali test topshirmadingiz.\n\n` +
+            `🔥 <b>Kunlik streak (ketma-ketlik)ni boy bermang!</b> Kuniga 15-20 daqiqa test yechish — imtihonda yuqori sertifikat olishning eng ishonchli usulidir.\n\n` +
+            `Platformadagi 40 ta qonun testlari yoki jonli duelda o'z kuchingizni sinab ko'ring! 👇`;
+        }
+
+        try {
+          const res = await this.sendMessage(targetId, reminderText, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "🚀 Bugungi testni yechish", web_app: { url: this.appUrl } }],
+                [{ text: "🥊 Huquqiy Duelga kirish", web_app: { url: `${this.appUrl}#octagon` } }]
+              ]
+            }
+          });
+
+          if (res && res.ok) {
+            sentCount++;
+          } else {
+            failCount++;
+          }
+        } catch (e) {
+          failCount++;
+        }
+
+        // Telegram API flood limitidan saqlanish
+        await new Promise(r => setTimeout(r, 60));
+      }
+
+      if (triggeredByChatId) {
+        await this.sendMessage(triggeredByChatId,
+          `✅ <b>O'quvchilarga eslatma yuborish yakunlandi!</b>\n\n` +
+          `• Jami o'quvchilar: <b>${tgUsers.length} nafar</b>\n` +
+          `• Muvaffaqiyatli yetkazildi: <b>${sentCount} nafar</b>\n` +
+          `• Bugun faol bo'lgani uchun o'tkazib yuborildi: <b>${skippedCount} nafar</b>\n` +
+          `• Yetkazib bo'lmadi (botni bloklagan): <b>${failCount} nafar</b>\n\n` +
+          `<i>Barcha o'quvchilar o'qish va test yechishga qayta jalb qilindi! 🎯</i>`
+        );
+      }
+
+      return { total: tgUsers.length, sent: sentCount, skipped: skippedCount, failed: failCount };
+    } catch (err) {
+      console.error("sendDailyRetentionReminders xatolik:", err);
+      if (triggeredByChatId) {
+        await this.sendMessage(triggeredByChatId, `⚠️ Xatolik yuz berdi: ${err.message}`);
+      }
+      return { error: err.message };
+    }
   }
 
   // 4. LEADERBOARD (REYTING) KO'RSATISH
@@ -669,6 +767,14 @@ class SimpleTelegramBot {
         return await this.broadcastMessage(chatId, bText);
       }
 
+      if (text === '/send_reminders' || text === '/remind') {
+        if (!isUserAdmin(userId)) {
+          return await this.sendMessage(chatId, `🔒 Bu buyruq faqat adminlar uchun.`);
+        }
+        await this.sendMessage(chatId, `⏳ O'quvchilarga eslatmalar yuborilmoqda, biroz kuting...`);
+        return await this.sendDailyRetentionReminders(chatId);
+      }
+
       // /start yoki /test
       if (text.startsWith('/start') || text === '/test') {
         const subCheck = await this.checkAllSubscriptions(userId);
@@ -845,6 +951,11 @@ class SimpleTelegramBot {
         await this.answerCallbackQuery(q.id);
         if (!isUserAdmin(userId)) return;
         await this.sendRecentReceipts(chatId);
+      } else if (q.data === 'admin_send_reminders') {
+        await this.answerCallbackQuery(q.id, "Eslatmalar yuborilmoqda...");
+        if (!isUserAdmin(userId)) return;
+        await this.sendMessage(chatId, `⏳ O'quvchilarga motivatsion eslatmalar yuborilmoqda, biroz kuting...`);
+        await this.sendDailyRetentionReminders(chatId);
       } else if (q.data === 'admin_broadcast_help') {
         await this.answerCallbackQuery(q.id);
         if (!isUserAdmin(userId)) return;

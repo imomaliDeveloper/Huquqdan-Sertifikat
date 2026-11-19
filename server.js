@@ -689,6 +689,26 @@ app.get('/api/set-webhook', async (req, res) => {
   }
 });
 
+// Kunlik eslatmalar (Vercel Cron va Admin orqali chaqiriladi)
+app.all('/api/cron/reminders', async (req, res) => {
+  const bot = getBotInstance();
+  if (!bot) {
+    return res.status(503).json({ error: "TELEGRAM_BOT_TOKEN topilmadi yoki bot ulanmagan" });
+  }
+
+  try {
+    const report = await bot.sendDailyRetentionReminders();
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      report
+    });
+  } catch (err) {
+    console.error("Cron reminders error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Bosh sahifa yo'naltirish (Fallback)
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
