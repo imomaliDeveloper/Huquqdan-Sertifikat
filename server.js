@@ -689,23 +689,34 @@ app.get('/api/set-webhook', async (req, res) => {
   }
 });
 
-// Kunlik eslatmalar (Vercel Cron va Admin orqali chaqiriladi)
+// Kunlik eslatmalar va Kanalga avto-viktorina (Vercel Cron orqali har soatda ishlaydi)
 app.all('/api/cron/reminders', async (req, res) => {
   const bot = getBotInstance();
   if (!bot) {
     return res.status(503).json({ error: "TELEGRAM_BOT_TOKEN topilmadi yoki bot ulanmagan" });
   }
 
+  const output = { success: true, timestamp: new Date().toISOString() };
   try {
-    const report = await bot.sendDailyRetentionReminders();
-    res.json({
-      success: true,
-      timestamp: new Date().toISOString(),
-      report
-    });
+    // 1. Kanalga avto-test tashlash (har 2 soatlik interval tekshiruvi)
+    if (req.query.force_quiz === 'true') {
+      output.channelQuiz = await bot.postNextQuizToChannel(null, true);
+    } else {
+      output.channelQuiz = await bot.checkAndPostScheduledQuiz();
+    }
+
+    // 2. Kunlik eslatmalar (Har kuni UTC 14:00 = Toshkent 19:00 da yoki force qilinganda)
+    const currentUtcHour = new Date().getUTCHours();
+    if (currentUtcHour === 14 || req.query.force_reminders === 'true') {
+      output.dailyReminders = await bot.sendDailyRetentionReminders();
+    } else {
+      output.dailyReminders = { status: "scheduled_at_19_00", currentUtcHour };
+    }
+
+    res.json(output);
   } catch (err) {
-    console.error("Cron reminders error:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Cron handler error:", err);
+    res.status(500).json({ error: err.message, output });
   }
 });
 
