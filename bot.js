@@ -767,10 +767,10 @@ class SimpleTelegramBot {
               { text: "🔹 D", callback_data: `ch_ans_${testNum}_3_${q.correctIndex}` }
             ],
             [
-              { text: "🚀 Mini Appda to'liq ishlash (800 ta test) 📲", web_app: { url: this.appUrl } }
+              { text: "🚀 800 ta testni Botda ishlash 📲", url: "https://t.me/HuquqdanSertifikatBot?start=quiz" }
             ],
             [
-              { text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" },
+              { text: "🌐 Veb-Platformaga kirish", url: this.appUrl },
               { text: "📢 Kanalga a'zo bo'lish ↗️", url: `https://t.me/${ch.replace('@', '')}` }
             ]
           ];
@@ -890,10 +890,10 @@ class SimpleTelegramBot {
               { text: "🔹 D", callback_data: `ch_ans_${testNum}_3_${q.correctIndex}` }
             ],
             [
-              { text: "🚀 Mini Appda test ishlash (800 ta test) 📲", web_app: { url: this.appUrl } }
+              { text: "🚀 800 ta testni Botda ishlash 📲", url: "https://t.me/HuquqdanSertifikatBot?start=quiz" }
             ],
             [
-              { text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" },
+              { text: "🌐 Veb-Platformaga kirish", url: this.appUrl },
               { text: "📢 Kanalga a'zo bo'lish ↗️", url: `https://t.me/${ch.replace('@', '')}` }
             ]
           ];
