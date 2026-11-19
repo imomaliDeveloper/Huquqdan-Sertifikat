@@ -56,6 +56,14 @@ function safeWrite(fileName, data) {
   } catch (e) {}
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function getAdminIds() {
   let ids = safeRead('admin_ids.json', [OFFICIAL_ADMIN_ID]);
   if (!Array.isArray(ids)) ids = [OFFICIAL_ADMIN_ID];
@@ -659,33 +667,17 @@ class SimpleTelegramBot {
     if (q.correctKey && map[q.correctKey] !== undefined) correctIdx = map[q.correctKey];
     else if (q.correct && map[q.correct] !== undefined) correctIdx = map[q.correct];
 
-    const prefixes = ['A) ', 'B) ', 'C) ', 'D) '];
-    const opts = (q.options || []).map((o, idx) => {
+    const cleanOpts = (q.options || []).map(o => {
       let txt = (typeof o === 'string' ? o : o.text) || '';
-      txt = txt.replace(/^[A-D][).:\s-]+/i, '').trim();
-      const prefix = prefixes[idx] || '';
-      const full = prefix + txt;
-      return full.length > 95 ? full.substring(0, 92) + '...' : full;
+      return txt.replace(/^[A-D][).:\s-]+/i, '').trim();
     }).slice(0, 4);
 
-    let qText = q.text || '';
-    const lawTitle = lawData && lawData.lawName ? `⚖️ ${lawData.lawName}\n\n` : '';
-    if ((lawTitle + qText).length > 295) {
-      qText = qText.substring(0, 290 - lawTitle.length) + '...';
-    }
-    qText = lawTitle + qText;
-
-    let explanation = q.explanation || '';
-    if (explanation.length > 195) {
-      explanation = explanation.substring(0, 190) + '...';
-    }
-
     return {
-      text: qText,
-      options: opts,
+      text: q.text || '',
+      options: cleanOpts,
       correctIndex: correctIdx,
-      explanation: explanation,
-      lawName: (lawData && lawData.lawName) ? lawData.lawName : "Qonunchilik"
+      explanation: q.explanation || '',
+      lawName: (lawData && lawData.lawName) ? lawData.lawName : "Fuqarolik huquqi"
     };
   }
 
@@ -721,47 +713,78 @@ class SimpleTelegramBot {
         ? settings.targetChannels
         : ["@Huquq_study", "@General_Huquq"];
 
+      const testNum = (settings.totalPosted || 0) + 1;
+
+      // Savol va izohni keshga saqlash
+      const quizCache = safeRead('posted_channel_quizzes.json', {});
+      quizCache[testNum] = {
+        lawName: q.lawName,
+        correctIndex: q.correctIndex,
+        explanation: q.explanation || "",
+        postedAt: new Date().toISOString()
+      };
+      const cacheKeys = Object.keys(quizCache);
+      if (cacheKeys.length > 200) {
+        delete quizCache[cacheKeys[0]];
+      }
+      safeWrite('posted_channel_quizzes.json', quizCache);
+
       let successCount = 0;
       let failDetails = [];
 
       for (const ch of channels) {
         try {
-          const pollRes = await this.callApi('sendPoll', {
-            chat_id: ch,
-            question: q.text,
-            options: q.options,
-            is_anonymous: true,
-            type: 'quiz',
-            correct_option_id: q.correctIndex,
-            explanation: q.explanation,
-            explanation_parse_mode: 'HTML'
+          const lawName = escapeHtml(q.lawName || "Fuqarolik huquqi");
+          const questionText = escapeHtml(q.text || "");
+          const opt0 = escapeHtml(q.options[0] || "");
+          const opt1 = escapeHtml(q.options[1] || "");
+          const opt2 = escapeHtml(q.options[2] || "");
+          const opt3 = escapeHtml(q.options[3] || "");
+
+          const postText =
+            `<b>Huquqdan sertifikat! GENERALIST</b>\n` +
+            `🏛 <b>HUQUQIY TEST #${testNum}</b>\n\n` +
+            `📌 <b>Mavzu:</b> ${lawName}\n\n` +
+            `❓ <b>SAVOL:</b>\n` +
+            `${questionText}\n\n` +
+            `🅰️ <b>A)</b> ${opt0}\n` +
+            `🅱️ <b>B)</b> ${opt1}\n` +
+            `🆎 <b>C)</b> ${opt2}\n` +
+            `🆓 <b>D)</b> ${opt3}\n\n` +
+            `👇 <i>Javobingizni pastdagi [ A ] [ B ] [ C ] [ D ] tugmalarini bosib tekshiring!</i>\n\n` +
+            `🤖 <b>Rasmiy Bot:</b> @HuquqdanSertifikatBot\n` +
+            `🚀 <b>Mini App:</b> 40 ta qonundan 800 ta test va Huquqiy Duel\n` +
+            `📢 <b>Kanal:</b> ${ch}\n` +
+            `💡 <i>«Qonunni bilish — o'z huquqingni himoya qilishdir.»</i>`;
+
+          const keyboard = [
+            [
+              { text: "🔹 A", callback_data: `ch_ans_${testNum}_0_${q.correctIndex}` },
+              { text: "🔹 B", callback_data: `ch_ans_${testNum}_1_${q.correctIndex}` }
+            ],
+            [
+              { text: "🔹 C", callback_data: `ch_ans_${testNum}_2_${q.correctIndex}` },
+              { text: "🔹 D", callback_data: `ch_ans_${testNum}_3_${q.correctIndex}` }
+            ],
+            [
+              { text: "🚀 Mini Appda to'liq ishlash (800 ta test) 📲", web_app: { url: this.appUrl } }
+            ],
+            [
+              { text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" },
+              { text: "📢 Kanalga a'zo bo'lish ↗️", url: `https://t.me/${ch.replace('@', '')}` }
+            ]
+          ];
+
+          const res = await this.sendMessage(ch, postText, {
+            reply_markup: {
+              inline_keyboard: keyboard
+            }
           });
 
-          if (pollRes.ok) {
+          if (res.ok) {
             successCount++;
-            await this.sendMessage(ch,
-              `🏛 <b>HUQUQSHUNOSLIK MILLIY SERTIFIKATI (BMBA)</b>\n\n` +
-              `Yuqoridagi savolni yechib, o'z bilimingizni sinab ko'ring! 👆\n\n` +
-              `📢 <b>Bizning rasmiy kanallarimizga obuna bo'ling:</b>\n` +
-              `1️⃣ @Huquq_study — Milliy sertifikatga tayyorlovchi asosiy kanal\n` +
-              `2️⃣ @General_Huquq — Qonunchilik va rasmiy tahlillar kanali\n\n` +
-              `🔥 <b>Rasmiy platformamizda:</b>\n` +
-              `• 📜 40 ta qonundan 800 ta saralangan test\n` +
-              `• 🎯 50 ta to'liq yangi formatdagi imtihon varianti\n` +
-              `• 🥊 Jonli Huquqiy Duel (Octagon)\n` +
-              `• 🤖 AI Repetitor bilan tezkor tahlil\n\n` +
-              `<i>O'z darajangizni aniqlash va imtihonga 100% tayyorlanish uchun pastdagi ilovani oching:</i> 👇`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: "🚀 Testni boshlash (Mini App)", web_app: { url: this.appUrl } }],
-                  [{ text: "🥊 Do'stlar bilan Duel", web_app: { url: `${this.appUrl}#octagon` } }],
-                  [{ text: "📢 @Huquq_study", url: "https://t.me/Huquq_study" }, { text: "📢 @General_Huquq", url: "https://t.me/General_Huquq" }],
-                  [{ text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" }]
-                ]
-              }
-            });
           } else {
-            failDetails.push(`${ch}: ${pollRes.description || 'Xatolik'}`);
+            failDetails.push(`${ch}: ${res.description || 'Xatolik'}`);
           }
         } catch (e) {
           failDetails.push(`${ch}: ${e.message}`);
@@ -771,7 +794,7 @@ class SimpleTelegramBot {
 
       // Sozlamalarni yangilash
       settings.lastPostedAt = new Date().toISOString();
-      settings.totalPosted = (settings.totalPosted || 0) + 1;
+      settings.totalPosted = testNum;
       safeWrite('autopost_settings.json', settings);
 
       if (chatNotifyId) {
@@ -817,53 +840,83 @@ class SimpleTelegramBot {
         ? settings.targetChannels
         : ["@Huquq_study", "@General_Huquq"];
 
+      const testNum = (settings.totalPosted || 0) + 1;
+
+      // Savol va izohni keshga saqlash
+      const quizCache = safeRead('posted_channel_quizzes.json', {});
+      quizCache[testNum] = {
+        lawName: q.lawName || "Maxsus Savol",
+        correctIndex: q.correctIndex,
+        explanation: q.explanation || "",
+        postedAt: new Date().toISOString()
+      };
+      safeWrite('posted_channel_quizzes.json', quizCache);
+
       let successCount = 0;
       let failDetails = [];
 
       for (const ch of channels) {
         try {
-          const pollRes = await this.callApi('sendPoll', {
-            chat_id: ch,
-            question: q.text,
-            options: q.options,
-            is_anonymous: true,
-            type: 'quiz',
-            correct_option_id: q.correctIndex,
-            explanation: q.explanation,
-            explanation_parse_mode: 'HTML'
+          const lawName = escapeHtml(q.lawName || "Huquqiy Sinov");
+          const questionText = escapeHtml(q.text || "");
+          const opt0 = escapeHtml(q.options[0] || "");
+          const opt1 = escapeHtml(q.options[1] || "");
+          const opt2 = escapeHtml(q.options[2] || "");
+          const opt3 = escapeHtml(q.options[3] || "");
+
+          const postText =
+            `<b>Huquqdan sertifikat! GENERALIST</b>\n` +
+            `🏛 <b>HUQUQIY TEST #${testNum}</b>\n\n` +
+            `📌 <b>Mavzu:</b> ${lawName}\n\n` +
+            `❓ <b>SAVOL:</b>\n` +
+            `${questionText}\n\n` +
+            `🅰️ <b>A)</b> ${opt0}\n` +
+            `🅱️ <b>B)</b> ${opt1}\n` +
+            `🆎 <b>C)</b> ${opt2}\n` +
+            `🆓 <b>D)</b> ${opt3}\n\n` +
+            `👇 <i>Javobingizni pastdagi [ A ] [ B ] [ C ] [ D ] tugmalarini bosib tekshiring!</i>\n\n` +
+            `🤖 <b>Rasmiy Bot:</b> @HuquqdanSertifikatBot\n` +
+            `🚀 <b>Mini App:</b> 40 ta qonundan 800 ta test va Huquqiy Duel\n` +
+            `📢 <b>Kanal:</b> ${ch}\n` +
+            `💡 <i>«Qonunni bilish — o'z huquqingni himoya qilishdir.»</i>`;
+
+          const keyboard = [
+            [
+              { text: "🔹 A", callback_data: `ch_ans_${testNum}_0_${q.correctIndex}` },
+              { text: "🔹 B", callback_data: `ch_ans_${testNum}_1_${q.correctIndex}` }
+            ],
+            [
+              { text: "🔹 C", callback_data: `ch_ans_${testNum}_2_${q.correctIndex}` },
+              { text: "🔹 D", callback_data: `ch_ans_${testNum}_3_${q.correctIndex}` }
+            ],
+            [
+              { text: "🚀 Mini Appda test ishlash (800 ta test) 📲", web_app: { url: this.appUrl } }
+            ],
+            [
+              { text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" },
+              { text: "📢 Kanalga a'zo bo'lish ↗️", url: `https://t.me/${ch.replace('@', '')}` }
+            ]
+          ];
+
+          const res = await this.sendMessage(ch, postText, {
+            reply_markup: {
+              inline_keyboard: keyboard
+            }
           });
 
-          if (pollRes.ok) {
+          if (res.ok) {
             successCount++;
-            await this.sendMessage(ch,
-              `🏛 <b>HUQUQSHUNOSLIK MILLIY SERTIFIKATI (BMBA)</b>\n\n` +
-              `Yuqoridagi savolni yechib, o'z bilimingizni sinab ko'ring! 👆\n\n` +
-              `📢 <b>Bizning rasmiy kanallarimizga obuna bo'ling:</b>\n` +
-              `1️⃣ @Huquq_study — Milliy sertifikatga tayyorlovchi asosiy kanal\n` +
-              `2️⃣ @General_Huquq — Qonunchilik va rasmiy tahlillar kanali\n\n` +
-              `🔥 <b>Rasmiy platformamizda:</b>\n` +
-              `• 📜 40 ta qonundan 800 ta saralangan test\n` +
-              `• 🎯 50 ta to'liq yangi formatdagi imtihon varianti\n` +
-              `• 🥊 Jonli Huquqiy Duel (Octagon)\n` +
-              `• 🤖 AI Repetitor bilan tezkor tahlil\n\n` +
-              `<i>O'z darajangizni aniqlash va imtihonga 100% tayyorlanish uchun pastdagi ilovani oching:</i> 👇`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: "🚀 Testni boshlash (Mini App)", web_app: { url: this.appUrl } }],
-                  [{ text: "🥊 Do'stlar bilan Duel", web_app: { url: `${this.appUrl}#octagon` } }],
-                  [{ text: "📢 @Huquq_study", url: "https://t.me/Huquq_study" }, { text: "📢 @General_Huquq", url: "https://t.me/General_Huquq" }],
-                  [{ text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" }]
-                ]
-              }
-            });
           } else {
-            failDetails.push(`${ch}: ${pollRes.description || 'Xatolik'}`);
+            failDetails.push(`${ch}: ${res.description || 'Xatolik'}`);
           }
         } catch (e) {
           failDetails.push(`${ch}: ${e.message}`);
         }
         await new Promise(r => setTimeout(r, 250));
       }
+
+      settings.totalPosted = testNum;
+      safeWrite('autopost_settings.json', settings);
 
       if (chatNotifyId) {
         if (successCount > 0) {
@@ -1106,17 +1159,13 @@ class SimpleTelegramBot {
             `<code>/yangi_test O'zbekiston Konstitutsiyasi nechanchi yilda qabul qilingan? | 1991 | 1992 | 1993 | 1994 | 2 | O'zbekiston Konstitutsiyasi 1992-yil 8-dekabrda qabul qilingan.</code>`
           );
         }
-        const prefixes = ['A) ', 'B) ', 'C) ', 'D) '];
         const rawOpts = [parts[1], parts[2], parts[3], parts[4]].filter(Boolean);
-        const formattedOpts = rawOpts.map((o, idx) => {
-          let t = (o || '').replace(/^[A-D][).:\s-]+/i, '').trim();
-          const p = prefixes[idx] || '';
-          const full = p + t;
-          return full.length > 95 ? full.substring(0, 92) + '...' : full;
+        const formattedOpts = rawOpts.map((o) => {
+          return (o || '').replace(/^[A-D][).:\s-]+/i, '').trim();
         });
 
         const customQ = {
-          text: `⚖️ Maxsus Savol\n\n${parts[0]}`,
+          text: parts[0],
           options: formattedOpts,
           correctIndex: (parseInt(parts[5]) - 1) || 0,
           explanation: parts[6] || "",
@@ -1257,11 +1306,49 @@ class SimpleTelegramBot {
 
     } else if (update.callback_query) {
       const q = update.callback_query;
-      const chatId = q.message.chat.id;
+      const chatId = q.message?.chat?.id;
       const userId = q.from?.id || chatId;
       const firstName = q.from?.first_name || "O'quvchi";
 
       recordUser(q.from);
+
+      // Kanallardagi test javoblari (🔹 A, 🔹 B, 🔹 C, 🔹 D)
+      if (q.data && q.data.startsWith('ch_ans_')) {
+        const parts = q.data.split('_');
+        // Format: ch_ans_<testNum>_<selectedIdx>_<correctIdx>
+        const testNum = parts[2];
+        const selectedIdx = parseInt(parts[3]);
+        const correctIdx = parseInt(parts[4]);
+
+        const letters = ['A', 'B', 'C', 'D'];
+        const selectedLetter = letters[selectedIdx] || 'A';
+        const correctLetter = letters[correctIdx] || 'A';
+
+        const quizCache = safeRead('posted_channel_quizzes.json', {});
+        const savedQuiz = quizCache[testNum];
+
+        let alertText = "";
+        if (selectedIdx === correctIdx) {
+          alertText = `✅ TO'G'RI JAVOB (${selectedLetter})! 🎉\n\n`;
+          if (savedQuiz && savedQuiz.explanation) {
+            alertText += `💡 ${savedQuiz.explanation}\n\n`;
+          }
+          alertText += `👉 Qolgan barcha 40 ta qonun testlarini @HuquqdanSertifikatBot da yeching!`;
+        } else {
+          alertText = `❌ NOTO'G'RI! Siz ${selectedLetter} ni tanladingiz.\n\n`;
+          alertText += `✅ To'g'ri javob: ${correctLetter})\n\n`;
+          if (savedQuiz && savedQuiz.explanation) {
+            alertText += `💡 ${savedQuiz.explanation}\n\n`;
+          }
+          alertText += `👉 To'liq tahlil va duel @HuquqdanSertifikatBot da!`;
+        }
+
+        if (alertText.length > 195) {
+          alertText = alertText.substring(0, 192) + '...';
+        }
+
+        return await this.answerCallbackQuery(q.id, alertText, true);
+      }
 
       if (q.data === 'check_subscription') {
         const subCheck = await this.checkAllSubscriptions(userId);
