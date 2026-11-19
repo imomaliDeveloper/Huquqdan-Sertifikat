@@ -172,7 +172,11 @@ function savePendingReferral(newUserId, referrerId) {
 class SimpleTelegramBot {
   constructor(botToken, appUrl, chanId) {
     this.token = botToken;
-    this.appUrl = appUrl;
+    let cleanUrl = (appUrl || 'https://huquqdan-sertifikat.vercel.app').trim();
+    if (!cleanUrl.endsWith('/')) {
+      cleanUrl += '/';
+    }
+    this.appUrl = cleanUrl;
     this.channelId = chanId;
     this.offset = 0;
     this.isRunning = false;
@@ -1406,6 +1410,27 @@ class SimpleTelegramBot {
       // Referal tizimi: 10 ta do'st = VIP Bepul
       if (text === "🎁 10 ta Do'st = VIP Bepul 👑" || text === "/ref" || text === "/referral" || text === "/dostlar") {
         return await this.sendReferralMenu(chatId, userId);
+      }
+
+      // Platformani ochish (Mini App)
+      if (text.includes("Platformani ochish") || text.includes("Mini App") || text === "/app" || text === "/webapp") {
+        return await this.sendMessage(chatId,
+          `🚀 <b>Huquqshunoslik Milliy Sertifikat Platformasi (Mini App)</b>\n\n` +
+          `Platformani Telegram ichida to'liq ekranda ochish uchun quyidagi tugmani bosing: 👇`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "🚀 Platformani ochish (Mini App)", web_app: { url: this.appUrl } }],
+              [
+                { text: "🥊 Huquqiy Duel", web_app: { url: `${this.appUrl}#octagon` } },
+                { text: "📜 40 ta Qonun Testi", web_app: { url: `${this.appUrl}#laws` } }
+              ],
+              [
+                { text: "🎯 50 ta Variant", web_app: { url: `${this.appUrl}#variants` } },
+                { text: "👤 Shaxsiy Profil", web_app: { url: `${this.appUrl}#profile` } }
+              ]
+            ]
+          }
+        });
       }
 
       // Oddiy klaviatura tugmalari javoblari

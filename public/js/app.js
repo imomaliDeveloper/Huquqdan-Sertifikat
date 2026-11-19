@@ -93,7 +93,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Kanallarga a'zolik holatini yangilash
   updateHomeSubscriptionUI();
+
+  // URL Hash orqali kerakli bo'limni darhol ochish (#octagon, #laws, #variants, #profile, #mistakes)
+  handleRouteHash();
+  window.addEventListener("hashchange", handleRouteHash);
 });
+
+function handleRouteHash() {
+  const hash = (window.location.hash || "").toLowerCase();
+  if (hash === '#octagon' || hash === '#duel') {
+    openOctagonLobby();
+  } else if (hash === '#laws' || hash === '#qonun') {
+    switchView('viewLaws');
+  } else if (hash === '#variants' || hash === '#variant') {
+    openVariantsModal();
+  } else if (hash === '#profile' || hash === '#profil') {
+    switchView('viewProfile');
+  } else if (hash === '#mistakes' || hash === '#xatolar') {
+    openMistakesTrainer();
+  } else if (hash === '#cases' || hash === '#keys') {
+    switchView('viewCases');
+  }
+}
 
 // Kunlik Streak (Daily Streak) hisoblash
 function updateDailyStreak() {
