@@ -762,9 +762,15 @@ class SimpleTelegramBot {
             (failDetails.length ? `• Ogohlantirish: <code>${failDetails.join('; ')}</code>` : ``)
           );
         } else {
+          let reasonMsg = failDetails.join('\n');
+          let helpNote = "";
+          if (reasonMsg.includes('Forbidden') || reasonMsg.includes('not a member')) {
+            helpNote = `\n\n💡 <b>Yechim:</b>\n1. Telegramda <b>${channels.join('</b> va <b>')}</b> kanalingizga kiring.\n2. <i>Kanal ma'lumotlari ➡️ Administratorlar ➡️ Yangi admin qo'shish</i> bo'limiga kiring.\n3. <b>@HuquqdanSertifikatBot</b> ni qidirib topib, <b>"Xabar yozish" (Post Messages)</b> ruxsatini bering!`;
+          }
           await this.sendMessage(chatNotifyId,
-            `⚠️ <b>Test yuborilmadi!</b>\nSabab:\n${failDetails.join('\n')}\n\n` +
-            `<i>(Bot ushbu kanallarda administrator ekanligiga va xabar yozish huquqiga egaligiga ishonch hosil qiling)</i>`
+            `⚠️ <b>Test kanalga yuborilmadi!</b>\n\n` +
+            `<b>Sabab:</b>\n<code>${reasonMsg}</code>` +
+            helpNote
           );
         }
       }
