@@ -77,15 +77,10 @@ function safeWriteJSON(fileName, data) {
 }
 
 // In-Memory Keshlar
-let inMemoryUsers = null;
 function getUsersList() {
-  if (!inMemoryUsers) {
-    inMemoryUsers = safeReadJSON('users.json', []);
-  }
-  return inMemoryUsers;
+  return safeReadJSON('users.json', []);
 }
 function saveUsersList(users) {
-  inMemoryUsers = users;
   safeWriteJSON('users.json', users);
 }
 

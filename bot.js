@@ -106,6 +106,7 @@ function recordUser(fromUser) {
       users[existingIndex].lastActive = new Date().toISOString();
       if (fromUser.username) users[existingIndex].username = `@${fromUser.username}`;
       if (fullName) users[existingIndex].name = fullName;
+      if (!users[existingIndex].referrals) users[existingIndex].referrals = [];
     } else {
       users.push({
         id: `TG-${fromUser.id}`,
@@ -116,6 +117,10 @@ function recordUser(fromUser) {
         plan: "START",
         city: "O'zbekiston",
         testsCompleted: 0,
+        referrals: [],
+        referredBy: null,
+        referralConfirmed: false,
+        isVip: false,
         registeredAt: new Date().toISOString(),
         lastActive: new Date().toISOString(),
         source: "telegram_bot"
@@ -124,6 +129,41 @@ function recordUser(fromUser) {
     safeWrite('users.json', users);
   } catch (err) {
     console.error("recordUser error:", err.message);
+  }
+}
+
+function savePendingReferral(newUserId, referrerId) {
+  try {
+    const users = safeRead('users.json', []);
+    const newIdStr = newUserId.toString();
+    const refIdStr = referrerId.toString();
+    if (newIdStr === refIdStr) return; // O'zini o'zi taklif qilolmaydi
+
+    const idx = users.findIndex(u => (u.tgId && u.tgId.toString() === newIdStr) || (u.id && u.id.toString() === `TG-${newIdStr}`));
+    if (idx >= 0) {
+      if (!users[idx].referredBy && !users[idx].referralConfirmed) {
+        users[idx].referredBy = refIdStr;
+        safeWrite('users.json', users);
+      }
+    } else {
+      users.push({
+        id: `TG-${newUserId}`,
+        tgId: newUserId,
+        name: "O'quvchi",
+        role: "Abituriyent",
+        plan: "START",
+        referrals: [],
+        referredBy: refIdStr,
+        referralConfirmed: false,
+        isVip: false,
+        registeredAt: new Date().toISOString(),
+        lastActive: new Date().toISOString(),
+        source: "referral_link"
+      });
+      safeWrite('users.json', users);
+    }
+  } catch (e) {
+    console.error("savePendingReferral error:", e.message);
   }
 }
 
@@ -238,8 +278,8 @@ class SimpleTelegramBot {
       [{ text: "🚀 Platformani ochish (Mini App)", web_app: { url: this.appUrl } }],
       [{ text: "📜 40 ta Qonun Testi" }, { text: "🎯 50 ta Variant" }],
       [{ text: "🥊 Huquqiy Duel" }, { text: "🏆 Reyting (Top)" }],
-      [{ text: "🤖 AI Ustozga Savol" }, { text: "👑 VIP Tariflar" }],
-      [{ text: "👤 Mening Natijam" }, { text: "📞 Bog'lanish" }]
+      [{ text: "🎁 10 ta Do'st = VIP Bepul 👑" }, { text: "👑 VIP Tariflar" }],
+      [{ text: "🤖 AI Ustozga Savol" }, { text: "👤 Mening Natijam" }]
     ];
     if (isAdmin) {
       rows.push([{ text: "⚙️ Admin Panel" }]);
@@ -280,7 +320,10 @@ class SimpleTelegramBot {
         { text: "🏆 Reyting", callback_data: "cmd_leaderboard" }
       ],
       [
-        { text: "👑 VIP PRO Tariflari", callback_data: "cmd_tariffs" },
+        { text: "🎁 10 ta Do'st = VIP Bepul 👑", callback_data: "cmd_referral" },
+        { text: "👑 VIP PRO Tariflari", callback_data: "cmd_tariffs" }
+      ],
+      [
         { text: "📞 Bog'lanish", callback_data: "cmd_contact" }
       ]
     ];
@@ -297,6 +340,130 @@ class SimpleTelegramBot {
     return await this.sendMessage(chatId, welcome, {
       reply_markup: { inline_keyboard: inlineKeyboard }
     });
+  }
+
+  // 2.1 REFERAL TIZIMI (10 TA DO'ST = VIP BEPUL)
+  async sendReferralMenu(chatId, userId) {
+    const users = safeRead('users.json', []);
+    const idStr = userId.toString();
+    const user = users.find(u => (u.tgId && u.tgId.toString() === idStr) || (u.id && u.id.toString() === `TG-${idStr}`)) || {};
+
+    const refs = user.referrals || [];
+    const count = refs.length;
+    const isVip = user.isVip || user.plan === 'VIP PRO' || user.plan === 'tariff_vip';
+
+    const filled = Math.min(count, 10);
+    const empty = 10 - filled;
+    const progressBar = "🟩".repeat(filled) + "⬜".repeat(empty);
+
+    const refLink = `https://t.me/HuquqdanSertifikatBot?start=ref_${userId}`;
+    const shareText = encodeURIComponent(
+      `🏛 Huquqshunoslik fanidan Milliy Sertifikat (BMBA) imtihoniga tayyorgarlik boti!\n\n` +
+      `• 40 ta qonundan 800 ta test\n` +
+      `• 50 ta to'liq rasmiy variant\n` +
+      `• Jonli Huquqiy Duel (Octagon)\n\n` +
+      `Do'stlar, hoziroq kiring va bilimingizni sinang 👇`
+    );
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${shareText}`;
+
+    const text =
+      `🎁 <b>DO'STLARNI TAKLIF QILING VA VIP PRO NI BEPUL OLING!</b>\n\n` +
+      `🔥 <b>Shart juda oddiy:</b>\n` +
+      `Shaxsiy taklif havolangiz orqali <b>10 nafar do'stingiz</b> botga kirib, kanallarimizga a'zo bo'lsa — sizga <b>VIP PRO (89 000 so'mlik)</b> tarifi <b>MUTLAQO BEPUL</b> ochiladi!\n\n` +
+      `📊 <b>Sizning ko'rsatkichingiz:</b>\n` +
+      `• Taklif qilingan do'stlar: <b>${count} / 10 ta</b>\n` +
+      `• Jarayon: ${progressBar} (${Math.round((count / 10) * 100)}%)\n` +
+      `• VIP Holati: <b>${isVip ? "✅ Faollashtirilgan (VIP PRO)" : (count >= 10 ? "✅ Faollashtirilgan" : `🔒 Yana ${10 - count} ta do'st kerak`)}</b>\n\n` +
+      `🔗 <b>Sizning shaxsiy taklif havolangiz:</b>\n` +
+      `<code>${refLink}</code>\n\n` +
+      `<i>Do'stlaringiz yoki guruhlarga yuborish uchun pastdagi "Do'stlarga ulashish" tugmasini bosing:</i> 👇`;
+
+    const keyboard = [
+      [
+        { text: "🚀 Do'stlarga va guruhlarga ulashish 📤", url: shareUrl }
+      ],
+      [
+        { text: "🔄 Natijani yangilash", callback_data: "refresh_referral" },
+        { text: "🏠 Asosiy Menyu", callback_data: "cmd_home" }
+      ]
+    ];
+
+    return await this.sendMessage(chatId, text, {
+      reply_markup: { inline_keyboard: keyboard }
+    });
+  }
+
+  // Referalni tasdiqlash va 10 ta do'st bo'lganda VIP berish
+  async confirmReferralIfPending(newUserId, newUserName) {
+    try {
+      const users = safeRead('users.json', []);
+      const newIdStr = newUserId.toString();
+      const currentUserIndex = users.findIndex(u => (u.tgId && u.tgId.toString() === newIdStr) || (u.id && u.id.toString() === `TG-${newIdStr}`));
+
+      if (currentUserIndex < 0) return;
+      const currentUser = users[currentUserIndex];
+
+      if (currentUser.referralConfirmed || !currentUser.referredBy) return;
+
+      const referrerIdStr = currentUser.referredBy.toString();
+      if (referrerIdStr === newIdStr) return;
+
+      const referrerIndex = users.findIndex(u => (u.tgId && u.tgId.toString() === referrerIdStr) || (u.id && u.id.toString() === `TG-${referrerIdStr}`));
+      if (referrerIndex < 0) return;
+
+      const referrer = users[referrerIndex];
+      if (!referrer.referrals) referrer.referrals = [];
+
+      if (!referrer.referrals.includes(newIdStr)) {
+        referrer.referrals.push(newIdStr);
+      }
+      currentUser.referralConfirmed = true;
+      safeWrite('users.json', users);
+
+      const count = referrer.referrals.length;
+      const referrerTgId = referrer.tgId || referrerIdStr;
+
+      if (count >= 10 && !referrer.isVip) {
+        referrer.isVip = true;
+        referrer.plan = "tariff_vip";
+        referrer.vipUnlockedVia = "10_friends_referral";
+        safeWrite('users.json', users);
+
+        await this.sendMessage(referrerTgId,
+          `🏆 <b>TABRIKLAYMIZ! SIZ 10 TA DO'STINGIZNI TAKLIF QILDINGIZ!</b> 🎉\n\n` +
+          `Siz barcha shartlarni a'lo darajada bajardingiz!\n` +
+          `👑 <b>VIP PRO (89 000 so'mlik) tarifi sizga MUTLAQO BEPUL faollashtirildi!</b>\n\n` +
+          `Endi siz uchun:\n` +
+          `• 📜 40 ta qonunning barchasi (800 ta test) ochiq!\n` +
+          `• 🎯 50 ta rasmiy imtihon varianti to'liq ochiq!\n` +
+          `• 🤖 AI Repetitor bilan cheksiz tahlil!\n` +
+          `• 🥊 Huquqiy Octagon duellari cheksiz!\n\n` +
+          `<i>Platformani oching va erkin foydalaning:</i> 👇`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "🚀 Platformani ochish (VIP PRO)", web_app: { url: this.appUrl } }]
+            ]
+          }
+        });
+
+        const adminIds = getAdminIds();
+        for (const aId of adminIds) {
+          await this.sendMessage(aId,
+            `🎁 <b>Yangi Referal VIP:</b>\n\n` +
+            `Foydalanuvchi: <b>${referrer.name || referrer.username || referrerIdStr}</b> 10 ta do'stini taklif qildi va <b>VIP PRO</b> ni bepul oldi!`
+          );
+        }
+      } else {
+        await this.sendMessage(referrerTgId,
+          `🎉 <b>Yangi do'stingiz a'zo bo'ldi!</b>\n\n` +
+          `<b>${newUserName}</b> sizning havolangiz orqali botga qo'shildi va kanallarga obuna bo'ldi.\n\n` +
+          `📊 Sizda: <b>${count} / 10 ta</b> do'st bo'ldi.\n` +
+          (count < 10 ? `🎯 Yana <b>${10 - count} nafar</b> do'stingiz qo'shilsa, VIP PRO mutlaqo bepul ochiladi!` : `👑 VIP PRO faol!`)
+        );
+      }
+    } catch (e) {
+      console.error("confirmReferralIfPending error:", e.message);
+    }
   }
 
   // 3. ADMIN PANEL & STATISTIKA
@@ -1177,10 +1344,19 @@ class SimpleTelegramBot {
 
       // /start yoki /test
       if (text.startsWith('/start') || text === '/test') {
+        const refMatch = text.match(/^\/start\s+ref_(\d+)/i);
+        if (refMatch) {
+          const referrerId = refMatch[1];
+          if (referrerId !== userId.toString()) {
+            savePendingReferral(userId, referrerId);
+          }
+        }
+
         const subCheck = await this.checkAllSubscriptions(userId);
         if (!subCheck.ok) {
           return await this.sendSubscriptionGate(chatId, firstName);
         }
+        await this.confirmReferralIfPending(userId, firstName);
         return await this.sendMainMenu(chatId, firstName, false, userId);
       }
 
@@ -1188,6 +1364,11 @@ class SimpleTelegramBot {
       const subCheck = await this.checkAllSubscriptions(userId);
       if (!subCheck.ok) {
         return await this.sendSubscriptionGate(chatId, firstName);
+      }
+
+      // Referal tizimi: 10 ta do'st = VIP Bepul
+      if (text === "🎁 10 ta Do'st = VIP Bepul 👑" || text === "/ref" || text === "/referral" || text === "/dostlar") {
+        return await this.sendReferralMenu(chatId, userId);
       }
 
       // Oddiy klaviatura tugmalari javoblari
@@ -1354,6 +1535,7 @@ class SimpleTelegramBot {
         const subCheck = await this.checkAllSubscriptions(userId);
         if (subCheck.ok) {
           await this.answerCallbackQuery(q.id, "✅ Ikkala kanalga a'zoligingiz muvaffaqiyatli tasdiqlandi!");
+          await this.confirmReferralIfPending(userId, firstName);
           await this.sendMainMenu(chatId, firstName, true, userId);
         } else {
           const missingChannels = subCheck.missing.map(m => m.username).join(" va ");
@@ -1366,6 +1548,9 @@ class SimpleTelegramBot {
       } else if (q.data === 'cmd_home') {
         await this.answerCallbackQuery(q.id);
         await this.sendMainMenu(chatId, firstName, false, userId);
+      } else if (q.data === 'cmd_referral' || q.data === 'refresh_referral') {
+        await this.answerCallbackQuery(q.id);
+        await this.sendReferralMenu(chatId, userId);
       } else if (q.data === 'cmd_leaderboard') {
         await this.answerCallbackQuery(q.id);
         await this.sendLeaderboard(chatId);
