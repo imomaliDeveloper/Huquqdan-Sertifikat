@@ -18,19 +18,41 @@ const channelId = process.env.TELEGRAM_CHANNEL_ID || '@Huquq_study';
 // ==================== YORDAMCHI BAZA FUNKSIYALARI ====================
 
 function safeRead(fileName, defaultVal = []) {
-  const filePath = path.join(__dirname, 'data', fileName);
+  // 1. /tmp dan o'qish (Vercel serverless da yozilgan yangi ma'lumotlar)
   try {
+    const tmpPath = path.join('/tmp', fileName);
+    if (fs.existsSync(tmpPath)) {
+      return JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
+    }
+  } catch (e) {}
+
+  // 2. data/ papkasidan o'qish
+  try {
+    const filePath = path.join(__dirname, 'data', fileName);
     if (fs.existsSync(filePath)) {
       return JSON.parse(fs.readFileSync(filePath, 'utf8'));
     }
   } catch (e) {}
+
   return defaultVal;
 }
 
 function safeWrite(fileName, data) {
-  const filePath = path.join(__dirname, 'data', fileName);
+  const jsonStr = JSON.stringify(data, null, 2);
+  // 1. /tmp/ papkasiga yozish (AWS Lambda va Vercel da yagona yozishga ruxsat etilgan joy)
   try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    const tmpPath = path.join('/tmp', fileName);
+    const tmpDir = path.dirname(tmpPath);
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    fs.writeFileSync(tmpPath, jsonStr, 'utf8');
+  } catch (e) {}
+
+  // 2. data/ papkasiga yozish (lokal muhit uchun)
+  try {
+    const filePath = path.join(__dirname, 'data', fileName);
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(filePath, jsonStr, 'utf8');
   } catch (e) {}
 }
 
@@ -728,13 +750,19 @@ class SimpleTelegramBot {
           if (pollRes.ok) {
             successCount++;
             await this.sendMessage(ch,
-              `💡 <b>Huquqshunoslik Milliy Sertifikat Test Tizimi</b>\n` +
-              `Yuqoridagi savolni yechib, bilimingizni sinang!\n\n` +
-              `🏛 BMBA spesifikatsiyasidagi barcha <b>40 ta qonun</b> va <b>50 ta variant</b>ni to'liq ishlash uchun pastdagi ilovani oching 👇`, {
+              `🏛 <b>HUQUQSHUNOSLIK MILLIY SERTIFIKATI (BMBA)</b>\n\n` +
+              `Yuqoridagi savolni yechib, o'z bilimingizni sinab ko'ring! 👆\n\n` +
+              `🔥 <b>Rasmiy platformamizda:</b>\n` +
+              `• 📜 40 ta qonundan 800 ta saralangan test\n` +
+              `• 🎯 50 ta to'liq yangi formatdagi imtihon varianti\n` +
+              `• 🥊 Jonli Huquqiy Duel (Octagon)\n` +
+              `• 🤖 AI Repetitor bilan savol-javob\n\n` +
+              `<i>O'z darajangizni aniqlash va imtihonga 100% tayyorlanish uchun pastdagi ilovani oching:</i> 👇`, {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: "📲 Mini Appda to'liq ishlash", web_app: { url: this.appUrl } }],
-                  [{ text: "🥊 Huquqiy Duelga kirish", web_app: { url: `${this.appUrl}#octagon` } }]
+                  [{ text: "🚀 Testni boshlash (Mini App)", web_app: { url: this.appUrl } }],
+                  [{ text: "🥊 Do'stlar bilan Duel", web_app: { url: `${this.appUrl}#octagon` } }],
+                  [{ text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" }]
                 ]
               }
             });
@@ -782,6 +810,74 @@ class SimpleTelegramBot {
         await this.sendMessage(chatNotifyId, `⚠️ Xatolik: ${err.message}`);
       }
       return { ok: false, error: err.message };
+    }
+  }
+
+  // Admin o'zi yozgan maxsus testni kanallarga tashlash
+  async postCustomQuizToChannels(chatNotifyId, q) {
+    try {
+      const settings = safeRead('autopost_settings.json', {
+        targetChannels: ["@Huquq_study", "@General_Huquq"]
+      });
+      const channels = (settings.targetChannels && settings.targetChannels.length)
+        ? settings.targetChannels
+        : ["@Huquq_study", "@General_Huquq"];
+
+      let successCount = 0;
+      let failDetails = [];
+
+      for (const ch of channels) {
+        try {
+          const pollRes = await this.callApi('sendPoll', {
+            chat_id: ch,
+            question: q.text,
+            options: q.options,
+            is_anonymous: true,
+            type: 'quiz',
+            correct_option_id: q.correctIndex,
+            explanation: q.explanation,
+            explanation_parse_mode: 'HTML'
+          });
+
+          if (pollRes.ok) {
+            successCount++;
+            await this.sendMessage(ch,
+              `🏛 <b>HUQUQSHUNOSLIK MILLIY SERTIFIKATI (BMBA)</b>\n\n` +
+              `Yuqoridagi savolni yechib, o'z bilimingizni sinab ko'ring! 👆\n\n` +
+              `🔥 <b>Rasmiy platformamizda:</b>\n` +
+              `• 📜 40 ta qonundan 800 ta saralangan test\n` +
+              `• 🎯 50 ta to'liq yangi formatdagi imtihon varianti\n` +
+              `• 🥊 Jonli Huquqiy Duel (Octagon)\n` +
+              `• 🤖 AI Repetitor bilan savol-javob\n\n` +
+              `<i>O'z darajangizni aniqlash va imtihonga 100% tayyorlanish uchun pastdagi ilovani oching:</i> 👇`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "🚀 Testni boshlash (Mini App)", web_app: { url: this.appUrl } }],
+                  [{ text: "🥊 Do'stlar bilan Duel", web_app: { url: `${this.appUrl}#octagon` } }],
+                  [{ text: "🤖 Rasmiy Botga kirish", url: "https://t.me/HuquqdanSertifikatBot" }]
+                ]
+              }
+            });
+          } else {
+            failDetails.push(`${ch}: ${pollRes.description || 'Xatolik'}`);
+          }
+        } catch (e) {
+          failDetails.push(`${ch}: ${e.message}`);
+        }
+        await new Promise(r => setTimeout(r, 250));
+      }
+
+      if (chatNotifyId) {
+        if (successCount > 0) {
+          await this.sendMessage(chatNotifyId, `✅ <b>Siz tuzgan test kanal(lar)ga muvaffaqiyatli tashlandi!</b>\n\n• Kanallar: <b>${channels.join(', ')}</b>\n• Muvaffaqiyatli: <b>${successCount} ta</b>`);
+        } else {
+          await this.sendMessage(chatNotifyId, `⚠️ <b>Xatolik yuz berdi:</b>\n${failDetails.join('\n')}`);
+        }
+      }
+      return { ok: successCount > 0 };
+    } catch (err) {
+      if (chatNotifyId) await this.sendMessage(chatNotifyId, `⚠️ Xatolik: ${err.message}`);
+      return { ok: false };
     }
   }
 
@@ -986,6 +1082,41 @@ class SimpleTelegramBot {
           return await this.sendMessage(chatId, `🔒 Bu buyruq faqat adminlar uchun.`);
         }
         return await this.sendAutopostMenu(chatId);
+      }
+
+      // Navbatdagi qonun testini kanalga reklama bilan tashlash
+      if (text === '/quiz' || text === '/post_quiz' || text === '/test_tashlash' || text === '/kanalga_test') {
+        if (!isUserAdmin(userId)) {
+          return await this.sendMessage(chatId, `🔒 Bu buyruq faqat bosh admin uchun.`);
+        }
+        await this.sendMessage(chatId, `⏳ Kanallarga navbatdagi qonun testi va reklama tashlanmoqda...`);
+        return await this.postNextQuizToChannel(chatId, true);
+      }
+
+      // Admin o'zi tuzgan maxsus testni tashlash
+      if (text.startsWith('/yangi_test')) {
+        if (!isUserAdmin(userId)) {
+          return await this.sendMessage(chatId, `🔒 Bu buyruq faqat admin uchun.`);
+        }
+        const raw = text.replace('/yangi_test', '').trim();
+        const parts = raw.split('|').map(s => s.trim());
+        if (parts.length < 6) {
+          return await this.sendMessage(chatId,
+            `ℹ️ <b>O'zingiz tuzgan maxsus testni kanalga tashlash tartibi:</b>\n\n` +
+            `<code>/yangi_test Savol matni | A variant | B variant | C variant | D variant | 1 | Tushuntirish</code>\n\n` +
+            `<i>Misol:</i>\n` +
+            `<code>/yangi_test O'zbekiston Konstitutsiyasi nechanchi yilda qabul qilingan? | 1991 | 1992 | 1993 | 1994 | 2 | O'zbekiston Konstitutsiyasi 1992-yil 8-dekabrda qabul qilingan.</code>`
+          );
+        }
+        const customQ = {
+          text: `⚖️ Maxsus Savol\n\n${parts[0]}`,
+          options: [parts[1], parts[2], parts[3], parts[4]].filter(Boolean),
+          correctIndex: (parseInt(parts[5]) - 1) || 0,
+          explanation: parts[6] || "",
+          lawName: "Huquqiy Sinov"
+        };
+        await this.sendMessage(chatId, `⏳ Maxsus tuzilgan test kanal(lar)ga tashlanmoqda...`);
+        return await this.postCustomQuizToChannels(chatId, customQ);
       }
 
       // /start yoki /test
