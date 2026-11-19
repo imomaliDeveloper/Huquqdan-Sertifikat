@@ -718,7 +718,7 @@ class SimpleTelegramBot {
             chat_id: ch,
             question: q.text,
             options: q.options,
-            is_anonymous: false,
+            is_anonymous: true,
             type: 'quiz',
             correct_option_id: q.correctIndex,
             explanation: q.explanation,
