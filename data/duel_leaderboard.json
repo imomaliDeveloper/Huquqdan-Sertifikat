@@ -68,5 +68,27 @@
     "matches": 4,
     "rankTitle": "Huquqiy Jangchi ⚔️",
     "lastActive": "16.11.2026"
+  },
+  {
+    "id": 1795079702030,
+    "userId": null,
+    "name": "Test Qatnashchi",
+    "duelScore": 75,
+    "wins": 1,
+    "losses": 0,
+    "matches": 1,
+    "rankTitle": "Oktagon Debyutanti 🥊",
+    "lastActive": "19/11/2026"
+  },
+  {
+    "id": 1795080028230,
+    "userId": 1001,
+    "name": "Dilshod Karimov",
+    "duelScore": 20,
+    "wins": 0,
+    "losses": 1,
+    "matches": 1,
+    "rankTitle": "Oktagon Debyutanti 🥊",
+    "lastActive": "19/11/2026"
   }
 ]

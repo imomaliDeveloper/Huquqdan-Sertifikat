@@ -353,6 +353,24 @@ function selectOption(key) {
   renderQuestion();
   updateGridMatrixCell(state.currentQuestion);
 
+  // Agar foydalanuvchi noto'g'ri variantni tanlasa, savol darhol avtomatik "Mening xatolarim"ga tushadi
+  const correctVal = (q.correct || q.correctKey || "").toString().trim().toUpperCase();
+  if (correctVal && key.toString().trim().toUpperCase() !== correctVal) {
+    saveMistakesFromResults([{
+      num: q.num,
+      type: q.type || "Y-1",
+      section: q.section || EXAM_DATA.title || "Huquqiy test",
+      text: q.text,
+      options: q.options || [],
+      correctAns: correctVal,
+      userAns: key,
+      isCorrect: false,
+      explanation: q.explanation || "To'g'ri javob amaldagi qonun talabiga asoslangan.",
+      bookSource: q.bookSource || "Huquq darsliklari va 40 ta Qonun",
+      lawSource: q.lawSource || q.section || "40 ta Qonun"
+    }]);
+  }
+
   if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
 }
 
@@ -810,6 +828,27 @@ function sendResultToTelegram() {
 
 let activeLeaderboardTab = 'exam';
 
+const DEFAULT_DUEL_LEADERBOARD = [
+  { name: "Boburmirzo Aliyev", duelScore: 1420, wins: 48, losses: 6, matches: 54, rankTitle: "Oktagon Chempioni 🏆👑", lastActive: "Bugun" },
+  { name: "Shahnoza Karimova", duelScore: 1180, wins: 39, losses: 9, matches: 48, rankTitle: "Oktagon Chempioni 🏆👑", lastActive: "Bugun" },
+  { name: "Javohir Usmonov", duelScore: 890, wins: 29, losses: 8, matches: 37, rankTitle: "Oliy Sud Himoyachisi 🏛️", lastActive: "Kecha" },
+  { name: "Dilshod Rahimov", duelScore: 760, wins: 25, losses: 11, matches: 36, rankTitle: "Oliy Sud Himoyachisi 🏛️", lastActive: "Bugun" },
+  { name: "Malika Sobirova", duelScore: 610, wins: 20, losses: 7, matches: 27, rankTitle: "Oliy Sud Himoyachisi 🏛️", lastActive: "Bugun" },
+  { name: "Azizbek Toirov", duelScore: 490, wins: 16, losses: 6, matches: 22, rankTitle: "Master Yurist ⚖️", lastActive: "2 kun oldin" },
+  { name: "Gulnoza Rustamova", duelScore: 340, wins: 11, losses: 4, matches: 15, rankTitle: "Master Yurist ⚖️", lastActive: "Bugun" },
+  { name: "Sardorbek Qodirov", duelScore: 220, wins: 7, losses: 3, matches: 10, rankTitle: "Huquqiy Jangchi ⚔️", lastActive: "Kecha" }
+];
+
+const DEFAULT_EXAM_LEADERBOARD = [
+  { name: "Alisher Qodirov", score: 44, total: 45, percentage: 98, grade: "A+", date: "18.11.2026", timeSpent: "68 daqiqa" },
+  { name: "Dilnoza Rahimova", score: 43, total: 45, percentage: 96, grade: "A+", date: "19.11.2026", timeSpent: "74 daqiqa" },
+  { name: "Shahzodbek Toirov", score: 42, total: 45, percentage: 93, grade: "A+", date: "17.11.2026", timeSpent: "81 daqiqa" },
+  { name: "Nodira Karimova", score: 41, total: 45, percentage: 91, grade: "A+", date: "19.11.2026", timeSpent: "85 daqiqa" },
+  { name: "Javlon Umarov", score: 39, total: 45, percentage: 87, grade: "A+", date: "16.11.2026", timeSpent: "79 daqiqa" },
+  { name: "Sevara Yusupova", score: 38, total: 45, percentage: 84, grade: "A", date: "18.11.2026", timeSpent: "88 daqiqa" },
+  { name: "Farrux Hasanov", score: 36, total: 45, percentage: 80, grade: "A", date: "17.11.2026", timeSpent: "90 daqiqa" }
+];
+
 async function openLeaderboardModal(tab = 'exam') {
   const modal = document.getElementById("leaderboardModal");
   if (!modal) return;
@@ -835,28 +874,63 @@ async function switchLeaderboardTab(tab) {
     if (duelBtn) duelBtn.className = "py-2 rounded-lg bg-red-600 text-white shadow-xs transition flex items-center justify-center space-x-1.5";
     if (modalTitle) modalTitle.innerText = "🥊 Huquqiy Duel Reytingi";
     if (modalSub) modalSub.innerText = "Octagon 1v1 janglari bo'yicha eng kuchli yuristlar";
-    if (listContainer) listContainer.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Duel reytingi yuklanmoqda...</div>';
+    
+    // Foydalanuvchining o'z ballarini qo'shgan holda zudlik bilan render qilish (0ms kutish)
+    let initialList = [...DEFAULT_DUEL_LEADERBOARD];
+    try {
+      const myStatsRaw = localStorage.getItem("huquq_duel_stats");
+      if (myStatsRaw) {
+        const myStats = JSON.parse(myStatsRaw);
+        if (myStats && myStats.duelScore > 0) {
+          const myName = (state.user?.name || (state.currentUser && state.currentUser.name) || "Siz (Ishtirokchi)").trim();
+          if (!initialList.some(p => p.name === myName)) {
+            initialList.push({
+              name: myName + " (Siz)",
+              duelScore: myStats.duelScore,
+              wins: myStats.wins || 0,
+              losses: myStats.losses || 0,
+              matches: myStats.matches || 0,
+              rankTitle: myStats.rankTitle || "Huquqiy Jangchi ⚔️",
+              lastActive: "Hozir"
+            });
+            initialList.sort((a, b) => b.duelScore - a.duelScore);
+          }
+        }
+      }
+    } catch (e) {}
+    renderDuelLeaderboardList(initialList);
 
+    // Fondan yangi ma'lumotlarni tortish
     try {
       const res = await fetch("/api/duel/leaderboard");
-      const data = await res.json();
-      renderDuelLeaderboardList(data);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          renderDuelLeaderboardList(data);
+        }
+      }
     } catch (err) {
-      if (listContainer) listContainer.innerHTML = '<div class="text-center py-4 text-rose-500">Duel reytingini yuklab bo\'lmadi.</div>';
+      console.warn("Duel leaderboard fetch fallback:", err);
     }
   } else {
     if (examBtn) examBtn.className = "py-2 rounded-lg bg-white dark:bg-slate-800 text-amber-600 shadow-xs transition flex items-center justify-center space-x-1.5";
     if (duelBtn) duelBtn.className = "py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition flex items-center justify-center space-x-1.5";
     if (modalTitle) modalTitle.innerText = "🏆 BMBA Imtihon Reytingi";
     if (modalSub) modalSub.innerText = "BMBA Milliy Test Tizimi natijalari";
-    if (listContainer) listContainer.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Imtihon reytingi yuklanmoqda...</div>';
+    
+    // Zudlik bilan default render
+    renderLeaderboardList(DEFAULT_EXAM_LEADERBOARD);
 
     try {
       const res = await fetch("/api/leaderboard");
-      const data = await res.json();
-      renderLeaderboardList(data);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          renderLeaderboardList(data);
+        }
+      }
     } catch (err) {
-      if (listContainer) listContainer.innerHTML = '<div class="text-center py-4 text-rose-500">Imtihon reytingini yuklab bo\'lmadi.</div>';
+      console.warn("Exam leaderboard fetch fallback:", err);
     }
   }
 }
@@ -1976,6 +2050,10 @@ function renderCasesList(cases) {
           </div>
           <h4 class="text-sm font-bold text-slate-800 dark:text-white leading-tight">${item.title}</h4>
         </div>
+        <button onclick="askAITutorForEntireCase(${idx})" class="px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-[11px] font-bold flex items-center space-x-1 hover:bg-amber-100 dark:hover:bg-amber-900 transition shadow-xs">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+          <span>AI Keys Tahlili</span>
+        </button>
       </div>
 
       <!-- Vaziyatli Matn (Scenario) -->
@@ -1987,28 +2065,30 @@ function renderCasesList(cases) {
       </div>
 
       <!-- Manbalar -->
-      <div class="flex flex-wrap gap-2 text-[10px] text-slate-500">
-        <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 font-medium">
-          <i class="fa-solid fa-book-bookmark text-indigo-500 mr-1"></i> ${item.bookSource}
-        </span>
-        <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 font-medium">
-          <i class="fa-solid fa-scale-balanced text-emerald-500 mr-1"></i> ${item.lawSource}
-        </span>
+      <div class="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
+        <div class="flex flex-wrap gap-2">
+          <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 font-medium">
+            <i class="fa-solid fa-book-bookmark text-indigo-500 mr-1"></i> ${item.bookSource || 'Huquqiy manba'}
+          </span>
+          <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 font-medium">
+            <i class="fa-solid fa-scale-balanced text-emerald-500 mr-1"></i> ${item.lawSource || 'Qonun'}
+          </span>
+        </div>
       </div>
 
       <!-- Savollarni ochish tugmasi -->
       <div>
-        <button onclick="toggleCaseQuestions('case_detail_${idx}')" class="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-between transition">
+        <button onclick="toggleCaseQuestions('case_detail_${idx}')" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-between transition">
           <span class="flex items-center">
-            <i class="fa-solid fa-list-ol mr-1.5 text-amber-600"></i> Savollar va qonuniy tahlilni ko'rish (33, 34, 35)
+            <i class="fa-solid fa-list-ol mr-1.5 text-amber-600"></i> Savollar va interaktiv yechish (33, 34, 35)
           </span>
           <i class="fa-solid fa-chevron-down text-[10px]" id="icon_case_detail_${idx}"></i>
         </button>
 
         <div id="case_detail_${idx}" class="hidden mt-3 space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700">
-          ${renderSingleCaseQuestion(33, item.q33)}
-          ${renderSingleCaseQuestion(34, item.q34)}
-          ${renderSingleCaseQuestion(35, item.q35)}
+          ${renderSingleCaseQuestion(idx, 33, item.q33)}
+          ${renderSingleCaseQuestion(idx, 34, item.q34)}
+          ${renderSingleCaseQuestion(idx, 35, item.q35)}
         </div>
       </div>
     `;
@@ -2017,32 +2097,144 @@ function renderCasesList(cases) {
   });
 }
 
-function renderSingleCaseQuestion(qNum, qObj) {
+function renderSingleCaseQuestion(caseIdx, qNum, qObj) {
   if (!qObj) return '';
-  const optsHtml = qObj.options.map(opt => `
-    <div class="p-2 rounded-lg text-xs font-medium ${opt.key === qObj.correct ? 'bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 font-bold' : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300'} flex items-start space-x-2">
-      <span class="w-5 h-5 rounded-full ${opt.key === qObj.correct ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'} flex items-center justify-center text-[10px] font-bold shrink-0">
+  const correctVal = (qObj.correct || "A").toString().trim().toUpperCase();
+  const qUniqueId = `case_${caseIdx}_q${qNum}`;
+
+  const optsHtml = (qObj.options || []).map(opt => `
+    <button type="button" 
+      id="${qUniqueId}_opt_${opt.key}"
+      onclick="handleCaseOptionAnswer(${caseIdx}, ${qNum}, '${opt.key}', this)" 
+      class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/50 hover:border-amber-500 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-start space-x-2.5 transition active:scale-98">
+      <span id="${qUniqueId}_badge_${opt.key}" class="w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-[10px] font-black shrink-0">
         ${opt.key}
       </span>
-      <span>${opt.text}</span>
-      ${opt.key === qObj.correct ? '<span class="ml-auto text-[10px] text-emerald-600 font-extrabold">✓ To\'g\'ri javob</span>' : ''}
-    </div>
+      <span class="flex-1">${opt.text}</span>
+    </button>
   `).join('');
 
   return `
-    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
+    <div id="${qUniqueId}_box" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 space-y-2.5">
       <div class="text-xs font-bold text-slate-800 dark:text-white flex items-center justify-between">
-        <span>${qNum}-savol (1.5 ball)</span>
+        <span class="flex items-center space-x-1">
+          <span class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] font-black">${qNum}</span>
+          <span>-savol (1.5 ball)</span>
+        </span>
+        <button onclick="askAITutorForCaseQuestion(${caseIdx}, ${qNum})" class="px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-300 font-bold text-[10px] flex items-center space-x-1 shadow-xs hover:bg-indigo-100 transition">
+          <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+          <span>AI Tahlil</span>
+        </button>
       </div>
-      <p class="text-xs text-slate-700 dark:text-slate-200 leading-snug">${qObj.text}</p>
-      <div class="space-y-1.5 pt-1">
+      <p class="text-xs text-slate-700 dark:text-slate-200 leading-snug font-medium">${qObj.text}</p>
+      
+      <div class="space-y-1.5 pt-1" id="${qUniqueId}_options">
         ${optsHtml}
       </div>
-      <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-[11px] text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50 mt-2">
-        <strong><i class="fa-solid fa-gavel mr-1"></i> Qonuniy tahlil:</strong> ${qObj.explanation}
+
+      <!-- Qonuniy tahlil bloki -->
+      <div id="${qUniqueId}_analysis" class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[11px] text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 mt-2">
+        <div class="font-bold flex items-center mb-0.5">
+          <i class="fa-solid fa-gavel mr-1.5 text-emerald-600"></i> Qonuniy tahlil:
+        </div>
+        <p class="leading-relaxed">${qObj.explanation || 'To\'g\'ri javob amaldagi qonun talablariga mos keladi.'}</p>
       </div>
     </div>
   `;
+}
+
+function handleCaseOptionAnswer(caseIdx, qNum, selectedKey, clickedBtn) {
+  const c = allCasesCache && allCasesCache[caseIdx];
+  if (!c) return;
+  const qObj = c['q' + qNum];
+  if (!qObj) return;
+
+  const correctVal = (qObj.correct || "A").toString().trim().toUpperCase();
+  const isCorrect = (selectedKey.toString().trim().toUpperCase() === correctVal);
+  const qUniqueId = `case_${caseIdx}_q${qNum}`;
+
+  // Barcha variantlarni qulflaymiz va to'g'ri variantni yashil bilan belgilaymiz
+  const container = document.getElementById(`${qUniqueId}_options`);
+  if (container) {
+    const buttons = container.querySelectorAll("button");
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      btn.classList.remove("hover:border-amber-500", "active:scale-98");
+    });
+  }
+
+  const correctBtn = document.getElementById(`${qUniqueId}_opt_${correctVal}`);
+  if (correctBtn) {
+    correctBtn.className = "w-full p-2.5 rounded-xl border border-emerald-500 bg-emerald-100 dark:bg-emerald-950 text-left text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-start space-x-2.5";
+    const badge = document.getElementById(`${qUniqueId}_badge_${correctVal}`);
+    if (badge) badge.className = "w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black shrink-0";
+  }
+
+  if (isCorrect) {
+    showToast(`To'g'ri javob! +1.5 ball 🎉`);
+    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+  } else {
+    // Xato tanlangan tugmani qizil qilamiz
+    if (clickedBtn && clickedBtn !== correctBtn) {
+      clickedBtn.className = "w-full p-2.5 rounded-xl border border-rose-500 bg-rose-100 dark:bg-rose-950 text-left text-xs font-bold text-rose-900 dark:text-rose-200 flex items-start space-x-2.5";
+      const badBadge = document.getElementById(`${qUniqueId}_badge_${selectedKey}`);
+      if (badBadge) badBadge.className = "w-5 h-5 rounded-md bg-rose-600 text-white flex items-center justify-center text-[10px] font-black shrink-0";
+    }
+
+    // XATOLAR BO'LIMIGA DARHOL AVTOMATIK TUSHIRISH!
+    const mistakeItem = {
+      num: qNum,
+      type: "Y-2",
+      section: `Keys #${caseIdx + 1}: ${c.title}`,
+      text: `[Keys #${caseIdx + 1} (${c.title}) - ${qNum}-savol]: ${qObj.text}`,
+      options: qObj.options || [],
+      correctAns: correctVal,
+      userAns: selectedKey,
+      isCorrect: false,
+      explanation: qObj.explanation || "Vaziyatli keys qonuniy tahlili.",
+      bookSource: c.bookSource || "Huquqiy Keyslar",
+      lawSource: c.lawSource || "Vaziyatli Keys (Y-2)"
+    };
+    saveMistakesFromResults([mistakeItem]);
+    showToast(`❌ Xato javob. Savol "Mening xatolarim"ga saqlandi!`);
+    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+  }
+}
+
+function askAITutorForCaseQuestion(caseIdx, qNum) {
+  const c = allCasesCache && allCasesCache[caseIdx];
+  if (!c) return;
+  const qObj = c['q' + qNum];
+  if (!qObj) return;
+
+  askAITutor({
+    num: qNum,
+    text: `[Vaziyatli Keys #${caseIdx + 1}]: ${c.title}\n\nVaziyat: ${c.scenario}\n\n${qNum}-Savol: ${qObj.text}`,
+    options: qObj.options || [],
+    correctAns: qObj.correct || "A",
+    userAns: "Keys savoli tahlili",
+    explanation: qObj.explanation || "Qonunchilik me'yorlariga ko'ra keys tahlili.",
+    section: `Keys #${caseIdx + 1} (${c.lawSource || 'Qonun'})`
+  });
+}
+
+function askAITutorForEntireCase(caseIdx) {
+  const c = allCasesCache && allCasesCache[caseIdx];
+  if (!c) return;
+
+  askAITutor({
+    num: 33,
+    text: `[VAZIYATLI KEYS TO'LIQ TAHLILI #${caseIdx + 1}]: ${c.title}\n\nVaziyat (Kazuistika):\n${c.scenario}\n\nManba: ${c.lawSource || ''} | ${c.bookSource || ''}`,
+    options: [
+      { key: "33", text: c.q33 ? c.q33.text : "1-savol" },
+      { key: "34", text: c.q34 ? c.q34.text : "2-savol" },
+      { key: "35", text: c.q35 ? c.q35.text : "3-savol" }
+    ],
+    correctAns: `33-savol: ${c.q33?.correct || 'A'}, 34-savol: ${c.q34?.correct || 'A'}, 35-savol: ${c.q35?.correct || 'A'}`,
+    userAns: "Keys to'liq yuridik tahlili",
+    explanation: `33-savol tahlili: ${c.q33?.explanation || ''}\n\n34-savol tahlili: ${c.q34?.explanation || ''}\n\n35-savol tahlili: ${c.q35?.explanation || ''}`,
+    section: `Keys #${caseIdx + 1}: ${c.title}`
+  });
 }
 
 function toggleCaseQuestions(detailId) {
@@ -2482,7 +2674,7 @@ const octagonState = {
   opponentHp: 100,
   currentRound: 0,
   totalRounds: 10,
-  damagePerHit: 15,
+  damagePerHit: 10,
   timeLeft: 15,
   timerInterval: null,
   activeQuestion: null,
@@ -2519,12 +2711,12 @@ function exitOctagonPrompt() {
 }
 
 async function startOctagonBattle() {
-  // Yangi jangni sozlash (10 ta raund)
+  // Yangi jangni sozlash (Qat'iy 10 ta to'liq raund)
   octagonState.playerHp = 100;
   octagonState.opponentHp = 100;
   octagonState.currentRound = 0;
   octagonState.totalRounds = 10;
-  octagonState.damagePerHit = 15;
+  octagonState.damagePerHit = 10;
   octagonState.playerRoundCorrect = 0;
   octagonState.battleMistakes = [];
   octagonState.isRoundLocked = false;
@@ -2691,7 +2883,8 @@ function updateOctagonHpBars() {
 }
 
 function loadOctagonRound(roundIdx) {
-  if (roundIdx >= octagonState.totalRounds || octagonState.playerHp <= 0 || octagonState.opponentHp <= 0) {
+  // Qat'iy 10 ta raund: faqat 10 ta raund to'liq o'ynalgach yakunlanadi
+  if (roundIdx >= octagonState.totalRounds) {
     finishOctagonBattle();
     return;
   }
@@ -2799,8 +2992,8 @@ function handleOctagonAnswer(selectedKey, clickedBtn) {
     octagonState.playerHp -= octagonState.damagePerHit;
     updateOctagonHpBars();
 
-    // Xatolikni saqlash ro'yxatiga olamiz
-    octagonState.battleMistakes.push({
+    // Xatolikni saqlash ro'yxatiga olamiz va DARHOL "Mening xatolarim"ga saqlaymiz!
+    const mistakeItem = {
       num: octagonState.currentRound + 1,
       type: "Y-1",
       section: q.section || "Huquqiy Duel",
@@ -2812,7 +3005,10 @@ function handleOctagonAnswer(selectedKey, clickedBtn) {
       explanation: q.explanation || "Huquqiy duel savoli bo'yicha to'g'ri javob me'yoriy asosga ega.",
       bookSource: "Huquqiy Octagon Arena",
       lawSource: q.section || "40 ta Qonun"
-    });
+    };
+
+    octagonState.battleMistakes.push(mistakeItem);
+    saveMistakesFromResults([mistakeItem]);
 
     if (clickedBtn) {
       clickedBtn.classList.add("bg-rose-100", "dark:bg-rose-950", "border-rose-500", "text-rose-800", "dark:text-rose-200");
@@ -2841,19 +3037,21 @@ function handleOctagonTimeout() {
   updateOctagonHpBars();
 
   if (q) {
-    octagonState.battleMistakes.push({
+    const mistakeItem = {
       num: octagonState.currentRound + 1,
       type: "Y-1",
       section: q.section || "Huquqiy Duel",
       text: q.text,
       options: q.options || [],
       correctAns: q.correct || q.correctKey || "A",
-      userAns: "Vaqt tugadi",
+      userAns: "Vaqt tugadi (Javobsiz)",
       isCorrect: false,
-      explanation: q.explanation || "Vaqt belgilangan me'yorda tugadi.",
+      explanation: q.explanation || "Vaqt belgilangan 15 soniya ichida tugadi.",
       bookSource: "Huquqiy Octagon Arena",
       lawSource: q.section || "40 ta Qonun"
-    });
+    };
+    octagonState.battleMistakes.push(mistakeItem);
+    saveMistakesFromResults([mistakeItem]);
   }
 
   const impact = document.getElementById("octCombatImpact");

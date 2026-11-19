@@ -347,8 +347,8 @@
       </div>
 
       <!-- 🔥 HUQUQIY OCTAGON DUEL BANNER -->
-      <div onclick="openOctagonLobby()" class="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-red-600 via-rose-700 to-slate-900 text-white shadow-lg cursor-pointer hover:opacity-95 active:scale-98 transition space-y-2 border border-red-500/40">
-        <div class="flex items-center justify-between relative z-10">
+      <div class="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-red-600 via-rose-700 to-slate-900 text-white shadow-lg space-y-3 border border-red-500/40">
+        <div class="flex items-center justify-between relative z-10 cursor-pointer" onclick="openOctagonLobby()">
           <div class="flex items-center space-x-3">
             <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur border border-white/20 flex items-center justify-center text-2xl shadow-inner text-yellow-300 animate-pulse">
               <i class="fa-solid fa-hand-fist"></i>
@@ -356,16 +356,24 @@
             <div>
               <div class="flex items-center space-x-2">
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-yellow-400 text-red-950 uppercase tracking-wider">PvP Arena</span>
-                <span class="text-[10px] text-red-200 font-bold">1v1 Jonli Duel</span>
+                <span class="text-[10px] text-red-200 font-bold">10 Raundlik Duel</span>
               </div>
               <h3 class="text-sm font-black tracking-wide uppercase mt-0.5">Huquqiy Octagon (Duel Jang)</h3>
-              <p class="text-[11px] text-red-100">Raqib bilan 10 raundlik qonuniy duelda kuch sinashing! Ball yig'ing va alohida Duel Reytingida peshqadam bo'ling!</p>
+              <p class="text-[11px] text-red-100">10 raundlik qonuniy duelda kuch sinashing! Ball yig'ing va alohida Duel Reytingida peshqadam bo'ling!</p>
             </div>
           </div>
-          <span class="px-3 py-1.5 rounded-xl bg-white/20 text-xs font-black tracking-wide border border-white/30 flex items-center space-x-1">
+        </div>
+
+        <!-- Duel harakat tugmalari: Jangga kirish va Duel Reytingi -->
+        <div class="flex items-center space-x-2 pt-1 relative z-10">
+          <button onclick="openOctagonLobby()" class="flex-1 py-2 px-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-red-950 font-black text-xs shadow-md flex items-center justify-center space-x-1.5 active:scale-98 transition">
+            <i class="fa-solid fa-bolt"></i>
             <span>Jangga kirish</span>
-            <i class="fa-solid fa-bolt text-yellow-300"></i>
-          </span>
+          </button>
+          <button onclick="openDuelLeaderboard()" class="flex-1 py-2 px-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-extrabold text-xs border border-white/30 backdrop-blur shadow-md flex items-center justify-center space-x-1.5 active:scale-98 transition">
+            <i class="fa-solid fa-trophy text-yellow-300"></i>
+            <span>🏆 Duel Reytingi</span>
+          </button>
         </div>
         <i class="fa-solid fa-shield-halved absolute -right-3 -bottom-5 text-7xl text-white/10 pointer-events-none"></i>
       </div>
@@ -1917,8 +1925,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/exam_data.js?v=25"></script>
-  <script src="js/flashcards.js?v=25"></script>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/exam_data.js?v=28"></script>
+  <script src="js/flashcards.js?v=28"></script>
+  <script src="js/app.js?v=28"></script>
 </body>
 </html>
