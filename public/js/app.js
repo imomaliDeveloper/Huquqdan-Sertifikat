@@ -683,55 +683,86 @@ function renderResultsList(list) {
 }
 
 // 1. AI REPETITOR MODAL BILAN SAVOLNI TAHLIL QILISH
-async function askAITutor(questionNum) {
+async function askAITutor(target) {
   const modal = document.getElementById("aiExplainModal");
   const loading = document.getElementById("aiExplainLoading");
   const content = document.getElementById("aiExplainContent");
 
+  if (!modal) return;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
-  loading.classList.remove("hidden");
-  content.classList.add("hidden");
+  if (loading) loading.classList.remove("hidden");
+  if (content) content.classList.add("hidden");
 
-  const item = state.currentDetailedResults.find(r => r.num === questionNum) || EXAM_DATA.questions[questionNum - 1];
+  let item = null;
+  if (typeof target === 'object' && target !== null) {
+    item = target;
+  } else if (typeof target === 'number') {
+    item = (state.currentDetailedResults && state.currentDetailedResults.find(r => r.num === target)) ||
+           (EXAM_DATA && EXAM_DATA.questions && EXAM_DATA.questions[target - 1]);
+  }
+
+  if (!item) {
+    item = {
+      text: "Huquqiy test savoli",
+      options: [],
+      correctAns: "A",
+      userAns: "",
+      explanation: "Ushbu savol O'zbekiston Respublikasi qonunlariga asoslangan.",
+      section: "Huquqshunoslik"
+    };
+  }
+
+  const lawArticleEl = document.getElementById("aiLawArticle");
+  const explanationEl = document.getElementById("aiExplanationText") || document.getElementById("aiExplanation");
+  const mistakeReasonEl = document.getElementById("aiMistakeReason");
+  const memoryTipEl = document.getElementById("aiMemoryTip");
 
   try {
     const res = await fetch("/api/ai/explain-question", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        questionText: item.text,
+        questionText: item.text || item.questionText || "",
         options: item.options || [],
-        correctAnswer: item.correctAns || item.correct,
-        userAnswer: item.userAns || "",
+        correctAnswer: item.correctAns || item.correct || item.correctAnswer || "A",
+        userAnswer: item.userAns || item.userAnswer || "",
         explanation: item.explanation || "",
-        lawRef: item.section || ""
+        lawRef: item.section || item.lawSource || ""
       })
     });
 
     const data = await res.json();
 
-    document.getElementById("aiLawArticle").innerText = data.lawArticle || item.section;
-    document.getElementById("aiExplanation").innerText = data.explanation;
-    document.getElementById("aiMistakeReason").innerText = data.mistakeReason;
-    document.getElementById("aiMemoryTip").innerText = data.memoryTip;
+    if (lawArticleEl) lawArticleEl.innerText = data.lawArticle || item.section || item.lawSource || "O'zbekiston Qonunchiligi";
+    if (explanationEl) explanationEl.innerText = data.explanation || item.explanation || "Tahlil mavjud emas.";
+    if (mistakeReasonEl) mistakeReasonEl.innerText = data.mistakeReason || "Savoldagi nozik normativ shartlarga yetarlicha e'tibor berilmagan.";
+    if (memoryTipEl) memoryTipEl.innerText = data.memoryTip || "Ushbu savol yuzasidan qonun moddasini konspekt qilib takrorlang.";
 
-    loading.classList.add("hidden");
-    content.classList.remove("hidden");
+    if (loading) loading.classList.add("hidden");
+    if (content) content.classList.remove("hidden");
   } catch (err) {
-    loading.classList.add("hidden");
-    content.classList.remove("hidden");
-    document.getElementById("aiLawArticle").innerText = item.section;
-    document.getElementById("aiExplanation").innerText = item.explanation;
-    document.getElementById("aiMistakeReason").innerText = "Savoldagi normativ muddatlar va shartlarga e'tibor qaratilmagan.";
-    document.getElementById("aiMemoryTip").innerText = "Ushbu savol bo'yicha Flashcardlarni takrorlab chiqing.";
+    console.warn("askAITutor fetch fallback:", err);
+    if (lawArticleEl) lawArticleEl.innerText = item.section || item.lawSource || "O'zbekiston Respublikasi Qonunchiligi";
+    if (explanationEl) explanationEl.innerText = item.explanation || "To'g'ri javob amaldagi qonun me'yorlariga to'liq mos keladi.";
+    if (mistakeReasonEl) mistakeReasonEl.innerText = "Savoldagi normativ muddatlar va shartlarga e'tibor qaratilmagan.";
+    if (memoryTipEl) memoryTipEl.innerText = "Ushbu savol bo'yicha Flashcardlarni takrorlab chiqing.";
+
+    if (loading) loading.classList.add("hidden");
+    if (content) content.classList.remove("hidden");
+  }
+}
+
+function closeAiExplainModal() {
+  const modal = document.getElementById("aiExplainModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
   }
 }
 
 function closeAIModal() {
-  const modal = document.getElementById("aiExplainModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  closeAiExplainModal();
 }
 
 // Natijani serverga va Leaderboardga saqlash
@@ -741,9 +772,9 @@ async function submitResultToServer(score, percentage, grade) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userName: state.user.name,
+        userName: state.user?.name || (state.currentUser && state.currentUser.name) || "Talaba",
         score: score,
-        total: EXAM_DATA.totalQuestions,
+        total: EXAM_DATA.totalQuestions || (EXAM_DATA.questions ? EXAM_DATA.questions.length : 45),
         percentage: percentage,
         grade: grade,
         timeSpent: `${Math.round((90 * 60 - state.timerSeconds) / 60)} daqiqa`
@@ -775,31 +806,68 @@ function sendResultToTelegram() {
   }
 }
 
-/* ==================== 4. REYTING & LEADERBOARD ==================== */
+/* ==================== 4. REYTING & LEADERBOARD (IMTIHON & DUEL) ==================== */
 
-async function openLeaderboardModal() {
+let activeLeaderboardTab = 'exam';
+
+async function openLeaderboardModal(tab = 'exam') {
   const modal = document.getElementById("leaderboardModal");
-  const listContainer = document.getElementById("leaderboardList");
-
+  if (!modal) return;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
-  listContainer.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Reyting yuklanmoqda...</div>';
+  await switchLeaderboardTab(tab);
+}
 
-  try {
-    const res = await fetch("/api/leaderboard");
-    const data = await res.json();
-    renderLeaderboardList(data);
-  } catch (err) {
-    listContainer.innerHTML = '<div class="text-center py-4 text-rose-500">Reytingni yuklab bo\'lmadi.</div>';
+function openDuelLeaderboard() {
+  openLeaderboardModal('duel');
+}
+
+async function switchLeaderboardTab(tab) {
+  activeLeaderboardTab = tab || 'exam';
+  const examBtn = document.getElementById("tabLeaderboardExam");
+  const duelBtn = document.getElementById("tabLeaderboardDuel");
+  const modalTitle = document.getElementById("leaderboardModalTitle");
+  const modalSub = document.getElementById("leaderboardModalSub");
+  const listContainer = document.getElementById("leaderboardList");
+
+  if (activeLeaderboardTab === 'duel') {
+    if (examBtn) examBtn.className = "py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition flex items-center justify-center space-x-1.5";
+    if (duelBtn) duelBtn.className = "py-2 rounded-lg bg-red-600 text-white shadow-xs transition flex items-center justify-center space-x-1.5";
+    if (modalTitle) modalTitle.innerText = "🥊 Huquqiy Duel Reytingi";
+    if (modalSub) modalSub.innerText = "Octagon 1v1 janglari bo'yicha eng kuchli yuristlar";
+    if (listContainer) listContainer.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Duel reytingi yuklanmoqda...</div>';
+
+    try {
+      const res = await fetch("/api/duel/leaderboard");
+      const data = await res.json();
+      renderDuelLeaderboardList(data);
+    } catch (err) {
+      if (listContainer) listContainer.innerHTML = '<div class="text-center py-4 text-rose-500">Duel reytingini yuklab bo\'lmadi.</div>';
+    }
+  } else {
+    if (examBtn) examBtn.className = "py-2 rounded-lg bg-white dark:bg-slate-800 text-amber-600 shadow-xs transition flex items-center justify-center space-x-1.5";
+    if (duelBtn) duelBtn.className = "py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition flex items-center justify-center space-x-1.5";
+    if (modalTitle) modalTitle.innerText = "🏆 BMBA Imtihon Reytingi";
+    if (modalSub) modalSub.innerText = "BMBA Milliy Test Tizimi natijalari";
+    if (listContainer) listContainer.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Imtihon reytingi yuklanmoqda...</div>';
+
+    try {
+      const res = await fetch("/api/leaderboard");
+      const data = await res.json();
+      renderLeaderboardList(data);
+    } catch (err) {
+      if (listContainer) listContainer.innerHTML = '<div class="text-center py-4 text-rose-500">Imtihon reytingini yuklab bo\'lmadi.</div>';
+    }
   }
 }
 
 function renderLeaderboardList(list) {
   const container = document.getElementById("leaderboardList");
+  if (!container) return;
   container.innerHTML = "";
 
   if (!list || list.length === 0) {
-    container.innerHTML = '<div class="text-center py-4 text-slate-400">Hozircha natijalar yo\'q. Birinchi bo\'lib testni topshiring!</div>';
+    container.innerHTML = '<div class="text-center py-6 text-slate-400">Hozircha natijalar yo\'q. Birinchi bo\'lib testni topshiring!</div>';
     return;
   }
 
@@ -815,7 +883,7 @@ function renderLeaderboardList(list) {
     item.innerHTML = `
       <div class="flex items-center space-x-3">
         <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm ${
-          idx < 3 ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
+          idx < 3 ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
         }">${rankBadge}</span>
         <div>
           <h4 class="font-bold text-slate-800 dark:text-white leading-tight">${entry.name}</h4>
@@ -832,10 +900,60 @@ function renderLeaderboardList(list) {
   });
 }
 
+function renderDuelLeaderboardList(list) {
+  const container = document.getElementById("leaderboardList");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div class="text-center py-6 text-slate-400">Hozircha duellar bo\'yicha ballar mavjud emas. Oktagonga kiring va birinchi g\'alabani qozoning! 🥊</div>';
+    return;
+  }
+
+  list.forEach((entry, idx) => {
+    let rankBadge = `${idx + 1}`;
+    if (idx === 0) rankBadge = "🥇";
+    else if (idx === 1) rankBadge = "🥈";
+    else if (idx === 2) rankBadge = "🥉";
+
+    const item = document.createElement("div");
+    item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between";
+
+    item.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <span class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+          idx < 3 ? 'bg-gradient-to-tr from-amber-400 to-yellow-500 text-red-950 font-black shadow-xs' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+        }">${rankBadge}</span>
+        <div>
+          <h4 class="font-bold text-slate-800 dark:text-white leading-tight flex items-center space-x-1.5">
+            <span>${entry.name}</span>
+          </h4>
+          <div class="flex items-center space-x-2 text-[10px] text-slate-400 pt-0.5">
+            <span class="text-red-500 font-bold">${entry.rankTitle || 'Huquqiy Jangchi'}</span>
+            <span>•</span>
+            <span>${entry.wins || 0}G' / ${entry.losses || 0}M (${entry.matches || 0} jang)</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="font-black text-sm text-yellow-600 dark:text-yellow-400 flex items-center justify-end space-x-1">
+          <i class="fa-solid fa-trophy text-[10px]"></i>
+          <span>${entry.duelScore || entry.score || 0}</span>
+        </span>
+        <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Duel Bali</span>
+      </div>
+    `;
+
+    container.appendChild(item);
+  });
+}
+
 function closeLeaderboardModal() {
   const modal = document.getElementById("leaderboardModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
 }
 
 /* ==================== AUTH VA PROFIL MANTIQI ==================== */
@@ -944,6 +1062,18 @@ function updateProfileViewData() {
   if (profAvg) profAvg.innerText = `${avgScore}%`;
   if (profStreak) profStreak.innerText = `${state.streak} kun`;
   if (profMistakes) profMistakes.innerText = `${mistakes.length} ta`;
+
+  // Huquqiy Duel statistikasi
+  let duelStats = { duelScore: 0, wins: 0, losses: 0, matches: 0 };
+  try {
+    const raw = localStorage.getItem("huquq_duel_stats");
+    if (raw) duelStats = JSON.parse(raw);
+  } catch (e) {}
+
+  const profDuelScoreEl = document.getElementById("profDuelScore");
+  const profDuelRecordEl = document.getElementById("profDuelRecord");
+  if (profDuelScoreEl) profDuelScoreEl.innerText = `${duelStats.duelScore || 0} ball`;
+  if (profDuelRecordEl) profDuelRecordEl.innerText = `${duelStats.matches || 0} jang • ${duelStats.wins || 0} g'alaba (${duelStats.losses || 0} mag'lubiyat)`;
 }
 
 function openProfileView() {
@@ -1933,34 +2063,37 @@ function toggleCaseQuestions(detailId) {
 function getStoredMistakes() {
   try {
     const raw = localStorage.getItem("huquq_my_mistakes");
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter(m => m && m.text && m.text !== "undefined" && m.text.trim() !== "") : [];
   } catch (e) {
     return [];
   }
 }
 
 function saveMistakesFromResults(resultsDetailed) {
+  if (!Array.isArray(resultsDetailed) || resultsDetailed.length === 0) return;
   const existing = getStoredMistakes();
-  const existingTexts = new Set(existing.map(m => m.text));
+  const existingTexts = new Set(existing.map(m => (m.text || "").trim()));
 
   let addedCount = 0;
   resultsDetailed.forEach(r => {
-    if (!r.isCorrect && !existingTexts.has(r.questionText)) {
+    const qText = (r.text || r.questionText || "").trim();
+    if (!r.isCorrect && qText && !existingTexts.has(qText)) {
       existing.unshift({
-        num: r.num,
-        type: r.type,
-        section: r.section,
-        text: r.questionText,
+        num: r.num || (existing.length + 1),
+        type: r.type || "Y-1",
+        section: r.section || "Huquqiy test",
+        text: qText,
         options: r.options || [],
-        correct: r.correctAnswer,
+        correct: r.correctAns || r.correctAnswer || r.correct || "A",
         acceptableAnswers: r.acceptableAnswers || [],
-        explanation: r.explanation,
-        bookSource: r.bookSource,
-        lawSource: r.lawSource,
-        userAnswer: r.userAnswer || "Javob berilmagan",
+        explanation: r.explanation || "To'g'ri javob amaldagi qonunchilik talabiga asoslangan.",
+        bookSource: r.bookSource || "Huquq darsliklari va 40 ta Qonun",
+        lawSource: r.lawSource || r.section || "Spesifikatsiyadagi 40 ta Qonun",
+        userAnswer: r.userAns || r.userAnswer || "Javob berilmagan",
         addedAt: new Date().toLocaleDateString('uz-UZ')
       });
-      existingTexts.add(r.questionText);
+      existingTexts.add(qText);
       addedCount++;
     }
   });
@@ -1968,7 +2101,8 @@ function saveMistakesFromResults(resultsDetailed) {
   localStorage.setItem("huquq_my_mistakes", JSON.stringify(existing));
   updateMistakesCount();
   if (addedCount > 0) {
-    console.log(`Xatolar bankiga ${addedCount} ta savol qo'shildi.`);
+    console.log(`Xatolar bankiga ${addedCount} ta yangi savol saqlandi.`);
+    showToast(`📝 ${addedCount} ta xato savol "Mening xatolarim"ga saqlandi!`);
   }
 }
 
@@ -2050,14 +2184,35 @@ function renderMistakesList() {
       </div>
 
       <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60 text-[10px] text-slate-400">
-        <span><i class="fa-solid fa-book mr-1"></i> ${m.bookSource}</span>
-        <button onclick="removeMistake(${idx})" class="text-emerald-600 font-bold hover:underline">
-          <i class="fa-solid fa-check mr-0.5"></i> Yod oldim
-        </button>
+        <span class="truncate max-w-[130px]"><i class="fa-solid fa-book mr-1"></i> ${m.bookSource}</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="askAITutorForMistake(${idx})" class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 font-bold hover:bg-indigo-100 flex items-center space-x-1 transition text-[11px]">
+            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+            <span>AI Tahlil</span>
+          </button>
+          <button onclick="removeMistake(${idx})" class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 font-bold hover:bg-emerald-100 flex items-center space-x-1 transition text-[11px]">
+            <i class="fa-solid fa-check text-[10px]"></i>
+            <span>Yod oldim</span>
+          </button>
+        </div>
       </div>
     `;
 
     container.appendChild(card);
+  });
+}
+
+function askAITutorForMistake(idx) {
+  const mistakes = getStoredMistakes();
+  const m = mistakes[idx];
+  if (!m) return;
+  askAITutor({
+    text: m.text,
+    options: m.options,
+    correctAns: m.correct,
+    userAns: m.userAnswer,
+    explanation: m.explanation,
+    section: m.section || m.lawSource
   });
 }
 
@@ -2320,17 +2475,20 @@ async function submitPaymentReceipt() {
   }
 }
 
-/* ==================== 🔥 HUQUQIY OCTAGON (1v1 DUEL JANGI) ==================== */
+/* ==================== 🔥 HUQUQIY OCTAGON (1v1 DUEL JANGI - 10 RAUND) ==================== */
 
 const octagonState = {
   playerHp: 100,
   opponentHp: 100,
   currentRound: 0,
-  totalRounds: 5,
+  totalRounds: 10,
+  damagePerHit: 15,
   timeLeft: 15,
   timerInterval: null,
   activeQuestion: null,
   isRoundLocked: false,
+  playerRoundCorrect: 0,
+  battleMistakes: [],
   opponentName: "Advokat Aliyev",
   opponentsList: [
     "Advokat Aliyev (Toshkent)",
@@ -2338,7 +2496,9 @@ const octagonState = {
     "Sudya Karimova (Farg'ona)",
     "BMBA Chempioni (Namangan)",
     "Yurist Qodirov (Buxoro)",
-    "Ekspert Saidov (Andijon)"
+    "Ekspert Saidov (Andijon)",
+    "Notarius Usmonov (Xorazm)",
+    "Tergovchi Jalilov (Qashqadaryo)"
   ],
   battleQuestions: []
 };
@@ -2359,16 +2519,20 @@ function exitOctagonPrompt() {
 }
 
 async function startOctagonBattle() {
-  // Yangi jangni sozlash
+  // Yangi jangni sozlash (10 ta raund)
   octagonState.playerHp = 100;
   octagonState.opponentHp = 100;
   octagonState.currentRound = 0;
+  octagonState.totalRounds = 10;
+  octagonState.damagePerHit = 15;
+  octagonState.playerRoundCorrect = 0;
+  octagonState.battleMistakes = [];
   octagonState.isRoundLocked = false;
   if (octagonState.timerInterval) clearInterval(octagonState.timerInterval);
 
   // UI nomlarini o'rnatish
   const pName = document.getElementById("octPlayerName");
-  if (pName) pName.innerText = state.user?.name || "Siz";
+  if (pName) pName.innerText = state.user?.name || (state.currentUser && state.currentUser.name) || "Siz";
   const oName = document.getElementById("octOpponentName");
   if (oName) oName.innerText = "Raqib qidirilmoqda...";
 
@@ -2387,7 +2551,7 @@ async function startOctagonBattle() {
     if (oppRes.ok) {
       const oppList = await oppRes.json();
       if (Array.isArray(oppList) && oppList.length > 0) {
-        const myName = (state.user?.name || "").toLowerCase().trim();
+        const myName = (state.user?.name || (state.currentUser && state.currentUser.name) || "").toLowerCase().trim();
         const available = oppList.filter(o => (o.name || "").toLowerCase().trim() !== myName);
         const candidates = available.length > 0 ? available : oppList;
         const picked = candidates[Math.floor(Math.random() * candidates.length)];
@@ -2404,27 +2568,29 @@ async function startOctagonBattle() {
   octagonState.opponentName = chosenOpponentName;
   if (oName) oName.innerText = chosenOpponentName;
 
-  // 2. DUELDA BIR XIL SAVOLLAR TAKRORLANMASLIGI UCHUN 800+ TA QONUN TESTIDAN DINAMIK 5 TA YANGI SAVOL OLISH
+  // 2. DUELDA BIR XIL SAVOLLAR TAKRORLANMASLIGI UCHUN 800+ TA QONUN TESTIDAN DINAMIK 10 TA YANGI SAVOL OLISH
   let dynamicQuestions = [];
   try {
     const qRes = await fetch("/api/duel/questions");
     if (qRes.ok) {
       const fetched = await qRes.json();
-      if (Array.isArray(fetched) && fetched.length >= 5) {
-        dynamicQuestions = fetched.slice(0, 5);
+      if (Array.isArray(fetched) && fetched.length >= 10) {
+        dynamicQuestions = fetched.slice(0, 10);
+      } else if (Array.isArray(fetched) && fetched.length > 0) {
+        dynamicQuestions = fetched;
       }
     }
   } catch (err) {
     console.warn("Duel questions fetch fallback:", err);
   }
 
-  // Oflayn yoki fallback holatida
-  if (!dynamicQuestions || dynamicQuestions.length < 5) {
+  // Oflayn yoki fallback holatida 10 ta savol
+  if (!dynamicQuestions || dynamicQuestions.length < 10) {
     const pool = (EXAM_DATA && EXAM_DATA.questions && EXAM_DATA.questions.length > 0)
       ? EXAM_DATA.questions.filter(q => q.options && q.options.length >= 2)
       : [];
-    if (pool.length >= 5) {
-      dynamicQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+    if (pool.length >= 10) {
+      dynamicQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 10);
     } else {
       dynamicQuestions = [
         {
@@ -2456,14 +2622,45 @@ async function startOctagonBattle() {
           options: [{key:"A", text:"1/4 qismi"}, {key:"B", text:"1/3 qismi"}, {key:"C", text:"1/2 qismi"}, {key:"D", text:"1/6 qismi"}],
           correct: "A",
           section: "Oila huquqi"
+        },
+        {
+          text: "Jinoyat kodeksiga ko'ra jinoiy javobgarlikka tortishning umumiy yoshi necha yosh?",
+          options: [{key:"A", text:"14 yosh"}, {key:"B", text:"16 yosh"}, {key:"C", text:"18 yosh"}, {key:"D", text:"21 yosh"}],
+          correct: "B",
+          section: "Jinoyat huquqi"
+        },
+        {
+          text: "O'zbekiston Respublikasi Oliy Majlisi Qonunchilik palatasi necha deputatdan iborat?",
+          options: [{key:"A", text:"100 nafar"}, {key:"B", text:"120 nafar"}, {key:"C", text:"150 nafar"}, {key:"D", text:"65 nafar"}],
+          correct: "C",
+          section: "Konstitutsiyaviy huquq"
+        },
+        {
+          text: "Fuqarolik huquqida to'liq muomala layoqati necha yoshdan boshlanadi?",
+          options: [{key:"A", text:"14 yosh"}, {key:"B", text:"16 yosh"}, {key:"C", text:"18 yosh"}, {key:"D", text:"21 yosh"}],
+          correct: "C",
+          section: "Fuqarolik huquqi"
+        },
+        {
+          text: "Mehnat shartnomasini xodimning tashabbusi bilan bekor qilishda ish beruvchi necha hafta oldin yozma ogohlantiriladi?",
+          options: [{key:"A", text:"1 hafta"}, {key:"B", text:"2 hafta"}, {key:"C", text:"1 oy"}, {key:"D", text:"3 kun"}],
+          correct: "B",
+          section: "Mehnat huquqi"
+        },
+        {
+          text: "Ma'muriy javobgarlik to'g'risidagi kodeksga ko'ra ma'muriy qamoq jazosining eng yuqori muddati necha sutka?",
+          options: [{key:"A", text:"10 sutka"}, {key:"B", text:"15 sutka"}, {key:"C", text:"30 sutka"}, {key:"D", text:"60 sutka"}],
+          correct: "B",
+          section: "Ma'muriy huquq"
         }
       ];
     }
   }
 
   octagonState.battleQuestions = dynamicQuestions;
+  octagonState.totalRounds = dynamicQuestions.length;
 
-  showToast(`🥊 Jang boshlandi! Raqib: ${chosenOpponentName}`);
+  showToast(`🥊 10 raundlik duel boshlandi! Raqib: ${chosenOpponentName}`);
   loadOctagonRound(0);
 }
 
@@ -2587,19 +2784,35 @@ function handleOctagonAnswer(selectedKey, clickedBtn) {
 
   if (isCorrect) {
     // Foydalanuvchi to'g'ri topdi -> Raqibga zarba!
-    octagonState.opponentHp -= 25;
+    octagonState.opponentHp -= octagonState.damagePerHit;
+    octagonState.playerRoundCorrect++;
     updateOctagonHpBars();
 
     if (impact) {
       impact.classList.remove("hidden");
       impact.className = "text-center text-xs font-black py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse";
-      impact.innerHTML = `💥 ANIQ VA KUCHLI ZARBA! Raqib -25 HP yo'qotdi!`;
+      impact.innerHTML = `💥 ANIQ VA KUCHLI ZARBA! Raqib -${octagonState.damagePerHit} HP yo'qotdi!`;
     }
     showToast("To'g'ri javob! Raqib jarohatlandi! 🥊");
   } else {
     // Foydalanuvchi xato qildi -> Foydalanuvchiga zarba!
-    octagonState.playerHp -= 25;
+    octagonState.playerHp -= octagonState.damagePerHit;
     updateOctagonHpBars();
+
+    // Xatolikni saqlash ro'yxatiga olamiz
+    octagonState.battleMistakes.push({
+      num: octagonState.currentRound + 1,
+      type: "Y-1",
+      section: q.section || "Huquqiy Duel",
+      text: q.text,
+      options: q.options || [],
+      correctAns: correctVal,
+      userAns: selectedKey,
+      isCorrect: false,
+      explanation: q.explanation || "Huquqiy duel savoli bo'yicha to'g'ri javob me'yoriy asosga ega.",
+      bookSource: "Huquqiy Octagon Arena",
+      lawSource: q.section || "40 ta Qonun"
+    });
 
     if (clickedBtn) {
       clickedBtn.classList.add("bg-rose-100", "dark:bg-rose-950", "border-rose-500", "text-rose-800", "dark:text-rose-200");
@@ -2608,7 +2821,7 @@ function handleOctagonAnswer(selectedKey, clickedBtn) {
     if (impact) {
       impact.classList.remove("hidden");
       impact.className = "text-center text-xs font-black py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse";
-      impact.innerHTML = `🥊 RAQIB SIZGA QARSHI ZARBA BERDI! -25 HP!`;
+      impact.innerHTML = `🥊 RAQIB SIZGA QARSHI ZARBA BERDI! -${octagonState.damagePerHit} HP!`;
     }
     showToast("Noto'g'ri javob! Zarba qabul qildingiz! 💥");
   }
@@ -2623,14 +2836,31 @@ function handleOctagonTimeout() {
   if (octagonState.isRoundLocked) return;
   octagonState.isRoundLocked = true;
 
-  octagonState.playerHp -= 25;
+  const q = octagonState.activeQuestion;
+  octagonState.playerHp -= octagonState.damagePerHit;
   updateOctagonHpBars();
+
+  if (q) {
+    octagonState.battleMistakes.push({
+      num: octagonState.currentRound + 1,
+      type: "Y-1",
+      section: q.section || "Huquqiy Duel",
+      text: q.text,
+      options: q.options || [],
+      correctAns: q.correct || q.correctKey || "A",
+      userAns: "Vaqt tugadi",
+      isCorrect: false,
+      explanation: q.explanation || "Vaqt belgilangan me'yorda tugadi.",
+      bookSource: "Huquqiy Octagon Arena",
+      lawSource: q.section || "40 ta Qonun"
+    });
+  }
 
   const impact = document.getElementById("octCombatImpact");
   if (impact) {
     impact.classList.remove("hidden");
     impact.className = "text-center text-xs font-black py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/40";
-    impact.innerHTML = `⏰ VAQT TUGADI! Raqib sizga hujum qildi (-25 HP)!`;
+    impact.innerHTML = `⏰ VAQT TUGADI! Raqib sizga hujum qildi (-${octagonState.damagePerHit} HP)!`;
   }
   showToast("Vaqt tugadi! Zarba yetkazildi! 💥");
 
@@ -2654,7 +2884,62 @@ function finishOctagonBattle() {
   const iconEl = document.getElementById("octResultIcon");
 
   const pWon = (octagonState.playerHp > octagonState.opponentHp);
+  const isDraw = (octagonState.playerHp === octagonState.opponentHp);
   const isKnockout = (octagonState.opponentHp <= 0 || octagonState.playerHp <= 0);
+
+  // Duel ballarini hisoblash
+  let scoreGained = octagonState.playerRoundCorrect * 10; // Har bir to'g'ri javob uchun 10 ball
+  if (pWon) {
+    scoreGained += 50; // G'alaba bonusi
+    if (isKnockout) scoreGained += 25; // Noqaud bonusi
+  } else if (isDraw) {
+    scoreGained += 25; // Durang bonusi
+  } else {
+    scoreGained += 10; // Ishtirok uchun rag'bat
+  }
+
+  // 1. Jangdagi xatolarni "Mening xatolarim" bankiga saqlash
+  if (octagonState.battleMistakes && octagonState.battleMistakes.length > 0) {
+    saveMistakesFromResults(octagonState.battleMistakes);
+  }
+
+  // 2. Mahalliy statistikani yangilash
+  let duelStats = { duelScore: 0, wins: 0, losses: 0, matches: 0 };
+  try {
+    const raw = localStorage.getItem("huquq_duel_stats");
+    if (raw) duelStats = JSON.parse(raw);
+  } catch (e) {}
+
+  duelStats.duelScore = (duelStats.duelScore || 0) + scoreGained;
+  duelStats.matches = (duelStats.matches || 0) + 1;
+  if (pWon) duelStats.wins = (duelStats.wins || 0) + 1;
+  else if (!isDraw) duelStats.losses = (duelStats.losses || 0) + 1;
+  localStorage.setItem("huquq_duel_stats", JSON.stringify(duelStats));
+
+  // 3. UI ballarini aks ettirish
+  const scoreGainedEl = document.getElementById("octScoreGained");
+  const totalScoreEl = document.getElementById("octTotalDuelScore");
+  if (scoreGainedEl) scoreGainedEl.innerText = `+${scoreGained} Reyting Bali Qozonildi! (${octagonState.playerRoundCorrect}/${octagonState.totalRounds} to'g'ri)`;
+  if (totalScoreEl) totalScoreEl.innerText = `Jami duel bali: ${duelStats.duelScore} ball | ${duelStats.wins} ta g'alaba`;
+
+  // 4. Serverga va alohida Duel Reytingiga natijani yuborish
+  const currentUserName = state.user?.name || (state.currentUser && state.currentUser.name) || "Talaba";
+  const currentUserId = state.user?.id || (state.currentUser && state.currentUser.id) || null;
+
+  fetch("/api/duel/result", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: currentUserId,
+      userName: currentUserName,
+      scoreGained: scoreGained,
+      won: pWon,
+      isKnockout: isKnockout,
+      correctCount: octagonState.playerRoundCorrect,
+      totalRounds: octagonState.totalRounds,
+      opponentName: octagonState.opponentName
+    })
+  }).catch(e => console.warn("Duel result save fallback:", e));
 
   if (pWon) {
     if (iconEl) {
@@ -2666,9 +2951,22 @@ function finishOctagonBattle() {
       titleEl.className = "text-lg font-black uppercase text-yellow-300";
     }
     if (descEl) {
-      descEl.innerText = `Siz ${octagonState.opponentName} ustidan qonuniy dalillar bilan to'liq ustun keldingiz! Octagon kamari sizga nasib etdi!`;
+      descEl.innerText = `Siz 10 raundlik shiddatli jangda ${octagonState.opponentName} ustidan to'liq ustun keldingiz! Octagon kamari sizga nasib etdi!`;
     }
     showToast("TABRIKLAYMIZ! OCTAGON G'OLIBI BO'LDINGIZ! 🥊🏆");
+  } else if (isDraw) {
+    if (iconEl) {
+      iconEl.className = "w-16 h-16 mx-auto rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-3xl border-2 border-blue-400 shadow-lg";
+      iconEl.innerHTML = `<i class="fa-solid fa-scale-balanced"></i>`;
+    }
+    if (titleEl) {
+      titleEl.innerText = "🤝 DURANG NATIJA!";
+      titleEl.className = "text-lg font-black uppercase text-blue-300";
+    }
+    if (descEl) {
+      descEl.innerText = `10 raund yakunida har ikki tomon teng kuchli bilim namoyish etdi!`;
+    }
+    showToast("Jang durang bilan yakunlandi! ⚖️");
   } else {
     if (iconEl) {
       iconEl.className = "w-16 h-16 mx-auto rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center text-3xl border-2 border-rose-500 shadow-lg";
@@ -2679,9 +2977,9 @@ function finishOctagonBattle() {
       titleEl.className = "text-lg font-black uppercase text-rose-400";
     }
     if (descEl) {
-      descEl.innerText = `Bu safar ${octagonState.opponentName} tajribasi ustun keldi. Flashcards va qonunlarni takrorlab qayta jangga chiqing!`;
+      descEl.innerText = `Bu safar ${octagonState.opponentName} tajribasi ustun keldi. Flashcards va xatolar bankini takrorlab qayta jangga chiqing!`;
     }
-    showToast("Jang yakunlandi. Qayta urinib ko'ring! 💪");
+    showToast("Jang yakunlandi. Xatolaringiz saqlandi, qayta urinib ko'ring! 💪");
   }
 }
 

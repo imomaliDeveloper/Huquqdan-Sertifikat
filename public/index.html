@@ -359,7 +359,7 @@
                 <span class="text-[10px] text-red-200 font-bold">1v1 Jonli Duel</span>
               </div>
               <h3 class="text-sm font-black tracking-wide uppercase mt-0.5">Huquqiy Octagon (Duel Jang)</h3>
-              <p class="text-[11px] text-red-100">Raqib bilan 5 raundlik qonuniy duelda kuch sinashing!</p>
+              <p class="text-[11px] text-red-100">Raqib bilan 10 raundlik qonuniy duelda kuch sinashing! Ball yig'ing va alohida Duel Reytingida peshqadam bo'ling!</p>
             </div>
           </div>
           <span class="px-3 py-1.5 rounded-xl bg-white/20 text-xs font-black tracking-wide border border-white/30 flex items-center space-x-1">
@@ -872,11 +872,17 @@
         </button>
         <div class="flex items-center space-x-2">
           <span class="px-2 py-0.5 rounded-md bg-yellow-400 text-red-950 text-[10px] font-black uppercase">Octagon Ring</span>
-          <span id="octRoundIndicator" class="text-xs font-black text-white">Raund 1 / 5</span>
+          <span id="octRoundIndicator" class="text-xs font-black text-white">Raund 1 / 10</span>
         </div>
-        <!-- Round Timer -->
-        <div id="octTimerBox" class="w-8 h-8 rounded-full bg-red-950 border-2 border-yellow-400 flex items-center justify-center font-black text-xs text-yellow-300">
-          <span id="octTimerVal">15</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="openDuelLeaderboard()" class="px-2.5 py-1 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-red-950 font-black text-[10px] shadow-sm flex items-center space-x-1 active:scale-95 transition">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Reyting</span>
+          </button>
+          <!-- Round Timer -->
+          <div id="octTimerBox" class="w-8 h-8 rounded-full bg-red-950 border-2 border-yellow-400 flex items-center justify-center font-black text-xs text-yellow-300">
+            <span id="octTimerVal">15</span>
+          </div>
         </div>
       </div>
 
@@ -935,7 +941,7 @@
       <div id="octQuestionCard" class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
         <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-700/60 pb-2">
           <span id="octQCategory"><i class="fa-solid fa-gavel mr-1 text-red-600"></i> Duel Savoli</span>
-          <span class="text-yellow-600 font-extrabold">+25 HP Zarba</span>
+          <span class="text-yellow-600 font-extrabold">+15 HP Zarba</span>
         </div>
 
         <div id="octQuestionText" class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
@@ -955,18 +961,23 @@
           <h3 id="octResultTitle" class="text-lg font-black uppercase text-yellow-300">G'alaba! (Knockout)</h3>
           <p id="octResultDesc" class="text-xs text-slate-300 mt-1">Siz raqibingizni qonuniy dalillar bilan to'liq mag'lub etdingiz!</p>
         </div>
-        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-mono">
-          <span class="text-emerald-400 font-bold">+25 Reyting Bali</span> | Octagon Chempioni
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-mono space-y-1">
+          <div id="octScoreGained" class="text-emerald-400 font-extrabold text-sm">+85 Reyting Bali Qozonildi!</div>
+          <div id="octTotalDuelScore" class="text-yellow-300 text-[11px] font-bold">Jami duel bali: 85 ball</div>
         </div>
         <div class="grid grid-cols-2 gap-2 pt-1">
-          <button onclick="startOctagonBattle()" class="py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-xs flex items-center justify-center space-x-1">
+          <button onclick="startOctagonBattle()" class="py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-xs flex items-center justify-center space-x-1 shadow-sm active:scale-95 transition">
             <i class="fa-solid fa-rotate-right"></i>
             <span>Qayta Jang</span>
           </button>
-          <button onclick="showHome()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs">
-            Bosh sahifa
+          <button onclick="openDuelLeaderboard()" class="py-2.5 px-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-red-950 font-black text-xs flex items-center justify-center space-x-1 shadow-sm active:scale-95 transition">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Duel Reytingi</span>
           </button>
         </div>
+        <button onclick="showHome()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">
+          Bosh sahifaga qaytish
+        </button>
       </div>
     </section>
 
@@ -1148,6 +1159,22 @@
           <div class="text-lg font-black text-rose-600 mt-0.5" id="profMistakesNum">0 ta</div>
           <div class="text-[10px] text-slate-500">Xatolar ustida ishlash</div>
         </div>
+
+        <!-- 5. Huquqiy Duel Ballari Card -->
+        <div class="col-span-2 p-3.5 rounded-xl bg-gradient-to-r from-red-950/40 via-rose-950/30 to-slate-900/60 border border-red-500/30 shadow-xs flex items-center justify-between">
+          <div class="space-y-0.5">
+            <div class="text-[10px] font-bold text-red-400 uppercase flex items-center space-x-1">
+              <i class="fa-solid fa-hand-fist"></i>
+              <span>Huquqiy Duel Ballari</span>
+            </div>
+            <div class="text-lg font-black text-yellow-300" id="profDuelScore">0 ball</div>
+            <div class="text-[10px] text-slate-400" id="profDuelRecord">0 jang • 0 g'alaba</div>
+          </div>
+          <button onclick="openDuelLeaderboard()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-sm flex items-center space-x-1 active:scale-95 transition">
+            <i class="fa-solid fa-trophy text-yellow-300 text-[10px]"></i>
+            <span>Reyting</span>
+          </button>
+        </div>
       </div>
 
       <!-- Quick Action Menu -->
@@ -1267,21 +1294,33 @@
   </div>
 
 
-  <!-- 2. MODAL: Reyting & Leaderboard (TOP-10) -->
+  <!-- 2. MODAL: Reyting & Leaderboard (TOP) -->
   <div id="leaderboardModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
         <div class="flex items-center space-x-2">
           <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm font-bold">
             <i class="fa-solid fa-trophy"></i>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-slate-800 dark:text-white">TOP-10 O'quvchilar Reytingi</h3>
-            <p class="text-[10px] text-slate-400">BMBA Milliy Test Tizimi natijalari</p>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white" id="leaderboardModalTitle">Eng Yaxshi Ishtirokchilar</h3>
+            <p class="text-[10px] text-slate-400" id="leaderboardModalSub">BMBA va Duel natijalari</p>
           </div>
         </div>
         <button onclick="closeLeaderboardModal()" class="text-slate-400 hover:text-slate-600 text-lg">
           <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Tab Buttons: Imtihon vs Duel -->
+      <div class="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl text-xs font-bold">
+        <button id="tabLeaderboardExam" onclick="switchLeaderboardTab('exam')" class="py-2 rounded-lg bg-white dark:bg-slate-800 text-amber-600 shadow-xs transition flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>BMBA Imtihon</span>
+        </button>
+        <button id="tabLeaderboardDuel" onclick="switchLeaderboardTab('duel')" class="py-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-hand-fist text-red-500"></i>
+          <span>🥊 Huquqiy Duel</span>
         </button>
       </div>
 

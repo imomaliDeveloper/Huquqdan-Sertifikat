@@ -712,7 +712,40 @@ class SimpleTelegramBot {
   }
 
   // 4. LEADERBOARD (REYTING) KO'RSATISH
-  async sendLeaderboard(chatId) {
+  async sendLeaderboard(chatId, type = 'exam') {
+    if (type === 'duel') {
+      const list = safeRead('duel_leaderboard.json', []);
+      list.sort((a, b) => (b.duelScore || 0) - (a.duelScore || 0) || (b.wins || 0) - (a.wins || 0));
+      const top = list.slice(0, 10);
+
+      const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+      let text = `🥊 <b>HUQUQIY DUEL (OCTAGON) REYTINGI (TOP-10)</b>\n\n`;
+
+      if (top.length === 0) {
+        text += `<i>Hozircha duel natijalari mavjud emas. Birinchi bo'lib Oktagonga kiring va g'alaba qozoning!</i>\n`;
+      } else {
+        top.forEach((u, idx) => {
+          text += `${medals[idx] || "🔹"} <b>${u.name}</b> — <b>${u.duelScore || 0} ball</b>\n` +
+                  `   ┗ <i>${u.rankTitle || 'Huquqiy Jangchi'}</i> (${u.wins || 0} g'alaba / ${u.losses || 0} mag'lubiyat)\n`;
+        });
+      }
+
+      text += `\n<i>Oktagon arenasida 10 raundlik qonuniy duellarda g'alaba qozonib, reytingda 1-o'ringa chiqing!</i>`;
+
+      const keyboard = [
+        [
+          { text: "🏆 BMBA Imtihon Reytingi", callback_data: "cmd_leaderboard_exam" },
+          { text: "🥊 Duel Reytingi (Faol)", callback_data: "cmd_leaderboard_duel" }
+        ],
+        [{ text: "🥊 Oktagonga kirish (1v1 Duel)", web_app: { url: `${this.appUrl}#octagon` } }],
+        [{ text: "🏠 Asosiy menyu", callback_data: "cmd_home" }]
+      ];
+
+      return await this.sendMessage(chatId, text, {
+        reply_markup: { inline_keyboard: keyboard }
+      });
+    }
+
     const list = safeRead('leaderboard.json', []);
     list.sort((a, b) => (b.score || 0) - (a.score || 0));
     const top = list.slice(0, 7);
@@ -727,6 +760,10 @@ class SimpleTelegramBot {
     text += `\n<i>Siz ham testlarni ishlab, peshqadamlar ro'yxatidan joy oling!</i>`;
 
     const keyboard = [
+      [
+        { text: "🏆 Imtihon Reytingi (Faol)", callback_data: "cmd_leaderboard_exam" },
+        { text: "🥊 Duel Reytingi", callback_data: "cmd_leaderboard_duel" }
+      ],
       [{ text: "🚀 Test topshirish va reytingga kirish", web_app: { url: this.appUrl } }],
       [{ text: "🏠 Asosiy menyu", callback_data: "cmd_home" }]
     ];
@@ -1407,13 +1444,14 @@ class SimpleTelegramBot {
         return await this.sendMessage(chatId,
           `🥊 <b>Huquqiy Octagon (1v1 Jonli Duel)</b>\n\n` +
           `Bot va veb-platformaning haqiqiy ishtirokchilariga qarshi intellektual jang olib boring!\n\n` +
-          `• 5 ta raund\n` +
-          `• 800+ ta qonun savollari ichidan tasodifiy savollar\n` +
-          `• Har safar yangi va takrorlanmas savollar\n\n` +
+          `• <b>10 ta shiddatli raund:</b> 800+ ta qonun savollari ichidan tasodifiy tushadi\n` +
+          `• <b>Duel ballari:</b> Har bir to'g'ri zarba va g'alaba uchun ball beriladi\n` +
+          `• <b>Alohida Duel Reytingi:</b> Ball to'plang va Oktagon chempioni unvoniga erishing!\n\n` +
           `Duelni boshlash uchun pastdagi tugmani bosing:`, {
           reply_markup: {
             inline_keyboard: [
-              [{ text: "🥊 Oktagonga kirish (Duel)", web_app: { url: `${this.appUrl}#octagon` } }]
+              [{ text: "🥊 Oktagonga kirish (10 Raund Duel)", web_app: { url: `${this.appUrl}#octagon` } }],
+              [{ text: "🏆 Duel Reytingini ko'rish", callback_data: "cmd_leaderboard_duel" }]
             ]
           }
         });
@@ -1551,9 +1589,12 @@ class SimpleTelegramBot {
       } else if (q.data === 'cmd_referral' || q.data === 'refresh_referral') {
         await this.answerCallbackQuery(q.id);
         await this.sendReferralMenu(chatId, userId);
-      } else if (q.data === 'cmd_leaderboard') {
+      } else if (q.data === 'cmd_leaderboard' || q.data === 'cmd_leaderboard_exam') {
         await this.answerCallbackQuery(q.id);
-        await this.sendLeaderboard(chatId);
+        await this.sendLeaderboard(chatId, 'exam');
+      } else if (q.data === 'cmd_leaderboard_duel') {
+        await this.answerCallbackQuery(q.id);
+        await this.sendLeaderboard(chatId, 'duel');
       } else if (q.data === 'cmd_tariffs') {
         await this.answerCallbackQuery(q.id);
         await this.sendTariffs(chatId);

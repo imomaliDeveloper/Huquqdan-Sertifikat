@@ -96,6 +96,26 @@ function saveLeaderboardList(list) {
   safeWriteJSON('leaderboard.json', list);
 }
 
+let inMemoryDuelLeaderboard = null;
+function getDuelLeaderboardList() {
+  if (!inMemoryDuelLeaderboard) {
+    inMemoryDuelLeaderboard = safeReadJSON('duel_leaderboard.json', []);
+  }
+  return inMemoryDuelLeaderboard;
+}
+function saveDuelLeaderboardList(list) {
+  inMemoryDuelLeaderboard = list;
+  safeWriteJSON('duel_leaderboard.json', list);
+}
+
+function getDuelRankTitle(score) {
+  if (score >= 1000) return "Oktagon Chempioni 🏆👑";
+  if (score >= 600) return "Oliy Sud Himoyachisi 🏛️";
+  if (score >= 300) return "Master Yurist ⚖️";
+  if (score >= 100) return "Huquqiy Jangchi ⚔️";
+  return "Oktagon Debyutanti 🥊";
+}
+
 let inMemoryReceipts = null;
 function getReceiptsList() {
   if (!inMemoryReceipts) {
@@ -114,6 +134,19 @@ app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: 0
 }));
 app.use('/data', express.static(path.join(__dirname, 'data')));
+
+// Reels video saqlash API
+app.post('/api/save-reels-video', express.raw({ type: '*/*', limit: '150mb' }), (req, res) => {
+  try {
+    const filePath = path.join(__dirname, 'public', 'reels_huquq_sertifikat.webm');
+    fs.writeFileSync(filePath, req.body);
+    console.log(`🎬 Reels video saqlandi: ${filePath} (${(req.body.length / 1024 / 1024).toFixed(2)} MB)`);
+    res.json({ success: true, url: '/reels_huquq_sertifikat.webm', size: req.body.length });
+  } catch (err) {
+    console.error('Reels video saqlashda xatolik:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // API: 50 ta Variantlar ro'yxati
 app.get('/api/variants', (req, res) => {
@@ -267,7 +300,7 @@ app.get('/api/duel/opponents', (req, res) => {
   }
 });
 
-// API: Duel uchun 800+ savol ichidan 5 ta mutlaqo yangi, turli savollar
+// API: Duel uchun 800+ savol ichidan 10 ta mutlaqo yangi, turli savollar (10 raund)
 app.get('/api/duel/questions', (req, res) => {
   try {
     const lawVariantsDir = path.join(__dirname, 'data', 'law_variants');
@@ -275,8 +308,8 @@ app.get('/api/duel/questions', (req, res) => {
 
     if (fs.existsSync(lawVariantsDir)) {
       const files = fs.readdirSync(lawVariantsDir).filter(f => f.endsWith('.json'));
-      // Tasodifiy 8-10 ta turli qonun variantlarini o'qiymiz
-      const shuffledFiles = [...files].sort(() => 0.5 - Math.random()).slice(0, 10);
+      // Tasodifiy 12-15 ta turli qonun variantlarini o'qiymiz
+      const shuffledFiles = [...files].sort(() => 0.5 - Math.random()).slice(0, 15);
       for (const file of shuffledFiles) {
         try {
           const varData = JSON.parse(fs.readFileSync(path.join(lawVariantsDir, file), 'utf8'));
@@ -297,7 +330,7 @@ app.get('/api/duel/questions', (req, res) => {
       }
     }
 
-    if (allQuestions.length < 5) {
+    if (allQuestions.length < 10) {
       const qBankFile = path.join(__dirname, 'data', 'questions_bank.json');
       if (fs.existsSync(qBankFile)) {
         const qBank = JSON.parse(fs.readFileSync(qBankFile, 'utf8'));
@@ -307,8 +340,8 @@ app.get('/api/duel/questions', (req, res) => {
       }
     }
 
-    // Har safar 5 ta mutlaqo tasodifiy savol
-    const selected = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
+    // Har safar 10 ta mutlaqo tasodifiy savol
+    const selected = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 10);
     res.json(selected);
   } catch (err) {
     res.status(500).json({ error: "Duel savollarini yuklashda xatolik: " + err.message });
@@ -465,6 +498,68 @@ app.get('/api/leaderboard', (req, res) => {
     res.json(list.slice(0, 15));
   } catch (err) {
     res.status(500).json({ error: "Leaderboardni yuklashda xatolik" });
+  }
+});
+
+// ==================== 2.1 DUEL LEADERBOARD API ====================
+
+app.get('/api/duel/leaderboard', (req, res) => {
+  try {
+    const list = getDuelLeaderboardList();
+    list.sort((a, b) => (b.duelScore || 0) - (a.duelScore || 0) || (b.wins || 0) - (a.wins || 0));
+    res.json(list.slice(0, 30));
+  } catch (err) {
+    res.status(500).json({ error: "Duel reytingini yuklashda xatolik: " + err.message });
+  }
+});
+
+// API: Duel natijasi va ballarni saqlash
+app.post('/api/duel/result', (req, res) => {
+  const { userId, userName, scoreGained, won, isKnockout, correctCount, totalRounds, opponentName } = req.body;
+  try {
+    const list = getDuelLeaderboardList();
+    const cleanName = (userName || "Yurist").trim();
+    const gained = parseInt(scoreGained, 10) || 0;
+
+    let player = list.find(u => (userId && u.userId === userId) || (u.name && u.name.toLowerCase() === cleanName.toLowerCase()));
+
+    if (player) {
+      player.duelScore = (player.duelScore || 0) + gained;
+      if (won) {
+        player.wins = (player.wins || 0) + 1;
+      } else {
+        player.losses = (player.losses || 0) + 1;
+      }
+      player.matches = (player.matches || 0) + 1;
+      player.rankTitle = getDuelRankTitle(player.duelScore);
+      player.lastActive = new Date().toLocaleDateString('uz-UZ');
+    } else {
+      player = {
+        id: Date.now(),
+        userId: userId || null,
+        name: cleanName,
+        duelScore: Math.max(0, gained),
+        wins: won ? 1 : 0,
+        losses: won ? 0 : 1,
+        matches: 1,
+        rankTitle: getDuelRankTitle(Math.max(0, gained)),
+        lastActive: new Date().toLocaleDateString('uz-UZ')
+      };
+      list.push(player);
+    }
+
+    list.sort((a, b) => (b.duelScore || 0) - (a.duelScore || 0) || (b.wins || 0) - (a.wins || 0));
+    saveDuelLeaderboardList(list.slice(0, 50));
+
+    res.json({
+      success: true,
+      message: "Duel natijasi va ballari muvaffaqiyatli saqlandi!",
+      player,
+      scoreGained: gained
+    });
+  } catch (err) {
+    console.error("Duel result saqlashda xatolik:", err);
+    res.status(500).json({ error: "Duel natijasini saqlashda xatolik: " + err.message });
   }
 });
 
