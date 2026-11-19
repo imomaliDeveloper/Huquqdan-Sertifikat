@@ -8,7 +8,7 @@ const MANDATORY_CHANNELS = [
   { username: '@General_Huquq', name: "General Huquq | Rasmiy Kanal", url: "https://t.me/General_Huquq" }
 ];
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin777';
+const OFFICIAL_ADMIN_ID = '8348657980';
 const botUserAiCounts = {};
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -35,28 +35,33 @@ function safeWrite(fileName, data) {
 }
 
 function getAdminIds() {
-  let ids = safeRead('admin_ids.json', [6445145]);
+  let ids = safeRead('admin_ids.json', [OFFICIAL_ADMIN_ID]);
+  if (!Array.isArray(ids)) ids = [OFFICIAL_ADMIN_ID];
+  ids = ids.map(id => id.toString().trim());
+  if (!ids.includes(OFFICIAL_ADMIN_ID)) ids.push(OFFICIAL_ADMIN_ID);
   if (process.env.ADMIN_IDS) {
-    const envIds = process.env.ADMIN_IDS.split(',').map(s => parseInt(s.trim())).filter(Boolean);
+    const envIds = process.env.ADMIN_IDS.split(',').map(s => s.trim()).filter(Boolean);
     ids = Array.from(new Set([...ids, ...envIds]));
   }
   return ids;
 }
 
 function addAdminId(newId) {
-  const numId = parseInt(newId);
-  if (!numId) return false;
+  if (!newId) return false;
+  const strId = newId.toString().trim();
   const ids = getAdminIds();
-  if (!ids.includes(numId)) {
-    ids.push(numId);
+  if (!ids.includes(strId)) {
+    ids.push(strId);
     safeWrite('admin_ids.json', ids);
   }
   return true;
 }
 
 function isUserAdmin(userId) {
+  if (!userId) return false;
+  const strId = userId.toString().trim();
   const ids = getAdminIds();
-  return ids.includes(parseInt(userId));
+  return ids.includes(strId);
 }
 
 function recordUser(fromUser) {
@@ -736,24 +741,16 @@ class SimpleTelegramBot {
         }
       }
 
-      // ADMIN BUYRUQLARI
+      // ADMIN BUYRUQLARI (Faqat tasdiqlangan admin ID uchun)
       if (text.startsWith('/admin_login')) {
-        const pass = text.replace('/admin_login', '').trim();
-        if (pass === ADMIN_PASSWORD || pass === 'admin777' || pass === 'admin2026') {
-          addAdminId(userId);
-          await this.sendMessage(chatId, `✅ <b>Tabriklaymiz, ${firstName}!</b> Siz admin sifatida muvaffaqiyatli tizimga kirdingiz.`);
-          return await this.sendAdminPanel(chatId);
-        } else {
-          return await this.sendMessage(chatId, `❌ Noto'g'ri parol! Parolni to'g'ri kiriting:\nMasalan: <code>/admin_login parol</code>`);
-        }
+        return await this.sendMessage(chatId, `🔒 Adminlik faqat rasmiy Telegram ID (8348657980) orqali beriladi.`);
       }
 
       if (text === '/admin' || text === '/admin_panel' || text === '⚙️ Admin Panel') {
         if (!isUserAdmin(userId)) {
           return await this.sendMessage(chatId,
-            `🔒 <b>Siz admin emassiz!</b>\n\n` +
-            `Agar siz loyiha administratori bo'lsangiz, quyidagi buyruq orqali kiring:\n` +
-            `👉 <code>/admin_login admin777</code>`
+            `🔒 <b>Kirish taqiqlangan!</b>\n\n` +
+            `Ushbu buyruq faqat loyiha bosh administratori uchun mo'ljallangan.`
           );
         }
         return await this.sendAdminPanel(chatId);
