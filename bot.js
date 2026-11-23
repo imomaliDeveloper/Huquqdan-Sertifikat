@@ -1103,7 +1103,7 @@ class SimpleTelegramBot {
     });
   }
 
-  // 40 ta qonundan navbatdagi savolni olish (800 ta test)
+  // 50 ta rasmiy variantdan yangi va takrorlanmas haqiqiy milliy sertifikat testini olish (1 750 ta savol)
   getNextQuizQuestion() {
     let settings = safeRead('autopost_settings.json', {
       enabled: true,
@@ -1111,55 +1111,87 @@ class SimpleTelegramBot {
       targetChannels: ["@Huquq_study", "@General_Huquq"],
       lastPostedAt: null,
       totalPosted: 0,
-      currentLawIndex: 1,
-      currentQuestionIndex: 0
+      currentVariantIndex: 1
     });
 
-    // 40 ta qonundan tasodifiy xilma-xil qonun tanlanadi (faqat konstitutsiya emas!)
-    const totalLaws = 40;
-    let randomLawIdx = Math.floor(Math.random() * totalLaws) + 1;
-    if (settings.currentLawIndex && settings.currentLawIndex === randomLawIdx) {
-      randomLawIdx = (randomLawIdx % totalLaws) + 1;
+    const history = safeRead('posted_quiz_history.json', []);
+    const historySet = new Set(history.map(h => (typeof h === 'string' ? h : h.text || '').trim()));
+
+    let chosenQ = null;
+    let chosenVarNum = 1;
+    let startVar = settings.currentVariantIndex || 1;
+
+    // 50 ta variant bo'ylab aylanib, hali kanallarga chiqmagan haqiqiy DTM/BMBA savolini qidiramiz
+    for (let offset = 0; offset < 50; offset++) {
+      let varNum = ((startVar - 1 + offset) % 50) + 1;
+      let varFile = path.join('variants', `variant_${varNum}.json`);
+      let varData = safeRead(varFile, null);
+
+      if (varData && varData.questions && varData.questions.length) {
+        // Haqiqiy 4 talik variantli (Y-1, Y-2) testlarni saralaymiz
+        const mcqList = varData.questions.filter(q => {
+          if (!q.text || !q.options || q.options.length < 4) return false;
+          const optTexts = q.options.map(o => (typeof o === 'string' ? o : o.text || ''));
+          // Bir xil sun'iy qolipli variantlarni chiqarib tashlaymiz
+          if (optTexts.some(t => t.includes('To‘g‘ri javob:') || t.includes('To\'g\'ri javob:') || t.includes('qonuniylik, adolat va shaffoflik'))) {
+            return false;
+          }
+          return true;
+        });
+
+        // Hali kanallarga yuborilmagan savollarni topamiz
+        const unposted = mcqList.filter(q => !historySet.has(q.text.trim()));
+        if (unposted.length > 0) {
+          // O'sha variantdan tasodifiy bittasini tanlaymiz
+          chosenQ = unposted[Math.floor(Math.random() * unposted.length)];
+          chosenVarNum = varNum;
+          break;
+        }
+      }
     }
 
-    let lawFile = path.join('law_variants', `law_var_${randomLawIdx}.json`);
-    let lawData = safeRead(lawFile, null);
-
-    if (!lawData || !lawData.questions || !lawData.questions.length) {
-      randomLawIdx = (randomLawIdx % totalLaws) + 1;
-      lawFile = path.join('law_variants', `law_var_${randomLawIdx}.json`);
-      lawData = safeRead(lawFile, null);
+    // Agar 1 750 ta savolning barchasi aylanib bo'lgan bo'lsa, tarixni tozalab yangidan boshlaymiz
+    if (!chosenQ) {
+      safeWrite('posted_quiz_history.json', []);
+      const var1 = safeRead(path.join('variants', 'variant_1.json'), null);
+      if (var1 && var1.questions && var1.questions.length) {
+        chosenQ = var1.questions[0];
+        chosenVarNum = 1;
+      }
     }
 
-    let questions = (lawData && lawData.questions) ? lawData.questions : [];
-    if (!questions.length) {
-      questions = safeRead('questions_bank.json', []);
-    }
-    if (!questions.length) return null;
+    if (!chosenQ) return null;
 
-    const randomQIdx = Math.floor(Math.random() * questions.length);
-    const q = questions[randomQIdx];
+    // Tanlangan savolni tarixga kiritamiz
+    history.push({
+      text: chosenQ.text.trim(),
+      varNum: chosenVarNum,
+      postedAt: new Date().toISOString()
+    });
+    if (history.length > 1500) history.shift();
+    safeWrite('posted_quiz_history.json', history);
 
-    settings.currentLawIndex = randomLawIdx;
-    settings.currentQuestionIndex = randomQIdx;
+    // Keyingi safar uchun navbatdagi variantni belgilaymiz
+    settings.currentVariantIndex = (chosenVarNum % 50) + 1;
     safeWrite('autopost_settings.json', settings);
 
     const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
     let correctIdx = 0;
-    if (q.correctKey && map[q.correctKey] !== undefined) correctIdx = map[q.correctKey];
-    else if (q.correct && map[q.correct] !== undefined) correctIdx = map[q.correct];
+    if (chosenQ.correct && map[chosenQ.correct] !== undefined) correctIdx = map[chosenQ.correct];
+    else if (chosenQ.correctKey && map[chosenQ.correctKey] !== undefined) correctIdx = map[chosenQ.correctKey];
+    else if (typeof chosenQ.correctIndex === 'number') correctIdx = chosenQ.correctIndex;
 
-    const cleanOpts = (q.options || []).map(o => {
+    const cleanOpts = (chosenQ.options || []).map(o => {
       let txt = (typeof o === 'string' ? o : o.text) || '';
       return txt.replace(/^[A-D][).:\s-]+/i, '').trim();
     }).slice(0, 4);
 
     return {
-      text: q.text || '',
+      text: chosenQ.text || '',
       options: cleanOpts,
       correctIndex: correctIdx,
-      explanation: q.explanation || '',
-      lawName: (lawData && lawData.lawName) ? lawData.lawName : "Fuqarolik huquqi"
+      explanation: chosenQ.explanation || '',
+      lawName: chosenQ.section || chosenQ.lawSource || `Variant #${chosenVarNum} (BMBA Testi)`
     };
   }
 
