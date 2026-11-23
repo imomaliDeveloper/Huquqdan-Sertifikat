@@ -3,11 +3,8 @@ const path = require('path');
 const { GoogleGenAI } = require('@google/genai');
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
-const openaiApiKey = process.env.OPENAI_API_KEY;
-const groqApiKey = process.env.GROQ_API_KEY;
-const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-
 let genAI = null;
+
 if (geminiApiKey) {
   try {
     genAI = new GoogleGenAI({ apiKey: geminiApiKey });
@@ -17,123 +14,52 @@ if (geminiApiKey) {
   }
 }
 
-// 1. OpenAI (Haqiqiy ChatGPT) orqali chaqirish
-async function callOpenAiApi(prompt, systemInstruction) {
-  if (!openaiApiKey) return null;
-  const messages = [];
-  if (systemInstruction) messages.push({ role: 'system', content: systemInstruction });
-  messages.push({ role: 'user', content: prompt });
-
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${openaiApiKey}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages,
-      temperature: 0.7
-    })
-  });
-
-  const data = await res.json();
-  if (data.choices && data.choices[0]?.message?.content) {
-    return data.choices[0].message.content.trim();
-  }
-  return null;
-}
-
-// 2. Groq (Tezkor va bepul Llama-3.3-70b) orqali chaqirish
-async function callGroqApi(prompt, systemInstruction) {
-  if (!groqApiKey) return null;
-  const messages = [];
-  if (systemInstruction) messages.push({ role: 'system', content: systemInstruction });
-  messages.push({ role: 'user', content: prompt });
-
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${groqApiKey}`
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages,
-      temperature: 0.7
-    })
-  });
-
-  const data = await res.json();
-  if (data.choices && data.choices[0]?.message?.content) {
-    return data.choices[0].message.content.trim();
-  }
-  return null;
-}
-
-// 3. Google Gemini orqali chaqirish
-const GEMINI_CANDIDATES = [
-  'gemini-3.5-flash-lite',
-  'gemini-flash-lite-latest',
-  'gemini-3.8-flash'
+const CANDIDATE_MODELS = [
+  'gemini-3.5-flash-lite'
 ];
 
-async function callGeminiApi(prompt, systemInstruction, responseMimeType) {
-  if (!genAI) return null;
+async function generateAiContent({ prompt, systemInstruction, responseMimeType }) {
+  if (!genAI) {
+    throw new Error('GEMINI_API_KEY topilmadi yoki ulanmagan.');
+  }
 
-  for (const model of GEMINI_CANDIDATES) {
-    try {
-      const config = {};
-      if (systemInstruction) config.systemInstruction = systemInstruction;
-      if (responseMimeType) config.responseMimeType = responseMimeType;
+  // Google GenAI v2 da systemInstruction alohida berilganda 503 xatosi ko'p uchraydi.
+  // Shuning uchun yo'riqnomani to'g'ridan-to'g'ri prompt boshiga qo'shish eng barqaror va tezkor usuldir.
+  const fullPrompt = systemInstruction 
+    ? `${systemInstruction}\n\nFoydalanuvchi so'rovi:\n${prompt}\n\nJavob:`
+    : prompt;
 
-      const callPromise = genAI.models.generateContent({
-        model,
-        contents: prompt,
-        config: Object.keys(config).length > 0 ? config : undefined
-      });
+  for (const model of CANDIDATE_MODELS) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const config = {};
+        if (responseMimeType) config.responseMimeType = responseMimeType;
 
-      const response = await Promise.race([
-        callPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 7000))
-      ]);
+        const callPromise = genAI.models.generateContent({
+          model,
+          contents: fullPrompt,
+          config: Object.keys(config).length > 0 ? config : undefined
+        });
 
-      if (response && response.text) {
-        return response.text.trim();
+        const response = await Promise.race([
+          callPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 8000))
+        ]);
+
+        if (response && response.text) {
+          return response.text.trim();
+        }
+      } catch (err) {
+        if ((err.status === 503 || (err.message && err.message.includes('503'))) && attempt === 1) {
+          await new Promise(r => setTimeout(r, 600));
+          continue;
+        }
+        break;
       }
-    } catch (err) {
-      // 503 yoki 429 bo'lsa keyingi modelga o'tish
-      continue;
     }
   }
-  return null;
-}
 
-// Universal AI generatori (OpenAI -> Groq -> Gemini)
-async function generateAiContent({ prompt, systemInstruction, responseMimeType }) {
-  // 1. Agar OpenAI kaliti bo'lsa — to'g'ridan-to'g'ri ChatGPT
-  if (openaiApiKey) {
-    try {
-      const ans = await callOpenAiApi(prompt, systemInstruction);
-      if (ans) return ans;
-    } catch (e) {}
-  }
-
-  // 2. Agar Groq kaliti bo'lsa
-  if (groqApiKey) {
-    try {
-      const ans = await callGroqApi(prompt, systemInstruction);
-      if (ans) return ans;
-    } catch (e) {}
-  }
-
-  // 3. Gemini modellari
-  if (geminiApiKey) {
-    const ans = await callGeminiApi(prompt, systemInstruction, responseMimeType);
-    if (ans) return ans;
-  }
-
-  throw new Error('Hozirda AI serverlarida yuklama yuqori (kvota cheklovi).');
+  throw new Error('AI API javob bera olmadi');
 }
 
 // ==================== BMBA SAVOLLARINI XOTIRAGA YUKLASH ====================
@@ -206,7 +132,7 @@ function isLegalQuery(text) {
   return legalKeywords.some(kw => text.includes(kw));
 }
 
-// Zaxira javob
+// Zaxira javob generatori
 function getTutorFallbackReply(userQuery, isStrict = false) {
   const qLower = userQuery.toLowerCase().trim();
 
@@ -217,41 +143,64 @@ function getTutorFallbackReply(userQuery, isStrict = false) {
     const op = mathMatch[2];
     const b = parseFloat(mathMatch[3]);
     let res = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : b !== 0 ? a / b : 'nolga bo\'lish mumkin emas';
-    return `Natija: **${a} ${op} ${b} = ${res}** ✅`;
+    return isStrict
+      ? `🔥 **Hisob natijasi:** **${a} ${op} ${b} = ${res}**\n\nOddiy hisoblardan vaqtni yo'qotma, asosiy fanga diqqatingni qarat! 👊`
+      : `Javob: **${a} ${op} ${b} = ${res}** ✅`;
   }
 
   // Salomlashish
   if (qLower.startsWith('salom') || qLower.startsWith('assalom') || qLower === 'qalaysiz') {
     return isStrict
-      ? `🔥 **Assalomu alaykum! Men Qattiq Qo'l Ustozingizman!**\n\nVaqtni behuda ketkazmaymiz. Qaysi mavzuda savolingiz bor? Tezda yozing, tahlil qilamiz! ⚖️`
-      : `Assalomu alaykum! Xush kelibsiz! 👋\n\nMen sizning AI yordamchingizman. Istalgan mavzuda (ilm-fan, huquq, darslar yoki shunchaki suhbat) savol berishingiz mumkin. Bugun sizga nima bo'yicha yordam beray?`;
+      ? `🔥 **Assalomu alaykum! Men sizning Qattiq Qo'l Ustozingizman!**\n\nVaqtni behuda sarflamaymiz. Qaysi mavzuda savolingiz bor? Tezda yozing, tahlil qilamiz! ⚖️`
+      : `Assalomu alaykum! Xush kelibsiz! 👋\n\nMen sizning universal AI Ustozingizman (xuddi ChatGPT kabi ishlayman). Menga istalgan mavzuda (fanlar, darslar, tahlillar yoki suhbat) savol berishingiz mumkin. Bugun sizga qanday yordam beray?`;
   }
 
-  // Huquqiy savol
+  // Kvant fizikasi
+  if (qLower.includes('kvant') || qLower.includes('fizika')) {
+    const pAns = `🔬 **Kvant fizikasi nima?**\n\nKvant fizikasi — bu olamning eng mikroskopik darajadagi, ya'ni **atomlar, elektronlar, fotonlar va subatom zarralar** harakatini o'rganadigan zamonaviy fizika bo'limidir.\n\n**Asosiy qoidalari:**\n1. **Kvantlanish:** Yorug'lik va energiya porsiyalar (kvantlar) shaklida tarqaladi;\n2. **Superpozitsiya:** Zarracha bir vaqtning o'zida bir nechta holatda bo'lishi mumkin;\n3. **Amaliy qo'llanilishi:** Kvant kompyuterlari, lazerlar, mikroprotsessorlar va MRT apparatlari aynan shu qonunlarga asoslangan.`;
+    return isStrict
+      ? `🔥 **Qattiq Qo'l Ustoz:**\n\n${pAns}\n\n❓ **Sinov:** Yorug'likning elementar zarrasi nima deb ataladi? Tezda yoz! 👊`
+      : `${pAns}\n\nYana qanday savollaringiz bor?`;
+  }
+
+  // Dasturlash
+  if (qLower.includes('dasturlash') || qLower.includes('python') || qLower.includes('javascript')) {
+    return `💻 **Dasturlash haqida:**\nDasturlash — zamonaviy dunyoning eng talabgir sohasidir. Boshlash uchun:\n• **Python:** Sun'iy intellekt va sodda sintaksis uchun a'lo;\n• **JavaScript:** Veb-saytlar va ilovalar yaratishda yetakchi.\nQaysi yo'nalishga qiziqasiz? Yo'l xaritasini tuzib berishim mumkin!`;
+  }
+
+  // Tarix
+  if (qLower.includes('amir temur') || qLower.includes('temur')) {
+    return `🏛️ **Amir Temur (1336–1405):**\nBuyuk sarkarda, davlat arbobi va qudratli Temuriylar imperiyasining asoschisi. U poytaxt Samarqandni jahon ilm-fani va madaniyati markaziga aylantirgan. Mashhur shiori: *"Kuch — adolatdadir"*.`;
+  }
+
+  // Huquqiy savollar
   if (isLegalQuery(qLower)) {
     const matched = searchBmbaQuestions(userQuery, 1);
     if (matched && matched.length > 0) {
       const bq = matched[0];
       const opts = bq.options.map(o => `${o.key}) ${o.text}`).join('\n');
       return isStrict
-        ? `🔥 **Qattiq Qo'l Ustoz tahlili:**\n\nSavolingiz: **"${userQuery}"**\n\nBu masala bo'yicha imtihon savoli:\n📌 **Savol:** ${bq.text}\n\n${opts}\n\n❓ To'g'ri javobni yozing, tekshiramiz! ⚖️`
-        : `💡 **Huquqiy tushuntirish:**\n\nSavolingiz: **"${userQuery}"**\n\n📖 **BMBA namunasi:** ${bq.text}\n\n${opts}\n\n✅ **To'g'ri javob:** ${bq.correct}\n📌 **Izoh:** ${bq.explanation || 'Qonun talablariga mos javob.'}`;
+        ? `🔥 **Qattiq Qo'l Ustoz tekshiruvi:**\n\nSavolingiz: **"${userQuery}"**\n\n📌 **Imtihon savoli:** ${bq.text}\n\n${opts}\n\n❓ To'g'ri javobni yozing, tekshiramiz! ⚖️`
+        : `💡 **Huquqiy tahlil:**\n\nSavolingiz: **"${userQuery}"**\n\n📖 **Savol:** ${bq.text}\n\n${opts}\n\n✅ **To'g'ri javob:** ${bq.correct}\n📌 **Izoh:** ${bq.explanation || 'Qonun talablariga mos javob.'}`;
     }
   }
 
-  // Umumiy savol
+  // Boshqa istalgan erkin savol
   if (isStrict) {
-    return `🔥 **Qattiq Qo'l Ustoz:**\n\nSavolingiz: **"${userQuery}"**\n\nHar qanday masalaga yuzaki emas, chuqur va faktlar bilan yondashish kerak. Savolingizni aniqroq qilib yozsangiz, darhol to'liq tahlil qilib beraman!`;
+    return `🔥 **Qattiq Qo'l Ustoz:**\n\nSavolingiz: **"${userQuery}"**\n\nUshbu masalaga jiddiy va amaliy yondashish kerak. Savolingizni aniqroq vaziyat yoki misol bilan davom ettiring, to'liq tahlil qilib beraman! 👊`;
   }
 
-  return `🤖 **AI Ustoz:**\n\nSizning savolingiz: **"${userQuery}"**\n\nBu bo'yicha aniqroq vaziyat yoki savol bersangiz, barcha tafsilotlari bilan batafsil yoritib beraman!`;
+  return `🤖 **AI Ustoz:**\n\nSizning savolingiz: **"${userQuery}"**\n\nUshbu mavzuni yanada chuqurroq tushunish uchun aniqroq misol yoki savol bersangiz, barcha tafsilotlari bilan batafsil yoritib beraman!`;
 }
 
+// Tizim yo'riqnomasi
 const TUTOR_SYSTEM_INSTRUCTION = `Siz nihoyatda aqlli, erkin fikrlovchi, har tomonlama yetuk va universal sun'iy intellektsiz (xuddi ChatGPT / GPT-4o kabi).
-FOYDALANUVCHINING ISTALGAN SAVOLIGA o'zbek tilida tabiiy, aqlli, batafsil va go'zal javob bering! Hech qanday sohada cheklanmaysiz.`;
+FOYDALANUVCHINING ISTALGAN SAVOLIGA o'zbek tilida tabiiy, aqlli, batafsil, go'zal va erkin javob bering!
+Foydalanuvchi qaysi tilda va qaysi mavzuda (ilm-fan, texnologiya, dasturlash, matematika, tarix, insho, huquq, hayotiy maslahat yoki erkin suhbat) yozsa, aynan o'sha mavzuda xuddi ChatGPT kabi to'liq va mukammal yoritib bering.`;
 
-const STRICT_TUTOR_SYSTEM_INSTRUCTION = `Siz talabchan, qat'iyatli, jiddiy va temir intizomli "QATTIQ QO'L USTOZ"siz.
-Har qanday mavzuda eng yuqori saviyada to'g'ridan-to'g'ri javob bering va oxirida o'quvchini sinov savoli bilan tekshiring!`;
+const STRICT_TUTOR_SYSTEM_INSTRUCTION = `Siz talabchan, qat'iyatli, jiddiy va temir intizomli "QATTIQ QO'L USTOZ"siz (Universal Repetitor).
+Foydalanuvchining har qanday mavzudagi savoliga eng yuqori saviyada, aniq va lutfbozliksiz to'g'ridan-to'g'ri javob bering.
+Agar foydalanuvchi erinchoqlik yoki dangasalik qilsa — qat'iy intizomga chaqiring. Javobingiz oxirida o'quvchini sinov savoli bilan tekshiring! Emojilar: 🔥, ⚖️, ⚠️, 👊, 🎓.`;
 
 async function askAiTutor(message, history = [], persona = 'friendly') {
   if (!message || !message.trim()) {
@@ -272,7 +221,7 @@ async function askAiTutor(message, history = [], persona = 'friendly') {
     if (Array.isArray(history) && history.length > 0) {
       prompt += "Oldingi suhbat:\n" + history.slice(-6).map(h => `${h.role === 'user' ? 'Foydalanuvchi' : 'AI'}: ${h.text}`).join("\n") + "\n\n";
     }
-    prompt += `Foydalanuvchi so'rovi: "${userQuery}"\n${isStrict ? 'Qattiq Qo\'l Ustoz javobi va nazorat savoli:' : 'AI javobi:'}`;
+    prompt += `Savol: "${userQuery}"`;
 
     const aiText = await generateAiContent({
       prompt,
