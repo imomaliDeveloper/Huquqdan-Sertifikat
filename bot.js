@@ -1529,6 +1529,24 @@ class SimpleTelegramBot {
           return await this.sendSubscriptionGate(chatId, firstName);
         }
         await this.confirmReferralIfPending(userId, firstName);
+
+        // Maxsus to'lov cheki parametri bilan kirganda (/start tolov_cheki yoki /start chek)
+        if (text.includes('tolov_cheki') || text.includes('chek') || text.includes('tolov')) {
+          return await this.sendMessage(chatId,
+            `📩 <b>Assalomu alaykum, hurmatli ${firstName}!</b>\n` +
+            `<i>"Huquq Milliy Sertifikat platformasida VIP obuna uchun to'lov qildim. Chekni taqdim etmoqdaman:"</i>\n\n` +
+            `📸 <b>To'lov kvitansiyasining (Click / Payme) skrinshotini (rasmini) shu yerga yuboring!</b> 🖼\n\n` +
+            `Rasm kelishi bilan zudlik bilan ma'muriyatimizga yetkaziladi va bir necha daqiqa ichida profilingizga <b>VIP PRO</b> to'liq ochib beriladi! ✅\n\n` +
+            `<i>💳 Humo karta:</i> <code>9860 0366 7156 8792</code> <i>(Imomali Mamatqulov)</i>`, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "📲 Mini Appga qaytish", web_app: { url: this.appUrl } }],
+                [{ text: "🏠 Asosiy Menyu", callback_data: "cmd_home" }]
+              ]
+            }
+          });
+        }
+
         return await this.sendMainMenu(chatId, firstName, false, userId);
       }
 

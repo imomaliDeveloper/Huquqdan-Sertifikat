@@ -1499,12 +1499,24 @@ function copyCardNumber() {
 }
 
 function openTelegramAdminContact() {
-  const adminUrl = "https://t.me/Imomali_Mamatkulov";
-  if (window.Telegram?.WebApp?.openTelegramLink) {
-    window.Telegram.WebApp.openTelegramLink(adminUrl);
-  } else {
-    window.open(adminUrl, "_blank");
+  const botUrl = "https://t.me/HuquqdanSertifikatBot?start=tolov_cheki";
+  showToast("Bot ochilmoqda... Chek rasmini botga yuboring! 📸");
+
+  if (window.Telegram?.WebApp) {
+    try {
+      if (window.Telegram.WebApp.openTelegramLink) {
+        window.Telegram.WebApp.openTelegramLink(botUrl);
+      }
+      setTimeout(() => {
+        window.Telegram.WebApp.close();
+      }, 350);
+      return;
+    } catch (e) {
+      console.warn("openTelegramLink error:", e);
+    }
   }
+
+  window.open(botUrl, "_blank");
 }
 
 function applyPromoCode() {
