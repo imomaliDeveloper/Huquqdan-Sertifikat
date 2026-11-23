@@ -1999,11 +1999,11 @@ class SimpleTelegramBot {
         const targetChatId = receipt.chatId || receipt.userId;
 
         // Kitob faylini aniqlash
-        let bookFileName = 'Huquqdan_namunaviy_test.pdf';
-        let bookTitleName = "Huquq Milliy Sertifikat: Namunaviy Testlar & Yechimlar To'plami";
+        let bookFileName = 'HUQUQSHUNOSLIK_MILLIY_SERTIFIKAT_30_VARIANT.pdf';
+        let bookTitleName = "Huquqshunoslik Milliy Sertifikat | 30 ta Professional Variant";
         if (bookId === '2') {
-          bookFileName = 'Huquq_spetsifikatsiya.pdf';
-          bookTitleName = "BMBA Huquqshunoslik: To'liq Spesifikatsiya & Qonunlar Izohi";
+          bookFileName = 'kitob_natija.pdf';
+          bookTitleName = "Huquqshunoslik Fanidan Milliy Test Tizimi To'plami & Yechimlar";
         }
 
         const cleanBaseUrl = this.appUrl.replace(/\/+$/, '');
