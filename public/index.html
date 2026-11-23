@@ -251,13 +251,13 @@
           <p class="text-[11px] text-slate-500 mt-0.5">Rasmiy 45 talik sinov testi</p>
         </button>
 
-        <!-- 4 ta Darslik Kitobi -->
-        <button onclick="openBooksDirectory()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-indigo-500 active:scale-95 transition">
-          <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 flex items-center justify-center text-lg mb-2">
-            <i class="fa-solid fa-book-open-reader"></i>
+        <!-- Mening kitoblarim -->
+        <button onclick="openBooksDirectory()" class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-left hover:border-amber-500 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center text-lg mb-2">
+            <i class="fa-solid fa-book-bookmark"></i>
           </div>
-          <h3 class="text-sm font-bold text-slate-800 dark:text-white">4 ta Darslik (PDF)</h3>
-          <p class="text-[11px] text-slate-500 mt-0.5">8, 9, 10, 11-sinf kitoblari</p>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">Mening kitoblarim</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Mualliflik qo'llanmalari & Darsliklar</p>
         </button>
 
         <!-- Flashcards (Deadlines and Numbers) -->
@@ -794,21 +794,21 @@
       <div id="variantsGridList" class="space-y-2.5 max-h-[72vh] overflow-y-auto pr-1"></div>
     </section>
 
-    <!-- VIEW 7: 4 TA ASOSIY DARSLIK KITOBLARI (8, 9, 10, 11-sinf) -->
+    <!-- VIEW 7: MENING KITOBLARIM (MUALLIFLIK & DARSLIKLAR) -->
     <section id="viewBooks" class="hidden space-y-4">
       <div class="flex items-center justify-between">
-        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 flex items-center">
+        <button onclick="showHome()" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center">
           <i class="fa-solid fa-arrow-left mr-1.5"></i> Orqaga
         </button>
-        <span class="text-xs font-bold text-indigo-600">4 ta Asosiy Darslik Kitobi</span>
+        <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Mening kitoblarim</span>
       </div>
 
-      <div class="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-xs text-indigo-900 dark:text-indigo-200 space-y-1">
-        <p class="font-bold flex items-center">
-          <i class="fa-solid fa-graduation-cap mr-1.5 text-indigo-600"></i> BMBA Milliy Test Manbasi:
+      <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border border-amber-300 dark:border-amber-700/60 text-xs text-slate-800 dark:text-slate-200 space-y-1">
+        <p class="font-bold flex items-center text-amber-600 dark:text-amber-400">
+          <i class="fa-solid fa-book-bookmark mr-1.5"></i> Imomali Mamatqulov — Mualliflik Kitoblari:
         </p>
-        <p class="text-[11px] leading-relaxed">
-          Ushbu 4 ta yangi darslik va 40 ta qonunchilik hujjati barcha 45 talik test variantlarining rasmiy manbasi hisoblanadi. PDF fayllarni to'g'ridan-to'g'ri o'qishingiz yoki yuklab olishingiz mumkin.
+        <p class="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+          Ushbu sahifada BMBA Huquq Milliy Sertifikat imtihoni uchun maxsus tayyorlangan 2 ta mualliflik kitobi (har biri 80 000 UZS) va 2 ta darslik taqdim etilmoqda. To'lov qilingach, bot PDF faylni shaxsiy Telegramingizga tashlab beradi.
         </p>
       </div>
 
@@ -1650,6 +1650,81 @@
     </div>
   </div>
 
+  <!-- 3.1 MODAL: KITOB SOTIB OLISH (80 000 UZS) -->
+  <div id="bookPurchaseModal" class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm hidden items-end sm:items-center justify-center p-3 animate-fade-in">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[92vh]">
+      <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-black text-slate-800 dark:text-white flex items-center">
+            <i class="fa-solid fa-book-bookmark text-amber-500 mr-1.5"></i> Kitobni Xarid Qilish
+          </h3>
+          <p id="bookModalSubtitle" class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">80 000 UZS · PDF Telegramingizga yuboriladi</p>
+        </div>
+        <button onclick="closeBookPurchaseModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-3 overflow-y-auto">
+        <div class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 space-y-1">
+          <span class="text-[9px] px-2 py-0.5 rounded bg-amber-500 text-white font-black uppercase">Tanlangan Kitob</span>
+          <h4 id="bookModalTitle" class="text-xs font-bold text-slate-900 dark:text-white leading-snug pt-0.5">Kitob nomi</h4>
+          <p class="text-xs font-black text-emerald-600 dark:text-emerald-400">Narxi: 80 000 UZS</p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-900 text-white space-y-2 border border-slate-700">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-slate-400 font-semibold">To'lov uchun karta (Humo):</span>
+            <span class="text-amber-300 font-bold">Imomali Mamatqulov</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-800 px-3 py-2 rounded-xl border border-slate-700">
+            <span class="font-mono text-xs font-bold tracking-wider text-white">9860 0366 7156 8792</span>
+            <button type="button" onclick="copyCardNumber()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] flex items-center space-x-1 shadow transition">
+              <i class="fa-regular fa-copy"></i>
+              <span>Nusxa</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            💡 <strong>80 000 so'm</strong> to'lov qiling va pastda chek skrinshotini yuklang. Admin tasdiqlashi bilan kitobning to'liq PDF fayli sizning Telegramingizga (@HuquqdanSertifikatBot) avtomatik tashlab beriladi!
+          </p>
+        </div>
+
+        <!-- Chek skrinshotini yuklash -->
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">
+            <i class="fa-solid fa-camera mr-1 text-emerald-500"></i> To'lov cheki skrinshotini yuklang:
+          </label>
+          <div onclick="document.getElementById('bookReceiptFileInput').click()" class="border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-emerald-500 bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-3.5 text-center cursor-pointer transition active:scale-98">
+            <input type="file" id="bookReceiptFileInput" accept="image/*" class="hidden" onchange="handleBookReceiptFileSelect(event)">
+            <div id="bookReceiptUploadPlaceholder" class="space-y-1">
+              <i class="fa-solid fa-cloud-arrow-up text-xl text-emerald-500"></i>
+              <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Chek rasmini tanlang (JPG, PNG)</p>
+              <p class="text-[10px] text-slate-400">Click yoki Payme kvitansiyasi</p>
+            </div>
+            <div id="bookReceiptPreviewBox" class="hidden flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-2 border border-slate-200 dark:border-slate-700">
+              <div class="flex items-center space-x-2 overflow-hidden">
+                <img id="bookReceiptPreviewImg" src="" alt="Chek" class="w-10 h-10 object-cover rounded-lg border border-slate-300 dark:border-slate-600 shrink-0">
+                <div class="text-left truncate">
+                  <p id="bookReceiptFileName" class="text-xs font-bold text-slate-800 dark:text-white truncate">chek.jpg</p>
+                  <p id="bookReceiptFileSize" class="text-[10px] text-emerald-600 font-semibold">Tayyor ✓</p>
+                </div>
+              </div>
+              <button type="button" onclick="cancelBookReceiptFile(event)" class="text-rose-500 hover:text-rose-600 p-1.5 text-xs">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+          </div>
+
+          <button id="sendBookReceiptBtn" onclick="submitBookReceipt()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 text-white font-black text-xs shadow-md flex items-center justify-center space-x-2 transition active:scale-98">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Chekni Yuborish (80 000 UZS)</span>
+          </button>
+
+          <div id="bookReceiptStatus" class="hidden text-[11px] font-semibold text-center p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- 3.5 MODAL: AI USTOZ BEPUL LIMITI TUGAGANINI BILDIRUVCHI MODAL -->
   <div id="aiLimitModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">

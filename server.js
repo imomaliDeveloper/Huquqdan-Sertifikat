@@ -789,6 +789,97 @@ app.post('/api/payments/submit-receipt-image', async (req, res) => {
   }
 });
 
+// API: Kitob sotib olish uchun to'lov cheki rasmini (Base64) qabul qilish va adminga yuborish
+app.post('/api/payments/submit-book-receipt', async (req, res) => {
+  const { imageBase64, bookId, bookTitle, userName, userId, userUsername, amount } = req.body;
+  if (!imageBase64) {
+    return res.status(400).json({ error: "Chek rasmi tanlanmadi!" });
+  }
+
+  try {
+    const receipts = getReceiptsList();
+    const receiptId = "REC-BK-" + Date.now();
+
+    const newReceipt = {
+      id: receiptId,
+      type: "book_purchase",
+      bookId: bookId ? bookId.toString() : "1",
+      bookTitle: bookTitle || "Huquq Milliy Sertifikat Kitobi",
+      transactionId: "Kitob xaridi cheki",
+      userContact: userUsername || userId || "Telegram WebApp",
+      userName: userName || "O'quvchi",
+      userId: userId ? userId.toString() : "",
+      userUsername: userUsername || "",
+      amount: amount || "80 000 UZS",
+      hasImage: true,
+      date: new Date().toISOString(),
+      status: "pending"
+    };
+
+    receipts.unshift(newReceipt);
+    saveReceiptsList(receipts);
+
+    // Adminlarga Telegram orqali rasmni yuborish
+    try {
+      const bot = getBotInstance();
+      if (bot && bot.token) {
+        const adminIds = typeof getAdminIds === 'function' ? getAdminIds() : ['8348657980'];
+        const adminCaption = `📚 <b>YANGI KITOB XARIDI CHEKI!</b> 💳\n\n` +
+          `📖 <b>Kitob:</b> ${escapeHtml(newReceipt.bookTitle)}\n` +
+          `👤 <b>Xaridor:</b> ${escapeHtml(newReceipt.userName)}\n` +
+          `🆔 <b>Telegram ID:</b> <code>${newReceipt.userId || 'Noma\'lum'}</code>\n` +
+          `📱 <b>Username:</b> ${newReceipt.userUsername || 'Mavjud emas'}\n` +
+          `💰 <b>Summa:</b> ${newReceipt.amount}\n` +
+          `📅 <b>Sana:</b> ${new Date().toLocaleString('uz-UZ')}\n` +
+          `🔢 <b>Chek ID:</b> <code>${newReceipt.id}</code>\n\n` +
+          `<i>Chekni tekshirib tasdiqlang. Tasdiqlashingiz bilan bot avtomatik ushbu foydalanuvchiga PDF kitobni tashlab beradi!</i>`;
+
+        // Base64 dan Buffer va FormData tayyorlash
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+
+        for (const aId of adminIds) {
+          try {
+            const formData = new FormData();
+            formData.append('chat_id', aId);
+            formData.append('photo', new Blob([imageBuffer], { type: 'image/jpeg' }), 'book_receipt.jpg');
+            formData.append('caption', adminCaption);
+            formData.append('parse_mode', 'HTML');
+            formData.append('reply_markup', JSON.stringify({
+              inline_keyboard: [
+                [
+                  { text: "✅ Tasdiqlash va PDF yuborish", callback_data: `approve_book_${newReceipt.bookId}_${newReceipt.id}` },
+                  { text: "❌ Rad etish", callback_data: `reject_receipt_${newReceipt.id}` }
+                ],
+                [
+                  { text: "💬 Foydalanuvchiga yozish", url: newReceipt.userUsername ? `https://t.me/${newReceipt.userUsername.replace('@', '')}` : (newReceipt.userId ? `tg://user?id=${newReceipt.userId}` : "https://t.me/Imomali_Mamatkulov") }
+                ]
+              ]
+            }));
+
+            await fetch(`https://api.telegram.org/bot${bot.token}/sendPhoto`, {
+              method: 'POST',
+              body: formData
+            });
+          } catch (sendErr) {
+            console.error(`Admin ${aId} ga kitob cheki yuborishda xato:`, sendErr.message);
+          }
+        }
+      }
+    } catch (botErr) {
+      console.error("Bot admin kitob cheki yuborish xatosi:", botErr.message);
+    }
+
+    res.json({
+      success: true,
+      message: "To'lov cheki adminga yuborildi! Admin tasdiqlashi bilan kitob PDF fayli botingizga yuboriladi.",
+      receiptId: newReceipt.id
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Kitob chekini saqlashda xatolik: " + err.message });
+  }
+});
+
 // ==================== TARIFFS & AUTH API ====================
 
 // API: 3 ta Tariflar ro'yxati

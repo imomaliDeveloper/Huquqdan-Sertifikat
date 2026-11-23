@@ -27,3 +27,6 @@ tmp/
 
 # Large PDF Books (GitHub 100MB limit & Vercel serverless limit)
 public/books/*.pdf
+!public/books/Huquqdan_namunaviy_test.pdf
+!public/books/Huquq_spetsifikatsiya.pdf
+/*.pdf

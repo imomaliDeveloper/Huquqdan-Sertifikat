@@ -238,6 +238,34 @@ class SimpleTelegramBot {
     });
   }
 
+  async sendLocalDocument(chatId, filePath, caption = '', options = {}) {
+    try {
+      if (!fs.existsSync(filePath)) {
+        console.error(`Fayl topilmadi: ${filePath}`);
+        return { ok: false, error: 'File not found: ' + filePath };
+      }
+      const buffer = fs.readFileSync(filePath);
+      const filename = path.basename(filePath);
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      formData.append('document', new Blob([buffer], { type: 'application/pdf' }), filename);
+      if (caption) formData.append('caption', caption);
+      formData.append('parse_mode', options.parse_mode || 'HTML');
+      if (options.reply_markup) {
+        formData.append('reply_markup', typeof options.reply_markup === 'string' ? options.reply_markup : JSON.stringify(options.reply_markup));
+      }
+
+      const response = await fetch(`${this.baseUrl}/sendDocument`, {
+        method: 'POST',
+        body: formData
+      });
+      return await response.json();
+    } catch (err) {
+      console.error('sendLocalDocument error:', err.message);
+      return { ok: false, error: err.message };
+    }
+  }
+
   async editMessageCaption(chatId, messageId, caption, options = {}) {
     return await this.callApi('editMessageCaption', {
       chat_id: chatId,
@@ -1944,6 +1972,84 @@ class SimpleTelegramBot {
             );
           }
         } catch (e) {}
+
+      } else if (q.data && q.data.startsWith('approve_book_')) {
+        // q.data format: approve_book_<bookId>_<receiptId>
+        const parts = q.data.replace('approve_book_', '').split('_');
+        const bookId = parts[0];
+        const rId = parts.slice(1).join('_');
+
+        await this.answerCallbackQuery(q.id, "✅ Kitob yuborilmoqda...");
+        if (!isUserAdmin(userId)) {
+          return await this.sendMessage(chatId, "🔒 Faqat adminlar to'lovni tasdiqlashi mumkin.");
+        }
+
+        const receipts = safeRead('receipts.json', []);
+        const receipt = receipts.find(r => r.id === rId);
+        if (!receipt) {
+          return await this.sendMessage(chatId, `⚠️ Chek topilmadi (${rId}).`);
+        }
+
+        receipt.status = 'approved';
+        receipt.approvedBy = userId;
+        receipt.approvedAt = new Date().toISOString();
+        safeWrite('receipts.json', receipts);
+
+        const targetUserIdStr = (receipt.userId || '').toString().trim();
+        const targetChatId = receipt.chatId || receipt.userId;
+
+        // Kitob faylini aniqlash
+        let bookFileName = 'Huquqdan_namunaviy_test.pdf';
+        let bookTitleName = "Huquq Milliy Sertifikat: Namunaviy Testlar & Yechimlar To'plami";
+        if (bookId === '2') {
+          bookFileName = 'Huquq_spetsifikatsiya.pdf';
+          bookTitleName = "BMBA Huquqshunoslik: To'liq Spesifikatsiya & Qonunlar Izohi";
+        }
+
+        const cleanBaseUrl = this.appUrl.replace(/\/+$/, '');
+        const miniAppBookUrl = `${cleanBaseUrl}/?purchased_book=${bookId}&uid=${targetUserIdStr || ''}`;
+
+        // Xaridorga tabrik va PDF kitobni yuborish
+        if (targetChatId) {
+          try {
+            await this.sendMessage(targetChatId,
+              `🎉 <b>TABRIKLAYMIZ! KITOB TO'LOVINGIZ TASDIQLANDI!</b> 📚\n\n` +
+              `Hurmatli <b>${escapeHtml(receipt.userName || "O'quvchi")}</b>, to'lov chekingiz admin tomonidan tekshirilib tasdiqlandi!\n\n` +
+              `📖 <b>Kitob:</b> ${escapeHtml(bookTitleName)}\n` +
+              `💰 <b>To'langan summa:</b> 80 000 UZS\n\n` +
+              `<i>Quyida siz sotib olgan kitobning rasmiy elektron PDF fayli yuklanmoqda... Marhamat, yuklab oling!</i> 👇`
+            );
+
+            // PDF faylni to'g'ridan-to'g'ri Telegram chatga yuborish
+            const pdfPath = path.join(__dirname, 'public', 'books', bookFileName);
+            const caption = `📘 <b>${escapeHtml(bookTitleName)}</b>\n\nMuallif: Imomali Mamatqulov\nFormat: PDF (To'liq nashr)`;
+            
+            await this.sendLocalDocument(targetChatId, pdfPath, caption, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "📱 Mini Appda ochish", web_app: { url: miniAppBookUrl } }]
+                ]
+              }
+            });
+          } catch (sendBookErr) {
+            console.error("Xaridorga kitob yuborishda xato:", sendBookErr.message);
+          }
+        }
+
+        // Admin xabarini yangilash
+        try {
+          if (q.message?.caption) {
+            await this.editMessageCaption(chatId, q.message.message_id,
+              `${q.message.caption}\n\n✅ <b>TASDIQLANDI: Xaridorga PDF kitob yuborildi! (${new Date().toLocaleTimeString('uz-UZ')})</b>`
+            );
+          } else if (q.message?.text) {
+            await this.editMessageText(chatId, q.message.message_id,
+              `${q.message.text}\n\n✅ <b>TASDIQLANDI: Xaridorga PDF kitob yuborildi! (${new Date().toLocaleTimeString('uz-UZ')})</b>`
+            );
+          }
+        } catch (adminEditErr) {
+          console.error("Admin xabarini tahrirlashda xato:", adminEditErr.message);
+        }
 
       } else if (q.data && q.data.startsWith('reject_receipt_')) {
         const rId = q.data.replace('reject_receipt_', '');

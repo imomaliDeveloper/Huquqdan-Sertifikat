@@ -36,6 +36,10 @@ if (!initialUser && tg?.initDataUnsafe?.user) {
 // URL parametrlarini tekshirish (Admin tasdiqlaganda keladigan ?vip=true)
 const urlParams = new URLSearchParams(window.location.search);
 const isVipParam = urlParams.get("vip") === "true";
+const purchasedBookParam = urlParams.get("purchased_book") || urlParams.get("bought_book");
+if (purchasedBookParam) {
+  localStorage.setItem("purchased_book_" + purchasedBookParam, "true");
+}
 if (isVipParam) {
   localStorage.setItem("huquq_premium_active", "true");
   localStorage.setItem("huquq_user_plan", "tariff_vip");
@@ -75,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     state.isPremium = true;
     state.userPlan = "tariff_vip";
     showToast("Tabriklaymiz! VIP PRO a'zoligingiz muvaffaqiyatli faollashtirildi! 💎");
+  }
+  if (purchasedBookParam) {
+    showToast("Tabriklaymiz! Kitobingiz muvaffaqiyatli xarid qilindi va ochildi! 📚");
   }
   // Telegram WebApp foydalanuvchisini aniqlash va kiritish
   if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
@@ -2055,15 +2062,50 @@ function renderBooksList(books) {
     const card = document.createElement("div");
     card.className = "p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3";
 
+    const isPurchased = !b.isPaid || localStorage.getItem("purchased_book_" + b.id) === "true";
+
+    const badgeHtml = b.isPaid
+      ? (isPurchased 
+          ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">Xarid qilingan ✓</span>`
+          : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">Pullik: 80 000 UZS</span>`)
+      : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">Bepul darslik</span>`;
+
+    let actionsHtml = "";
+    if (isPurchased) {
+      actionsHtml = `
+        <div class="flex items-center space-x-2 pt-1">
+          <a href="${b.url}" target="_blank" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+            <i class="fa-regular fa-file-pdf"></i>
+            <span>PDF ni O'qish</span>
+          </a>
+          <a href="${b.url}" download="${b.filename}" class="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center space-x-1 transition">
+            <i class="fa-solid fa-download"></i>
+            <span>Yuklab olish</span>
+          </a>
+        </div>
+      `;
+    } else {
+      const escapedTitle = (b.title || '').replace(/'/g, "\\'");
+      actionsHtml = `
+        <div class="flex items-center space-x-2 pt-1">
+          <button onclick="openBookPurchaseModal(${b.id}, '${escapedTitle}')" class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 text-white font-black text-xs flex items-center justify-center space-x-1.5 shadow-md transition active:scale-98">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Sotib olish (80 000 UZS)</span>
+          </button>
+        </div>
+      `;
+    }
+
     card.innerHTML = `
       <div class="flex items-start justify-between">
         <div class="flex items-start space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+          <div class="w-10 h-10 rounded-xl ${b.isPaid ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600' : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600'} flex items-center justify-center text-lg shrink-0">
             <i class="fa-solid ${b.icon || 'fa-book'}"></i>
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">${b.grade}</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">${b.grade}</span>
+              ${badgeHtml}
               <span class="text-[10px] text-slate-400">${b.size}</span>
             </div>
             <h3 class="text-sm font-bold text-slate-800 dark:text-white mt-1 leading-snug">${b.title}</h3>
@@ -2076,20 +2118,157 @@ function renderBooksList(books) {
         <div><strong>Imtihon savollari:</strong> <span class="text-emerald-600 font-semibold">${b.examCoverage}</span></div>
       </div>
 
-      <div class="flex items-center space-x-2 pt-1">
-        <a href="${b.url}" target="_blank" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
-          <i class="fa-regular fa-file-pdf"></i>
-          <span>PDF ni O'qish</span>
-        </a>
-        <a href="${b.url}" download="${b.filename}" class="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center space-x-1 transition">
-          <i class="fa-solid fa-download"></i>
-          <span>Yuklab olish</span>
-        </a>
-      </div>
+      ${actionsHtml}
     `;
 
     container.appendChild(card);
   });
+}
+
+// ==================== KITOB SOTIB OLISH MODAL MANTIQI ====================
+let currentPurchasingBook = null;
+let selectedBookReceiptFile = null;
+
+function openBookPurchaseModal(bookId, bookTitle) {
+  currentPurchasingBook = { id: bookId, title: bookTitle || "Huquqiy kitob" };
+  const modal = document.getElementById("bookPurchaseModal");
+  const titleEl = document.getElementById("bookModalTitle");
+  if (titleEl) titleEl.innerText = currentPurchasingBook.title;
+  cancelBookReceiptFile();
+  const statusEl = document.getElementById("bookReceiptStatus");
+  if (statusEl) {
+    statusEl.classList.add("hidden");
+    statusEl.innerText = "";
+  }
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+}
+
+function closeBookPurchaseModal() {
+  const modal = document.getElementById("bookPurchaseModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+  cancelBookReceiptFile();
+}
+
+function handleBookReceiptFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    showToast("Faqat rasm fayllarini yuklash mumkin (JPG, PNG)!");
+    return;
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    showToast("Rasm hajmi juda katta (maksimal 12MB)!");
+    return;
+  }
+
+  selectedBookReceiptFile = file;
+  const placeholder = document.getElementById("bookReceiptUploadPlaceholder");
+  const previewBox = document.getElementById("bookReceiptPreviewBox");
+  const previewImg = document.getElementById("bookReceiptPreviewImg");
+  const fileName = document.getElementById("bookReceiptFileName");
+  const fileSize = document.getElementById("bookReceiptFileSize");
+
+  if (placeholder) placeholder.classList.add("hidden");
+  if (previewBox) previewBox.classList.remove("hidden");
+  if (fileName) fileName.innerText = file.name;
+  if (fileSize) fileSize.innerText = `${(file.size / 1024).toFixed(0)} KB • Tayyor ✓`;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (previewImg) previewImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function cancelBookReceiptFile(e) {
+  if (e) e.stopPropagation();
+  selectedBookReceiptFile = null;
+  const fileInput = document.getElementById("bookReceiptFileInput");
+  if (fileInput) fileInput.value = "";
+
+  const placeholder = document.getElementById("bookReceiptUploadPlaceholder");
+  const previewBox = document.getElementById("bookReceiptPreviewBox");
+  if (placeholder) placeholder.classList.remove("hidden");
+  if (previewBox) previewBox.classList.add("hidden");
+}
+
+async function submitBookReceipt() {
+  if (!selectedBookReceiptFile) {
+    showToast("Iltimos, avval to'lov cheki rasmini tanlang!");
+    return;
+  }
+
+  const statusEl = document.getElementById("bookReceiptStatus");
+  const btn = document.getElementById("sendBookReceiptBtn");
+
+  if (statusEl) {
+    statusEl.classList.remove("hidden");
+    statusEl.className = "text-[11px] font-bold text-amber-500 block text-center p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700";
+    statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Chek adminga yuborilmoqda, kuting...';
+  }
+  if (btn) btn.disabled = true;
+
+  try {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64Data = reader.result;
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+        const res = await fetch("/api/payments/submit-book-receipt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageBase64: base64Data,
+            bookId: currentPurchasingBook?.id || 1,
+            bookTitle: currentPurchasingBook?.title || "Huquq kitobi",
+            userName: state.currentUser?.name || state.user?.name || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : "O'quvchi"),
+            userId: tgUser?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : "") || "",
+            userUsername: tgUser?.username ? `@${tgUser.username}` : (state.currentUser?.username || ""),
+            amount: "80 000 UZS"
+          })
+        });
+
+        const data = await res.json();
+        if (btn) btn.disabled = false;
+
+        if (data.success) {
+          if (statusEl) {
+            statusEl.className = "text-[11px] font-bold text-emerald-600 dark:text-emerald-400 block text-center p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/40";
+            statusEl.innerHTML = `✅ ${data.message || "Chek qabul qilindi! Admin tasdiqlashi bilan botingizga PDF yuboriladi."}`;
+          }
+          showToast("To'lov cheki adminga yuborildi! 📚");
+          cancelBookReceiptFile();
+          setTimeout(() => {
+            closeBookPurchaseModal();
+          }, 3500);
+        } else {
+          if (statusEl) {
+            statusEl.className = "text-[11px] font-bold text-rose-500 block text-center p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-500/40";
+            statusEl.innerText = data.error || "Yuklashda xatolik yuz berdi.";
+          }
+        }
+      } catch (err) {
+        if (btn) btn.disabled = false;
+        if (statusEl) {
+          statusEl.className = "text-[11px] font-bold text-rose-500 block text-center p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-500/40";
+          statusEl.innerText = "Tarmoq xatosi yoki server javob bermadi.";
+        }
+      }
+    };
+    reader.readAsDataURL(selectedBookReceiptFile);
+  } catch (e) {
+    if (btn) btn.disabled = false;
+    showToast("Faylni o'qishda xatolik!");
+  }
 }
 
 /* ==================== 25 TA VAZIYATLI KEYSLAR BANKI (Y-2) ==================== */
