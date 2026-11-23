@@ -1,0 +1,20 @@
+name: Avtomatik Kunlik Motivatsiya va Viktorina
+
+on:
+  schedule:
+    # Har kuni UTC 05:00 = Toshkent vaqti bilan 10:00 (Ertalabki motivatsiya)
+    - cron: '0 5 * * *'
+    # Har kuni UTC 14:00 = Toshkent vaqti bilan 19:00 (Kechki motivatsiya va eslatma)
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  send-daily-motivation:
+    name: Kunlik motivatsiyani avtomatik yuborish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Serverga so'rov yuborish va avtomatik yuborish
+        run: |
+          echo "Avtomatik kunlik motivatsiya yuborilmoqda..."
+          curl -s -X GET "https://huquqdan-sertifikat.vercel.app/api/cron/reminders?force_reminders=true"
+          echo "Barcha o'quvchilarga avtomatik motivatsiya muvaffaqiyatli yetkazildi!"
