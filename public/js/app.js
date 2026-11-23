@@ -91,6 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // 40 ta qonunni yuklash
   fetchLawsList();
 
+  // Foydalanuvchi profilini server bilan sinxronizatsiya qilish (VIP statusni tekshirish)
+  syncUserProfile();
+
   // Kanallarga a'zolik holatini yangilash
   updateHomeSubscriptionUI();
 
@@ -113,6 +116,37 @@ function handleRouteHash() {
     openMistakesTrainer();
   } else if (hash === '#cases' || hash === '#keys') {
     switchView('viewCases');
+  }
+}
+
+// Serverdan foydalanuvchi VIP statusini sinxronizatsiya qilish
+async function syncUserProfile() {
+  const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : null);
+  if (!tgId) return;
+
+  try {
+    const res = await fetch(`/api/auth/profile/${tgId}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.isVip || data.plan === 'VIP PRO' || data.plan === 'tariff_vip' || data.plan === 'VIP') {
+        state.isPremium = true;
+        state.userPlan = 'tariff_vip';
+        localStorage.setItem("huquq_premium_active", "true");
+        localStorage.setItem("huquq_user_plan", "tariff_vip");
+        if (state.currentUser) {
+          state.currentUser.plan = 'tariff_vip';
+          state.currentUser.isVip = true;
+          localStorage.setItem("huquq_auth_user", JSON.stringify(state.currentUser));
+        }
+        initAuthUI();
+        if (typeof updateAiLimitUI === 'function') updateAiLimitUI();
+        if (state.laws && state.laws.length > 0 && typeof renderLawsList === 'function') {
+          renderLawsList(state.laws);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("User profile sync error:", e);
   }
 }
 
@@ -1465,8 +1499,12 @@ function copyCardNumber() {
 }
 
 function openTelegramAdminContact() {
-  const text = encodeURIComponent("Assalomu alaykum! Huquq Milliy Sertifikat platformasida VIP obuna uchun to'lov qildim. Chekni taqdim etmoqdaman:");
-  window.open(`https://t.me/share/url?url=&text=${text}`, "_blank");
+  const adminUrl = "https://t.me/Imomali_Mamatkulov";
+  if (window.Telegram?.WebApp?.openTelegramLink) {
+    window.Telegram.WebApp.openTelegramLink(adminUrl);
+  } else {
+    window.open(adminUrl, "_blank");
+  }
 }
 
 function applyPromoCode() {
@@ -2659,14 +2697,17 @@ async function submitPaymentReceipt() {
   statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Chek yuborilmoqda...';
 
   try {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const res = await fetch("/api/payments/submit-receipt", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         transactionId: val,
         userContact: val,
-        userName: state.currentUser?.name || state.user?.name || "O'quvchi",
+        userName: state.currentUser?.name || state.user?.name || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : "O'quvchi"),
         userPhone: state.currentUser?.phone || "",
+        userId: tgUser?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : "") || "",
+        userUsername: tgUser?.username ? `@${tgUser.username}` : (state.currentUser?.username || ""),
         tariffId: state.selectedTariff || "tariff_vip",
         amount: state.selectedTariff === "tariff_standard" ? "49 000 UZS" : "89 000 UZS"
       })
@@ -2674,17 +2715,17 @@ async function submitPaymentReceipt() {
 
     const data = await res.json();
     if (data.success) {
-      statusEl.className = "text-[11px] font-bold text-emerald-600 block";
+      statusEl.className = "text-[11px] font-bold text-emerald-400 block";
       statusEl.innerHTML = `✓ ${data.message} (Raqam: ${data.receiptId})`;
       input.value = "";
-      showToast("To'lov ma'lumoti muvaffaqiyatli qabul qilindi! 💎");
+      showToast("To'lov ma'lumoti adminga yetkazildi! Tez orada faollashadi. 💎");
     } else {
       statusEl.className = "text-[11px] font-bold text-rose-500 block";
       statusEl.innerText = data.error || "Xatolik yuz berdi.";
     }
   } catch (err) {
     statusEl.className = "text-[11px] font-bold text-rose-500 block";
-    statusEl.innerText = "Yuborishda xatolik: " + err.message;
+    statusEl.innerText = "Aloqa xatosi. Iltimos adminga to'g'ridan-to'g'ri yozing: @Imomali_Mamatkulov";
   }
 }
 

@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { GoogleGenAI } = require('@google/genai');
 const { generateVariant } = require('./scripts/generator');
-const { initBot, getBotInstance } = require('./bot');
+const { initBot, getBotInstance, getAdminIds } = require('./bot');
 const { askAiTutor, checkOpenAnswer, explainQuestion } = require('./scripts/aiService');
 
 const app = express();
@@ -606,8 +606,8 @@ app.post('/api/channel/post-quiz', async (req, res) => {
 });
 
 // API: To'lov chekini qabul qilish va saqlash
-app.post('/api/payments/submit-receipt', (req, res) => {
-  const { transactionId, userContact, userName, amount } = req.body;
+app.post('/api/payments/submit-receipt', async (req, res) => {
+  const { transactionId, userContact, userName, userPhone, userId, userUsername, amount, tariffId } = req.body;
   if (!transactionId && !userContact) {
     return res.status(400).json({ error: "Tranzaksiya ma'lumoti yoki aloqa kiritilmadi" });
   }
@@ -620,7 +620,11 @@ app.post('/api/payments/submit-receipt', (req, res) => {
       transactionId: transactionId || "Noma'lum",
       userContact: userContact || "Kiritilmagan",
       userName: userName || "O'quvchi",
-      amount: amount || "49 000 UZS",
+      userPhone: userPhone || "",
+      userId: userId ? userId.toString() : "",
+      userUsername: userUsername || "",
+      tariffId: tariffId || "tariff_vip",
+      amount: amount || "89 000 UZS (VIP PRO)",
       date: new Date().toISOString(),
       status: "pending"
     };
@@ -628,9 +632,44 @@ app.post('/api/payments/submit-receipt', (req, res) => {
     receipts.unshift(newReceipt);
     saveReceiptsList(receipts);
 
+    // Adminlarga Telegram orqali bildirishnoma yuborish
+    try {
+      const bot = getBotInstance();
+      if (bot) {
+        const adminIds = typeof getAdminIds === 'function' ? getAdminIds() : ['8348657980'];
+        const adminMsg = `📥 <b>YANGI TO'LOV CHEKI (Mini App orqali)!</b> 💳\n\n` +
+          `👤 <b>Foydalanuvchi:</b> ${newReceipt.userName}\n` +
+          `🆔 <b>Telegram ID:</b> <code>${newReceipt.userId || 'Noma\'lum'}</code>\n` +
+          `📱 <b>Aloqa / Username:</b> ${newReceipt.userUsername || newReceipt.userContact}\n` +
+          `💰 <b>Summa:</b> ${newReceipt.amount}\n` +
+          `🔢 <b>Tranzaksiya / Kvitansiya:</b> <code>${newReceipt.transactionId}</code>\n` +
+          `📅 <b>Sana:</b> ${new Date().toLocaleString('uz-UZ')}\n` +
+          `🆔 <b>Chek ID:</b> <code>${newReceipt.id}</code>\n\n` +
+          `<i>Ushbu foydalanuvchiga VIP PRO berishni tasdiqlaysizmi?</i>`;
+
+        for (const aId of adminIds) {
+          bot.sendMessage(aId, adminMsg, {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: "✅ Tasdiqlash (VIP PRO berish)", callback_data: `approve_receipt_${newReceipt.id}` },
+                  { text: "❌ Rad etish", callback_data: `reject_receipt_${newReceipt.id}` }
+                ],
+                [
+                  { text: "💬 Foydalanuvchiga yozish", url: newReceipt.userUsername ? `https://t.me/${newReceipt.userUsername.replace('@', '')}` : (newReceipt.userId ? `tg://user?id=${newReceipt.userId}` : "https://t.me/Imomali_Mamatkulov") }
+                ]
+              ]
+            }
+          }).catch(err => console.error("Admin notify error:", err.message));
+        }
+      }
+    } catch (botErr) {
+      console.error("Bot admin notification error:", botErr.message);
+    }
+
     res.json({
       success: true,
-      message: "Chek qabul qilindi! Tez orada VIP a'zoligingiz faollashtiriladi.",
+      message: "Chek qabul qilindi! Operatorimiz 5–15 daqiqa ichida tekshirib, VIP a'zoligingizni faollashtiradi.",
       receiptId: newReceipt.id
     });
   } catch (err) {
@@ -731,7 +770,14 @@ app.post('/api/auth/login', (req, res) => {
 app.get('/api/auth/profile/:id', (req, res) => {
   try {
     const users = getUsersList();
-    const user = users.find(u => u.id === req.params.id);
+    const idParam = (req.params.id || '').toString().trim();
+    const cleanId = idParam.replace(/^TG-/, '');
+    const user = users.find(u => 
+      (u.id && u.id.toString() === idParam) ||
+      (u.id && u.id.toString() === `TG-${cleanId}`) ||
+      (u.tgId && u.tgId.toString() === cleanId) ||
+      (u.tgId && u.tgId.toString() === idParam)
+    );
     if (!user) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
 
     const { password: _, ...userWithoutPass } = user;

@@ -218,6 +218,46 @@ class SimpleTelegramBot {
     return await this.callApi('answerCallbackQuery', params);
   }
 
+  async sendPhoto(chatId, photo, caption = '', options = {}) {
+    return await this.callApi('sendPhoto', {
+      chat_id: chatId,
+      photo: photo,
+      caption: caption,
+      parse_mode: options.parse_mode || 'HTML',
+      reply_markup: options.reply_markup
+    });
+  }
+
+  async sendDocument(chatId, document, caption = '', options = {}) {
+    return await this.callApi('sendDocument', {
+      chat_id: chatId,
+      document: document,
+      caption: caption,
+      parse_mode: options.parse_mode || 'HTML',
+      reply_markup: options.reply_markup
+    });
+  }
+
+  async editMessageCaption(chatId, messageId, caption, options = {}) {
+    return await this.callApi('editMessageCaption', {
+      chat_id: chatId,
+      message_id: messageId,
+      caption: caption,
+      parse_mode: options.parse_mode || 'HTML',
+      reply_markup: options.reply_markup
+    });
+  }
+
+  async editMessageText(chatId, messageId, text, options = {}) {
+    return await this.callApi('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      text: text,
+      parse_mode: options.parse_mode || 'HTML',
+      reply_markup: options.reply_markup
+    });
+  }
+
   // Kanalga a'zolikni tekshirish
   async checkUserSubscription(userId, channel = '@Huquq_study') {
     if (!this.token || this.token === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
@@ -555,7 +595,7 @@ class SimpleTelegramBot {
   // To'lov cheklari ro'yxati (Admin)
   async sendRecentReceipts(chatId) {
     const receipts = safeRead('receipts.json', []);
-    const recent = receipts.slice(-6).reverse();
+    const recent = receipts.slice(-10).reverse();
 
     if (!recent.length) {
       return await this.sendMessage(chatId, "📥 Hozircha to'lov cheklari mavjud emas.", {
@@ -564,17 +604,29 @@ class SimpleTelegramBot {
     }
 
     let text = `💳 <b>So'nggi kelib tushgan to'lov cheklari:</b>\n\n`;
+    const keyboard = [];
+
     recent.forEach((r, idx) => {
-      text += `<b>${idx + 1}. ${r.userName || "Foydalanuvchi"}</b>\n` +
-        `• Tranzaksiya/Chek: <code>${r.transactionId || r.userContact}</code>\n` +
+      const isPending = (r.status === 'pending');
+      const statusIcon = isPending ? '⏳ Kutilmoqda' : (r.status === 'approved' ? '✅ Tasdiqlangan' : '❌ Rad etilgan');
+      const shortName = (r.userName || "O'quvchi").slice(0, 14);
+
+      text += `<b>${idx + 1}. ${escapeHtml(r.userName || "Foydalanuvchi")}</b>\n` +
+        `• Chek / Izoh: <code>${escapeHtml(r.transactionId || r.caption || r.userContact || "Noma'lum")}</code>\n` +
+        `• ID / Kontakt: <code>${r.userId || r.userContact || "Noma'lum"}</code> (${r.userUsername || ''})\n` +
         `• Summa: <b>${r.amount || "Noma'lum"}</b>\n` +
-        `• Holati: <i>${r.status === 'pending' ? '⏳ Kutilmoqda' : '✅ Tasdiqlangan'}</i>\n` +
+        `• Holati: <i>${statusIcon}</i>\n` +
         `• Sana: ${r.date ? new Date(r.date).toLocaleString('uz-UZ') : ''}\n\n`;
+
+      if (isPending) {
+        keyboard.push([
+          { text: `✅ Tasdiqlash (${shortName})`, callback_data: `approve_receipt_${r.id}` },
+          { text: `❌ Rad`, callback_data: `reject_receipt_${r.id}` }
+        ]);
+      }
     });
 
-    const keyboard = [
-      [{ text: "🔙 Admin panelga qaytish", callback_data: "admin_panel" }]
-    ];
+    keyboard.push([{ text: "🔙 Admin panelga qaytish", callback_data: "admin_panel" }]);
 
     return await this.sendMessage(chatId, text, {
       reply_markup: { inline_keyboard: keyboard }
@@ -1273,11 +1325,90 @@ class SimpleTelegramBot {
       const msg = update.message;
       const chatId = msg.chat.id;
       const userId = msg.from?.id || chatId;
-      const text = (msg.text || '').trim();
+      const text = (msg.text || msg.caption || '').trim();
       const firstName = msg.from?.first_name || "O'quvchi";
 
       // Foydalanuvchini bazaga kiritish / yangilash
       recordUser(msg.from);
+
+      // 0. TO'LOV CHEKI (RASM YOKI HUJJAT) QABUL QILISH VA ADMINGA YUBORISH
+      const isPhoto = Array.isArray(msg.photo) && msg.photo.length > 0;
+      const isDocImage = msg.document && (msg.document.mime_type?.startsWith('image/') || msg.document.mime_type === 'application/pdf');
+
+      if (isPhoto || isDocImage) {
+        const fileId = isPhoto ? msg.photo[msg.photo.length - 1].file_id : msg.document.file_id;
+        const receiptId = "REC-" + Date.now();
+        const userName = [msg.from?.first_name, msg.from?.last_name].filter(Boolean).join(' ') || msg.from?.username || firstName;
+        const userUsername = msg.from?.username ? `@${msg.from.username}` : "Kiritilmagan";
+        const captionText = (msg.caption || text || "To'lov cheki skrinshoti").trim();
+
+        const newReceipt = {
+          id: receiptId,
+          userId: userId.toString(),
+          chatId: chatId,
+          userName: userName,
+          userUsername: userUsername,
+          photoFileId: fileId,
+          isDocument: !isPhoto,
+          caption: captionText,
+          amount: "89 000 UZS (VIP PRO)",
+          status: "pending",
+          date: new Date().toISOString()
+        };
+
+        const receipts = safeRead('receipts.json', []);
+        receipts.unshift(newReceipt);
+        safeWrite('receipts.json', receipts);
+
+        // Foydalanuvchiga samimiy va xushmuomala javob
+        await this.sendMessage(chatId,
+          `✅ <b>To'lov chekingiz muvaffaqiyatli qabul qilindi!</b>\n\n` +
+          `Hurmatli <b>${firstName}</b>, chekingiz tekshirish uchun ma'muriyatga yetkazildi.\n` +
+          `Operatorlarimiz 5–15 daqiqa ichida to'lovni tasdiqlashadi va sizga <b>VIP PRO</b> imkoniyatlari to'liq ochiladi! 🎉\n\n` +
+          `<i>Savollaringiz bo'lsa adminga yozishingiz mumkin: @Imomali_Mamatkulov</i>`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "📲 Mini Appni ochish", web_app: { url: this.appUrl } }],
+              [{ text: "💬 Admin bilan bog'lanish", url: "https://t.me/Imomali_Mamatkulov" }]
+            ]
+          }
+        });
+
+        // Adminga darhol to'lov cheki va tasdiqlash tugmalarini yuborish
+        const adminCaption = `📥 <b>YANGI TO'LOV CHEKI KELDI!</b> 💳\n\n` +
+          `👤 <b>Foydalanuvchi:</b> ${escapeHtml(userName)}\n` +
+          `🆔 <b>Telegram ID:</b> <code>${userId}</code>\n` +
+          `📱 <b>Username:</b> ${userUsername}\n` +
+          `📅 <b>Sana:</b> ${new Date().toLocaleString('uz-UZ')}\n` +
+          `📝 <b>Izoh:</b> ${escapeHtml(captionText)}\n` +
+          `🔢 <b>Chek ID:</b> <code>${receiptId}</code>\n\n` +
+          `<i>Foydalanuvchiga VIP PRO berishni tasdiqlaysizmi?</i>`;
+
+        const adminIds = getAdminIds();
+        for (const aId of adminIds) {
+          try {
+            const kb = {
+              inline_keyboard: [
+                [
+                  { text: "✅ Tasdiqlash (VIP PRO)", callback_data: `approve_receipt_${receiptId}` },
+                  { text: "❌ Rad etish", callback_data: `reject_receipt_${receiptId}` }
+                ],
+                [
+                  { text: "💬 Foydalanuvchiga yozish", url: msg.from?.username ? `https://t.me/${msg.from.username}` : `tg://user?id=${userId}` }
+                ]
+              ]
+            };
+            if (isPhoto) {
+              await this.sendPhoto(aId, fileId, adminCaption, { reply_markup: kb });
+            } else {
+              await this.sendDocument(aId, fileId, adminCaption, { reply_markup: kb });
+            }
+          } catch (e) {
+            console.error(`Admin ${aId} ga chek yuborishda xato:`, e.message);
+          }
+        }
+        return;
+      }
 
       // Mini App dan kelgan natija (web_app_data)
       if (msg.web_app_data) {
@@ -1514,15 +1645,64 @@ class SimpleTelegramBot {
         );
       }
 
-      // AI Ustozga savol berish (2 ta bepul limit)
-      const used = botUserAiCounts[userId] || 0;
-      if (used >= 2) {
+      // TABIIY MULOQOT & KICHIK SAVOLLAR (AI savol limitini bekorga yeb qo'ymaslik uchun)
+      const cleanLower = text.toLowerCase().replace(/['`’‘]/g, '').trim();
+
+      // Salomlashish
+      if (['salom', 'assalomu alaykum', 'assalom alaykum', 'salom alaykum', 'qalaysiz', 'qalesiz', 'hayrli kun', 'privet'].includes(cleanLower)) {
         return await this.sendMessage(chatId,
-          `⚠️ <b>Hurmatli ${firstName}! Siz 2 ta bepul AI Ustoz savol limitidan foydalandingiz.</b>\n\n` +
-          `Cheksiz va to'liq savol-javoblar uchun <b>VIP PRO</b> tarifiga ulaning! 👑`, {
+          `⚖️ <b>Vaalaykum assalom, hurmatli ${firstName}!</b>\n\n` +
+          `Huquqshunoslik fanidan Milliy Sertifikat (BMBA) tayyorlov tizimiga xush kelibsiz!\n\n` +
+          `Sizga qanday yordam bera olaman? Quyidagi bo'limlardan birini tanlashingiz mumkin: 👇`, {
+          reply_markup: this.getMainReplyKeyboard(isUserAdmin(userId))
+        });
+      }
+
+      // Rahmat / Minnatdorchilik
+      if (['rahmat', 'katta rahmat', 'tashakkur', 'raxmat', 'spasibo', 'salomat boling'].includes(cleanLower)) {
+        return await this.sendMessage(chatId,
+          `Arzimaydi, hurmatli ${firstName}! 😊 Sizga yordam bera olganimizdan mamnunmiz. Imtihonda eng yuqori A+ darajaga erishishingizga tilakdoshmiz! ⚖️`
+        );
+      }
+
+      // Narxlar va Tariflar haqida so'rash
+      if (cleanLower.includes('narx') || cleanLower.includes('qancha') || cleanLower.includes('tolov qanday') || cleanLower.includes('obuna narxi') || cleanLower === 'tarif') {
+        return await this.sendTariffs(chatId);
+      }
+
+      // To'lov / Chek haqida gapirsa, skrinshot yuborishni so'rash
+      if (cleanLower.includes('chek') || cleanLower.includes('toladim') || cleanLower.includes('pul otdim') || cleanLower.includes('otkazdim') || cleanLower.includes('tolov qildim')) {
+        return await this.sendMessage(chatId,
+          `💳 <b>Hurmatli ${firstName}!</b>\n\n` +
+          `Agar to'lov qilgan bo'lsangiz, iltimos, <b>to'lov kvitansiyasining (cheki) skrinshotini</b> to'g'ridan-to'g'ri shu yerga <b>rasm ko'rinishida yuboring</b> 📸\n\n` +
+          `Rasm kelishi bilan zudlik bilan adminga tasdiqlash uchun yuboriladi va profilingizga <b>VIP PRO</b> ochib beriladi! ✅\n\n` +
+          `<i>Savollar bo'lsa adminga murojaat qiling: @Imomali_Mamatkulov</i>`
+        );
+      }
+
+      // Agar foydalanuvchi juda qisqa yoki noaniq matn yozsa
+      if (cleanLower.length < 3) {
+        return await this.sendMessage(chatId,
+          `Hurmatli ${firstName}, savolingizni to'liqroq yozing yoki pastdagi menyudan kerakli bo'limni tanlang: 👇`, {
+          reply_markup: this.getMainReplyKeyboard(isUserAdmin(userId))
+        });
+      }
+
+      // AI Ustozga savol berish (VIP foydalanuvchilarda CHEKSIZ, bepulda 2 ta limit)
+      const allUsers = safeRead('users.json', []);
+      const curUser = allUsers.find(u => (u.tgId && u.tgId.toString() === userId.toString()) || (u.id && u.id.toString() === `TG-${userId}`));
+      const isVipUser = isUserAdmin(userId) || (curUser && (curUser.isVip || curUser.plan === 'VIP PRO' || curUser.plan === 'tariff_vip'));
+
+      const used = botUserAiCounts[userId] || 0;
+      if (!isVipUser && used >= 2) {
+        return await this.sendMessage(chatId,
+          `⚠️ <b>Hurmatli ${firstName}! Siz 2 ta bepul AI Ustoz savol limitidan to'liq foydalandingiz.</b>\n\n` +
+          `Cheksiz va tezkor savol-javoblar uchun <b>VIP PRO</b> tarifiga ulaning! 👑\n` +
+          `<i>Yoki 10 ta do'stingizni taklif qilib, VIP PRO ni mutlaqo bepul qo'lga kiriting!</i>`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: "👑 VIP PRO Tarifiga Ulanish", callback_data: "cmd_tariffs" }],
+              [{ text: "🎁 10 ta Do'st = VIP Bepul", callback_data: "cmd_referral" }],
               [{ text: "🔙 Asosiy Menyu", callback_data: "cmd_home" }]
             ]
           }
@@ -1531,11 +1711,17 @@ class SimpleTelegramBot {
 
       await this.callApi('sendChatAction', { chat_id: chatId, action: 'typing' });
       const aiRes = await askAiTutor(text);
-      botUserAiCounts[userId] = used + 1;
-      const remaining = 2 - botUserAiCounts[userId];
-      const limitNote = remaining > 0
-        ? `\n\n<i>(💡 Sizda yana ${remaining} ta bepul savol imkoniyati qoldi)</i>`
-        : `\n\n<i>(⚠️ 2 ta bepul savol limitingiz tugadi. Cheksiz savol-javob uchun VIP PRO ga o'ting!)</i>`;
+
+      let limitNote = "";
+      if (isVipUser) {
+        limitNote = `\n\n<i>(👑 VIP PRO a'zosi — Cheksiz AI maslahat)</i>`;
+      } else {
+        botUserAiCounts[userId] = used + 1;
+        const remaining = 2 - botUserAiCounts[userId];
+        limitNote = remaining > 0
+          ? `\n\n<i>(💡 Sizda yana ${remaining} ta bepul savol imkoniyati qoldi)</i>`
+          : `\n\n<i>(⚠️ 2 ta bepul savol limitingiz tugadi. Cheksiz savol-javob uchun VIP PRO ga o'ting!)</i>`;
+      }
 
       const replyText = `🤖 <b>AI Huquqiy Ustoz:</b>\n\n${aiRes.reply}${limitNote}`;
 
@@ -1640,6 +1826,135 @@ class SimpleTelegramBot {
         await this.answerCallbackQuery(q.id);
         if (!isUserAdmin(userId)) return;
         await this.sendRecentReceipts(chatId);
+      } else if (q.data && q.data.startsWith('approve_receipt_')) {
+        const rId = q.data.replace('approve_receipt_', '');
+        await this.answerCallbackQuery(q.id, "✅ To'lov tasdiqlanmoqda...");
+        if (!isUserAdmin(userId)) {
+          return await this.sendMessage(chatId, "🔒 Faqat adminlar to'lovni tasdiqlashi mumkin.");
+        }
+
+        const receipts = safeRead('receipts.json', []);
+        const receipt = receipts.find(r => r.id === rId);
+        if (!receipt) {
+          return await this.sendMessage(chatId, `⚠️ Chek topilmadi (${rId}).`);
+        }
+
+        receipt.status = 'approved';
+        receipt.approvedBy = userId;
+        receipt.approvedAt = new Date().toISOString();
+        safeWrite('receipts.json', receipts);
+
+        // Foydalanuvchini bazada VIP qilish
+        const users = safeRead('users.json', []);
+        const targetUserIdStr = (receipt.userId || '').toString().trim();
+        let targetUser = users.find(u => 
+          (u.tgId && u.tgId.toString() === targetUserIdStr) ||
+          (u.id && u.id.toString() === `TG-${targetUserIdStr}`) ||
+          (u.id && u.id.toString() === targetUserIdStr)
+        );
+
+        if (targetUser) {
+          targetUser.isVip = true;
+          targetUser.plan = "tariff_vip";
+          targetUser.vipUnlockedVia = "payment_approved";
+          targetUser.vipApprovedAt = new Date().toISOString();
+        } else if (targetUserIdStr) {
+          targetUser = {
+            id: `TG-${targetUserIdStr}`,
+            tgId: parseInt(targetUserIdStr) || targetUserIdStr,
+            name: receipt.userName || "O'quvchi",
+            username: receipt.userUsername || null,
+            role: "Abituriyent",
+            plan: "tariff_vip",
+            isVip: true,
+            vipUnlockedVia: "payment_approved",
+            registeredAt: new Date().toISOString(),
+            lastActive: new Date().toISOString(),
+            referrals: []
+          };
+          users.push(targetUser);
+        }
+        safeWrite('users.json', users);
+
+        // Foydalanuvchiga Telegramda chiroyli tasdiq xabari yuborish
+        const targetChatId = receipt.chatId || receipt.userId;
+        if (targetChatId) {
+          try {
+            await this.sendMessage(targetChatId,
+              `🎉 <b>TABRIKLAYMIZ! TO'LOVINGIZ TASDIQLANDI!</b> 👑\n\n` +
+              `Hurmatli <b>${escapeHtml(receipt.userName || "O'quvchi")}</b>, to'lovingiz admin tomonidan muvaffaqiyatli qabul qilindi!\n\n` +
+              `🌟 <b>Sizga VIP PRO tarifi to'liq faollashtirildi:</b>\n` +
+              `• 📜 Barcha 40 ta Qonunchilik testlari (800 ta test) ochiq!\n` +
+              `• 🎯 50 ta to'liq rasmiy BMBA imtihon variantlari ochiq!\n` +
+              `• 🤖 AI Yuridik Ustoz bilan cheksiz muloqot!\n` +
+              `• 🥊 Huquqiy Octagon cheksiz janglari!\n` +
+              `• 🎓 Rasmiy elektron sertifikatlar generatsiyasi!\n\n` +
+              `<i>Platformani ochib, hoziroq tayyorgarlikni boshlang:</i> 👇`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "🚀 Platformani ochish (VIP PRO)", web_app: { url: this.appUrl } }]
+                ]
+              }
+            });
+          } catch (notifErr) {
+            console.error("Foydalanuvchiga tasdiq xabari yuborishda xato:", notifErr.message);
+          }
+        }
+
+        // Admin xabarini yangilash
+        try {
+          if (q.message?.caption) {
+            await this.editMessageCaption(chatId, q.message.message_id,
+              `${q.message.caption}\n\n✅ <b>TASDIQLANDI: VIP PRO BERILDI! (${new Date().toLocaleTimeString('uz-UZ')})</b>`
+            );
+          } else if (q.message?.text) {
+            await this.editMessageText(chatId, q.message.message_id,
+              `${q.message.text}\n\n✅ <b>TASDIQLANDI: VIP PRO BERILDI! (${new Date().toLocaleTimeString('uz-UZ')})</b>`
+            );
+          }
+        } catch (e) {}
+
+      } else if (q.data && q.data.startsWith('reject_receipt_')) {
+        const rId = q.data.replace('reject_receipt_', '');
+        await this.answerCallbackQuery(q.id, "❌ To'lov rad etildi.");
+        if (!isUserAdmin(userId)) return;
+
+        const receipts = safeRead('receipts.json', []);
+        const receipt = receipts.find(r => r.id === rId);
+        if (receipt) {
+          receipt.status = 'rejected';
+          receipt.rejectedBy = userId;
+          receipt.rejectedAt = new Date().toISOString();
+          safeWrite('receipts.json', receipts);
+
+          const targetChatId = receipt.chatId || receipt.userId;
+          if (targetChatId) {
+            try {
+              await this.sendMessage(targetChatId,
+                `⚠️ <b>Hurmatli ${escapeHtml(receipt.userName || "Foydalanuvchi")}!</b>\n\n` +
+                `Siz yuborgan to'lov cheki ma'muriyat tomonidan tasdiqlanmadi (chek noaniq yoki to'lov kelib tushmagan).\n\n` +
+                `Iltimos, to'lov skrinshotini qayta tekshirib yuboring yoki adminga murojaat qiling: @Imomali_Mamatkulov`, {
+                reply_markup: {
+                  inline_keyboard: [
+                    [{ text: "💬 Admin bilan bog'lanish", url: "https://t.me/Imomali_Mamatkulov" }]
+                  ]
+                }
+              });
+            } catch (e) {}
+          }
+
+          try {
+            if (q.message?.caption) {
+              await this.editMessageCaption(chatId, q.message.message_id,
+                `${q.message.caption}\n\n❌ <b>RAD ETILDI (${new Date().toLocaleTimeString('uz-UZ')})</b>`
+              );
+            } else if (q.message?.text) {
+              await this.editMessageText(chatId, q.message.message_id,
+                `${q.message.text}\n\n❌ <b>RAD ETILDI (${new Date().toLocaleTimeString('uz-UZ')})</b>`
+              );
+            }
+          } catch (e) {}
+        }
       } else if (q.data === 'admin_send_reminders') {
         await this.answerCallbackQuery(q.id, "Eslatmalar yuborilmoqda...");
         if (!isUserAdmin(userId)) return;
@@ -1735,4 +2050,4 @@ function getBotInstance() {
   return botInstance;
 }
 
-module.exports = { initBot, getBotInstance, SimpleTelegramBot };
+module.exports = { initBot, getBotInstance, SimpleTelegramBot, getAdminIds, isUserAdmin };
