@@ -152,7 +152,13 @@ function addApprovedVipId(id) {
   }
 }
 
-// Statik fayllarni ulash
+// Statik fayllarni ulash va Keshni butunlay to'xtatish (Har doim eng yangi versiya yuklanishi uchun)
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   maxAge: 0

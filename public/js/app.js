@@ -3,8 +3,11 @@
 // PWA Service Worker Ro'yxatdan o'tkazish
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('SW faol:', reg.scope))
+    navigator.serviceWorker.register('/sw.js?v=40')
+      .then(reg => {
+        reg.update();
+        console.log('SW faol va yangilandi:', reg.scope);
+      })
       .catch(err => console.log('SW xatolik:', err));
   });
 }
@@ -2040,17 +2043,17 @@ async function submitNewQuestion(e) {
 /* ==================== 9. 4 TA DARSLIK KITOBLARI ==================== */
 
 async function openBooksDirectory() {
-  if (!checkAuthRequired("Darsliklar (PDF)")) return;
+  if (!checkAuthRequired("Mening kitoblarim")) return;
   switchView("viewBooks");
   const container = document.getElementById("booksListContainer");
-  container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Darsliklar yuklanmoqda...</div>';
+  container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Kitoblar yuklanmoqda...</div>';
 
   try {
-    const res = await fetch("/api/textbooks");
+    const res = await fetch("/api/textbooks?_t=" + Date.now(), { cache: "no-store" });
     const books = await res.json();
     renderBooksList(books);
   } catch (err) {
-    container.innerHTML = '<div class="text-center py-4 text-rose-500 text-xs">Darsliklarni yuklab bo\'lmadi</div>';
+    container.innerHTML = '<div class="text-center py-4 text-rose-500 text-xs">Kitoblarni yuklab bo\'lmadi</div>';
   }
 }
 
@@ -2062,16 +2065,43 @@ function renderBooksList(books) {
     const card = document.createElement("div");
     card.className = "p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3";
 
-    const isPurchased = !b.isPaid || localStorage.getItem("purchased_book_" + b.id) === "true";
+    // Pullik kitoblar: Obuna turi (PRO, VIP, Start) nima bo'lishidan qat'i nazar FAQAT sotiladi!
+    const isPaidBook = (b.isPaid === true) || (b.price && Number(b.price) > 0);
+    const isPurchased = !isPaidBook || (localStorage.getItem("purchased_book_" + b.id) === "true");
 
-    const badgeHtml = b.isPaid
+    const badgeHtml = isPaidBook
       ? (isPurchased 
           ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">Xarid qilingan ✓</span>`
-          : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">Pullik: 80 000 UZS</span>`)
+          : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">🔒 Pullik: 80 000 UZS</span>`)
       : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">Bepul darslik</span>`;
 
     let actionsHtml = "";
-    if (isPurchased) {
+    if (isPaidBook) {
+      if (isPurchased) {
+        actionsHtml = `
+          <div class="flex items-center space-x-2 pt-1">
+            <a href="${b.url}" target="_blank" class="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+              <i class="fa-regular fa-file-pdf"></i>
+              <span>PDF ni O'qish</span>
+            </a>
+            <a href="${b.url}" download="${b.filename}" class="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center space-x-1 transition">
+              <i class="fa-solid fa-download"></i>
+              <span>Yuklab olish</span>
+            </a>
+          </div>
+        `;
+      } else {
+        const escapedTitle = (b.title || '').replace(/'/g, "\\'");
+        actionsHtml = `
+          <div class="pt-1">
+            <button onclick="openBookPurchaseModal(${b.id}, '${escapedTitle}')" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 text-white font-black text-xs flex items-center justify-center space-x-2 shadow-md transition active:scale-98">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span>Sotib olish (80 000 UZS)</span>
+            </button>
+          </div>
+        `;
+      }
+    } else {
       actionsHtml = `
         <div class="flex items-center space-x-2 pt-1">
           <a href="${b.url}" target="_blank" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
@@ -2082,16 +2112,6 @@ function renderBooksList(books) {
             <i class="fa-solid fa-download"></i>
             <span>Yuklab olish</span>
           </a>
-        </div>
-      `;
-    } else {
-      const escapedTitle = (b.title || '').replace(/'/g, "\\'");
-      actionsHtml = `
-        <div class="flex items-center space-x-2 pt-1">
-          <button onclick="openBookPurchaseModal(${b.id}, '${escapedTitle}')" class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 text-white font-black text-xs flex items-center justify-center space-x-1.5 shadow-md transition active:scale-98">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Sotib olish (80 000 UZS)</span>
-          </button>
         </div>
       `;
     }

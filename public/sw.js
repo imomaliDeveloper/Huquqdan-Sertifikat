@@ -1,13 +1,9 @@
-const CACHE_NAME = 'huquq-sertifikat-v28';
+const CACHE_NAME = 'huquq-sertifikat-v40';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/js/app.js',
-  '/js/exam_data.js',
-  '/js/flashcards.js',
   '/data/laws_list.json',
-  '/data/textbooks.json',
   '/data/cases_bank.json',
   '/data/channels.json',
   '/data/tariffs.json',
@@ -19,7 +15,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('SW: Yangi versiya keshlanmoqda (v11)');
+      console.log('SW: Yangi versiya keshlanmoqda (v40)');
       return cache.addAll(STATIC_ASSETS).catch(err => {
         console.warn('SW keshida ayrim tashqi fayllar olinmadi:', err);
       });
@@ -47,10 +43,14 @@ self.addEventListener('fetch', event => {
   // Faqat GET so'rovlar
   if (event.request.method !== 'GET') return;
 
-  // API so'rovlari tarmoqqa
-  if (event.request.url.includes('/api/')) {
+  // API va doim yangi bo'lishi shart bo'lgan fayllar (Keshlanmasin)
+  if (
+    event.request.url.includes('/api/') || 
+    event.request.url.includes('/data/textbooks.json') ||
+    event.request.url.includes('app.js')
+  ) {
     event.respondWith(
-      fetch(event.request).catch(() => {
+      fetch(event.request, { cache: 'no-store' }).catch(() => {
         return new Response(JSON.stringify({ error: "Oflayn rejimdasiz" }), {
           headers: { 'Content-Type': 'application/json' }
         });
