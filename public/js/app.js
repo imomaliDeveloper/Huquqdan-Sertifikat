@@ -687,6 +687,18 @@ async function finishExam() {
   document.getElementById("resPercent").innerText = `${percentage}% to'g'ri bajarildi (${correctCount} ta to'g'ri, ${totalQ - correctCount} ta xato)`;
   document.getElementById("resBadgeLevel").innerText = level;
 
+  // Ustoz & Katta Aka samimiy dalda xabari
+  const mentorTextEl = document.getElementById("mentorFeedbackText");
+  if (mentorTextEl) {
+    if (percentage >= 80) {
+      mentorTextEl.innerHTML = `<strong>Qoyil, bo'lajak yurist!</strong> Haqiqiy chempioncha natija! Sen bilan faxrlanaman. Imtihonda ham xuddi shunday sovuqqonlik va ishonch bilan yuqori 'A+' darajani qo'lga kiritasan! 🔥🎓`;
+    } else if (percentage >= 50) {
+      mentorTextEl.innerHTML = `<strong>Yaxshi harakat, bo'lajak yurist!</strong> Yaxshi natija, lekin sen bundan ham yuqorisiga qodirsan. Xato qilgan savollaring ustida ishlab, to'g'ri javoblarni eslab qol. Talabalik baxti, ota-onangning quvonchi har bir intilishingga arziydi! 💪✨`;
+    } else {
+      mentorTextEl.innerHTML = `<strong>Xafa bo'lma, bo'lajak yurist!</strong> Hozir bu yerda adashganing — imtihonda adashmasliging uchun eng katta dars bo'ldi. Bilaman, moddalarni, sanalarni yodlash oson emas. Asosiysi, to'xtama, to'g'ri javobni eslab qol va yana bir bor takrorlab chiq! 🤝`;
+    }
+  }
+
   // 1. Sohalar bo'yicha diagnostika va kuchsiz mavzularni chizish
   renderDomainDiagnostics(resultsDetailed);
 
@@ -793,7 +805,13 @@ function renderResultsList(list) {
 
       <div class="p-2.5 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200/60 dark:border-slate-700 space-y-1">
         <div><strong>Sizning javobingiz:</strong> <span class="${item.isCorrect ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}">${item.userAns}</span></div>
-        ${!item.isCorrect ? `<div><strong>To'g'ri javob:</strong> <span class="text-emerald-700 font-bold">${item.correctAns}</span></div>` : ''}
+        ${!item.isCorrect ? `
+          <div><strong>To'g'ri javob:</strong> <span class="text-emerald-700 font-bold">${item.correctAns}</span></div>
+          <div class="mt-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-[11px] flex items-start gap-1.5 leading-relaxed">
+            <span class="text-sm">🤝</span>
+            <span><strong>Xafa bo'lma!</strong> Hozir bu yerda adashganing — imtihonda adashmasliging uchun eng katta dars bo'ldi. Asosiysi, to'g'ri javobni eslab qol.</span>
+          </div>
+        ` : ''}
         <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-100 dark:border-slate-700">
           <i class="fa-solid fa-scale-balanced mr-1 text-emerald-600"></i> ${item.explanation}
         </div>

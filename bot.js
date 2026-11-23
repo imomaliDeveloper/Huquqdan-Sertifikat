@@ -379,12 +379,13 @@ class SimpleTelegramBot {
 
   // 1. MAJBURIY A'ZOLIK XABARI (2 TA KANAL)
   async sendSubscriptionGate(chatId, firstName = "O'quvchi") {
-    const text = `⚖️ <b>Assalomu alaykum, ${firstName}!</b>\n\n` +
-      `🏛 <b>Huquqshunoslik fanidan Milliy Sertifikat (BMBA)</b> rasmiy botiga xush kelibsiz!\n\n` +
-      `⚠️ <b>Bot va Veb-platformadan to'liq foydalanish uchun quyidagi 2 ta rasmiy kanalimizga a'zo bo'ling:</b>\n\n` +
+    const text = `⚖️ <b>Salom, bo'lajak yurist ${firstName}!</b> 👋\n\n` +
+      `🏛 <b>Huquqshunoslik fanidan Milliy Sertifikat (BMBA)</b> rasmiy botimizga xush kelibsan!\n\n` +
+      `Bilaman, yurist bo'lish yo'lida moddalarni, qonunlarni o'rganish oson emas. Lekin talabalik baxti, ota-onangning quvonchi har qanday mehnatga arziydi! 🎓✨\n\n` +
+      `Biz sen uchun barcha 40 ta qonun testlari, 50 ta variant va amaliy tahlillarni bitta joyga jamladik. Bepul foydalanish uchun rasmiy kanallarimizga ulanib olgin:\n\n` +
       `1️⃣ <b>@Huquq_study</b> — Milliy sertifikatga tayyorlovchi asosiy kanal\n` +
       `2️⃣ <b>@General_Huquq</b> — Qonunchilik, testlar va rasmiy tahlillar kanali\n\n` +
-      `<i>Har ikkala kanalga obuna bo'lgach, pastdagi "✅ A'zolikni tekshirish" tugmasini bosing:</i>`;
+      `<i>Ikkala kanalga obuna bo'lgach, pastdagi "✅ A'zolikni tekshirish" tugmasini bosgin:</i>`;
 
     const keyboard = [
       [{ text: "📢 1. @Huquq_study kanaliga a'zo bo'lish ↗️", url: "https://t.me/Huquq_study" }],
@@ -421,19 +422,20 @@ class SimpleTelegramBot {
     const isAdmin = userId ? isUserAdmin(userId) : isUserAdmin(chatId);
 
     let welcome = isNewVerification
-      ? `🎉 <b>A'zoligingiz muvaffaqiyatli tasdiqlandi!</b>\n\n`
+      ? `🎉 <b>A'zoliging muvaffaqiyatli tasdiqlandi, safimizga xush kelibsan!</b>\n\n`
       : ``;
 
-    welcome += `⚖️ <b>Assalomu alaykum, ${firstName}!</b>\n\n` +
-      `🏛 <b>Huquqshunoslik Milliy Sertifikat (BMBA) Test Simulyatori</b>ga xush kelibsiz!\n\n` +
-      `Platformada siz uchun barcha imkoniyatlar yaratilgan:\n` +
+    welcome += `👋 <b>Salom, bo'lajak yurist ${firstName}!</b> ⚖️\n\n` +
+      `Qalaysan, charchamayapsanmi? Bilaman, huquqdan moddalarni, sanalarni yodlash oson emas. Lekin talabalik baxti, ota-onangning yuzidagi quvonchni tasavvur qil — bunga arziydi! 🎓✨\n\n` +
+      `Kel, hozir atigi 5 daqiqa ajratib, muhim savollarni takrorlab olamiz. Tayyormisan?\n\n` +
+      `Platformada sen uchun barcha imkoniyatlar tayyorlab qo'yilgan:\n` +
       `• 📜 <b>40 ta Qonun Testlari:</b> Har bir qonun bo'yicha alohida 20 talik test\n` +
       `• 🎯 <b>50 ta To'liq Imtihon Varianti:</b> 45 talik yangi standart (T-760)\n` +
-      `• 🥊 <b>Huquqiy Octagon (Duel):</b> Real ishtirokchilar bilan jonli jang\n` +
+      `• 🥊 <b>Huquqiy Octagon (Duel):</b> Do'stlaring va raqiblaring bilan jonli jang\n` +
+      `• 📚 <b>Mening Kitoblarim:</b> 30 variant va rasmiy yechimlar to'plami\n` +
       `• 🤖 <b>AI Huquqiy Ustoz:</b> Qonunchilik va moddalar bo'yicha sun'iy intellekt\n` +
-      `• 🏆 <b>Respublika Reytingi:</b> Eng yuqori ball to'plagan abituriyentlar\n` +
-      `• 🎖 <b>Elektron Sertifikat:</b> QR-kodli rasmiy darajali sertifikat\n\n` +
-      `<i>Quyidagi tugmalar orqali platformani oching yoki kerakli bo'limni tanlang:</i>`;
+      `• 🏆 <b>Respublika Reytingi:</b> Eng bilimli abituriyentlar safida bo'l!\n\n` +
+      `<i>Quyidagi tugmalar orqali platformani och yoki kerakli bo'limni tanla:</i> 👇`;
 
     const inlineKeyboard = [
       [{ text: "🚀 Veb-Platformani ochish (Mini App)", web_app: { url: this.appUrl } }],
@@ -918,18 +920,17 @@ class SimpleTelegramBot {
         if (diffHours >= 48 || !u.lastActive) {
           // 2 kundan ortiq kirmagan o'quvchilar uchun
           reminderText =
-            `👋 <b>Assalomu alaykum, ${firstName}!</b> ⚖️\n\n` +
-            `🎯 <b>Huquqshunoslik Milliy Sertifikat imtihoni har kuni yaqinlashmoqda!</b>\n\n` +
-            `Bir necha kundan beri test yechmadingiz. Do'stlaringiz va raqiblaringiz esa har kuni 40 ta qonun bo'yicha bilimlarini oshirib, umumiy reytingda oldinga intilmoqda! 🔥\n\n` +
-            `Bugun kamida <b>1 ta qonun varianti</b>ni yechib, bilimingizni mustahkamlang va o'rningizni boy bermang! 🚀`;
+            `👋 <b>Salom, bo'lajak yurist ${firstName}!</b> ⚖️\n\n` +
+            `Qalaysan, charchamayapsanmi? Bilaman, huquqdan moddalarni, sanalarni yodlash oson emas. Lekin talabalik baxti, ota-onangning yuzidagi quvonchni tasavvur qil — bunga arziydi! ✨\n\n` +
+            `Bir necha kundan beri test yechmading. Do'stlaring va raqiblaring esa har kuni yangi moddalarni o'rganib, reytingda oldinga intilmoqda! 🔥\n\n` +
+            `Kel, hozir atigi 5 daqiqa ajratib, 5 ta muhim savolni takrorlab olamiz. Tayyormisan? 🚀`;
         } else {
           // 12-24 soat atrofida faol bo'lmagan o'quvchilar uchun
           reminderText =
-            `🔔 <b>Kunlik Eslatma | BMBA Huquq Testlari</b> ⚖️\n\n` +
-            `Assalomu alaykum, <b>${firstName}</b>!\n\n` +
-            `💡 <i>"Muvaffaqiyat — bu har kuni takrorlanadigan kichik intilishlar yig'indisidir."</i>\n\n` +
-            `🔥 <b>Kunlik streak (ketma-ketlik)ni boy bermang!</b> Kuniga 15-20 daqiqa test yechish — imtihonda yuqori A+ sertifikat olishning eng ishonchli usulidir.\n\n` +
-            `Platformadagi 40 ta qonun testlari yoki jonli duelda o'z kuchingizni sinab ko'ring! 👇`;
+            `👋 <b>Salom, bo'lajak yurist ${firstName}!</b> ⚖️\n\n` +
+            `Qalaysan, charchamayapsanmi? Bilaman, huquqdan moddalarni, sanalarni yodlash oson emas. Lekin talabalik baxti, ota-onangning yuzidagi quvonchni tasavvur qil — bunga arziydi!\n\n` +
+            `💡 <i>"Har kungi kichik 5 daqiqalik intilish — ertangi 'A' darajali sertifikat poydevoridir."</i>\n\n` +
+            `Kel, hozir atigi 5 daqiqa ajratib, 5 ta muhim savolni takrorlab olamiz. Tayyormisan? 👇`;
         }
 
         try {
@@ -1624,17 +1625,29 @@ class SimpleTelegramBot {
         try {
           const data = JSON.parse(msg.web_app_data.data);
           if (data.action === 'test_completed') {
-            const resultMsg = `🎉 <b>Tabriklaymiz, ${firstName}!</b> Siz Huquq Milliy Testini yakunladingiz.\n\n` +
-              `📊 <b>Natijangiz:</b>\n` +
+            const scoreNum = parseInt(data.score) || 0;
+            const totalNum = parseInt(data.total) || 45;
+            const hasMistakes = scoreNum < totalNum;
+
+            let mentorNote = "";
+            if (hasMistakes) {
+              mentorNote = `\n\n🤝 <b>Xafa bo'lma, bo'lajak yurist!</b>\nHozir bu yerda adashganing — haqiqiy imtihonda adashmasliging uchun eng katta dars bo'ldi. Asosiysi, to'g'ri javobni eslab qol! Bilaman, huquqdan moddalarni, sanalarni yodlash oson emas, lekin ota-onangning yuzidagi quvonchni tasavvur qil — bunga albatta arziydi! 💪✨`;
+            } else {
+              mentorNote = `\n\n🔥 <b>Qoyil, bo'lajak yurist! Haqiqiy chempioncha natija!</b>\nBarcha savollarga to'g'ri javob berding. Imtihonda ham xuddi shunday yuqori 'A+' sertifikat olishingga ishonaman! 🎓🏛️`;
+            }
+
+            const resultMsg = `🎉 <b>Barakalla, ${firstName}!</b> Testni yakunlading.\n\n` +
+              `📊 <b>Natijang:</b>\n` +
               `• To'plangan ball: <b>${data.score} / ${data.total}</b>\n` +
               `• Foiz: <b>${data.percent}</b>\n` +
-              `• BMBA Darajangiz: <b>${data.level}</b>\n\n` +
-              `Xatolaringiz ustida ishlab, darajangizni oshirish uchun yana qayta topshirishingiz mumkin! 🚀`;
+              `• BMBA Darajang: <b>${data.level}</b>` +
+              mentorNote;
 
             await this.sendMessage(chatId, resultMsg, {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: "🔄 Qayta topshirish", web_app: { url: this.appUrl } }]
+                  [{ text: "🔄 Qayta topshirish", web_app: { url: this.appUrl } }],
+                  [{ text: "🥊 Huquqiy Duelda kuch sinash", web_app: { url: `${this.appUrl}#octagon` } }]
                 ]
               }
             });
