@@ -1594,31 +1594,54 @@
           </div>
         </div>
 
-        <!-- Receipt submission form -->
-        <div class="space-y-2 pt-1">
-          <label class="block text-[11px] font-bold text-slate-300">
-            <i class="fa-solid fa-receipt mr-1 text-emerald-400"></i> To'lov cheki yoki Telegram @username:
+        <!-- To'lov cheki skrinshotini yuklash (Rasm) -->
+        <div class="space-y-2.5 pt-1">
+          <label class="block text-[11px] font-bold text-slate-200">
+            <i class="fa-solid fa-camera mr-1 text-emerald-400"></i> To'lov cheki skrinshotini yuklang (Rasm):
           </label>
-          <div class="flex items-center space-x-2">
-            <input type="text" id="receiptTxInput" placeholder="Masalan: Click tranzaksiya № yoki @username" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-            <button onclick="submitPaymentReceipt()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow whitespace-nowrap active:scale-95 transition">
-              Yuborish
-            </button>
+          
+          <div onclick="document.getElementById('receiptFileInput').click()" class="border-2 border-dashed border-slate-600 hover:border-emerald-500 bg-slate-800/80 rounded-2xl p-4 text-center cursor-pointer transition active:scale-98">
+            <input type="file" id="receiptFileInput" accept="image/*" class="hidden" onchange="handleReceiptFileSelect(event)">
+            
+            <div id="receiptUploadPlaceholder" class="space-y-1.5 py-1">
+              <i class="fa-solid fa-cloud-arrow-up text-2xl text-emerald-400"></i>
+              <p class="text-xs font-bold text-slate-100">Chek rasmini tanlang (JPG, PNG)</p>
+              <p class="text-[10px] text-slate-400">Click, Payme yoki bank ilovasi kvitansiyasi</p>
+            </div>
+            
+            <!-- Rasm tanlanganda ko'rinadigan preview -->
+            <div id="receiptPreviewBox" class="hidden flex items-center justify-between bg-slate-900/90 rounded-xl p-2 border border-slate-700">
+              <div class="flex items-center space-x-2.5 overflow-hidden">
+                <img id="receiptPreviewImg" src="" alt="Chek" class="w-12 h-12 object-cover rounded-lg border border-slate-600 shrink-0">
+                <div class="text-left truncate">
+                  <p id="receiptFileName" class="text-xs font-bold text-white truncate">chek.jpg</p>
+                  <p id="receiptFileSize" class="text-[10px] text-emerald-400 font-semibold">Tayyor ✓</p>
+                </div>
+              </div>
+              <button type="button" onclick="cancelReceiptFile(event)" class="text-rose-400 hover:text-rose-300 p-2 text-xs">
+                <i class="fa-solid fa-xmark text-base"></i>
+              </button>
+            </div>
           </div>
-          <div id="receiptSubmitStatus" class="hidden text-[11px] font-semibold text-emerald-400"></div>
-        </div>
 
-        <button onclick="openTelegramAdminContact()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow transition">
-          <i class="fa-brands fa-telegram text-base"></i>
-          <span>Telegram botga to'lov chekini yuborish</span>
-        </button>
-
-        <div class="flex items-center space-x-2 pt-1 border-t border-slate-800">
-          <input type="text" id="promoCodeInput" placeholder="Promo-kod (masalan: BMBA2026)" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-500 focus:outline-none">
-          <button onclick="applyPromoCode()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl">
-            Kiritish
+          <button id="sendReceiptBtn" onclick="submitReceiptImage()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-extrabold text-xs shadow-md flex items-center justify-center space-x-2 transition active:scale-98">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Chekni Adminga Yuborish</span>
           </button>
+
+          <div id="receiptSubmitStatus" class="hidden text-[11px] font-semibold text-center p-2.5 rounded-xl bg-slate-800 border border-slate-700"></div>
         </div>
+
+        <div class="relative flex py-0.5 items-center">
+          <div class="flex-grow border-t border-slate-800"></div>
+          <span class="flex-shrink mx-2 text-[10px] text-slate-500 font-semibold uppercase">Yoki</span>
+          <div class="flex-grow border-t border-slate-800"></div>
+        </div>
+
+        <button onclick="openTelegramAdminContact()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow transition active:scale-98">
+          <i class="fa-brands fa-telegram text-base"></i>
+          <span>Telegram bot orqali chek yuborish</span>
+        </button>
       </div>
     </div>
   </div>

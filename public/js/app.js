@@ -33,6 +33,19 @@ if (!initialUser && tg?.initDataUnsafe?.user) {
   localStorage.setItem("huquq_auth_user", JSON.stringify(initialUser));
 }
 
+// URL parametrlarini tekshirish (Admin tasdiqlaganda keladigan ?vip=true)
+const urlParams = new URLSearchParams(window.location.search);
+const isVipParam = urlParams.get("vip") === "true";
+if (isVipParam) {
+  localStorage.setItem("huquq_premium_active", "true");
+  localStorage.setItem("huquq_user_plan", "tariff_vip");
+  if (initialUser) {
+    initialUser.plan = "tariff_vip";
+    initialUser.isVip = true;
+    localStorage.setItem("huquq_auth_user", JSON.stringify(initialUser));
+  }
+}
+
 // App State
 const state = {
   user: {
@@ -41,7 +54,7 @@ const state = {
     username: tg?.initDataUnsafe?.user?.username || initialUser?.username || ""
   },
   currentUser: initialUser,
-  userPlan: localStorage.getItem("huquq_user_plan") || (localStorage.getItem("huquq_premium_active") === "true" ? "tariff_vip" : "tariff_start"),
+  userPlan: isVipParam ? "tariff_vip" : (localStorage.getItem("huquq_user_plan") || (localStorage.getItem("huquq_premium_active") === "true" ? "tariff_vip" : "tariff_start")),
   selectedTariff: "tariff_vip",
   currentQuestion: 0,
   userAnswers: {}, // { 1: "B", 36: "300 soat" }
@@ -51,13 +64,18 @@ const state = {
   currentCard: 0,
   isCardFlipped: false,
   laws: [],
-  isPremium: localStorage.getItem("huquq_premium_active") === "true" || localStorage.getItem("huquq_user_plan") === "tariff_vip" || localStorage.getItem("huquq_user_plan") === "tariff_standard",
+  isPremium: isVipParam || localStorage.getItem("huquq_premium_active") === "true" || localStorage.getItem("huquq_user_plan") === "tariff_vip" || localStorage.getItem("huquq_user_plan") === "tariff_standard",
   streak: parseInt(localStorage.getItem("huquq_daily_streak") || "1"),
   currentDetailedResults: []
 };
 
 // DOM yuklanganda
 document.addEventListener("DOMContentLoaded", () => {
+  if (isVipParam) {
+    state.isPremium = true;
+    state.userPlan = "tariff_vip";
+    showToast("Tabriklaymiz! VIP PRO a'zoligingiz muvaffaqiyatli faollashtirildi! 💎");
+  }
   // Telegram WebApp foydalanuvchisini aniqlash va kiritish
   if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
     const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
@@ -125,6 +143,30 @@ async function syncUserProfile() {
   if (!tgId) return;
 
   try {
+    // 1. VIP holatini tezkor tekshirish
+    const checkRes = await fetch(`/api/check-vip-status?userId=${tgId}`);
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      if (checkData.isVip) {
+        state.isPremium = true;
+        state.userPlan = 'tariff_vip';
+        localStorage.setItem("huquq_premium_active", "true");
+        localStorage.setItem("huquq_user_plan", "tariff_vip");
+        if (state.currentUser) {
+          state.currentUser.plan = 'tariff_vip';
+          state.currentUser.isVip = true;
+          localStorage.setItem("huquq_auth_user", JSON.stringify(state.currentUser));
+        }
+        initAuthUI();
+        if (typeof updateAiLimitUI === 'function') updateAiLimitUI();
+        if (state.laws && state.laws.length > 0 && typeof renderLawsList === 'function') {
+          renderLawsList(state.laws);
+        }
+        return;
+      }
+    }
+
+    // 2. To'liq profil orqali tekshirish
     const res = await fetch(`/api/auth/profile/${tgId}`);
     if (res.ok) {
       const data = await res.json();
@@ -1519,18 +1561,6 @@ function openTelegramAdminContact() {
   window.open(botUrl, "_blank");
 }
 
-function applyPromoCode() {
-  const code = (document.getElementById("promoCodeInput")?.value || "").trim().toUpperCase();
-  if (code === "BMBA2026" || code === "PREMIUM" || code === "HUQUQ") {
-    state.isPremium = true;
-    localStorage.setItem("huquq_premium_active", "true");
-    showToast("Tabriklaymiz! VIP a'zolik muvaffaqiyatli faollashtirildi! 💎");
-    closePremiumModal();
-    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
-  } else {
-    showToast("Noto'g'ri promo-kod! Admin bilan bog'laning.");
-  }
-}
 
 function showToast(msg) {
   const toast = document.getElementById("toastNotification");
@@ -2693,51 +2723,122 @@ function shareCertificateToTelegram() {
   window.open(`https://t.me/share/url?url=https://t.me/HuquqMilliySertifikatBot&text=${text}`, "_blank");
 }
 
-/* ==================== TO'LOV CHEKINI YUBORISH ==================== */
+/* ==================== TO'LOV CHEKI RASMINI YUBORISH ==================== */
 
-async function submitPaymentReceipt() {
-  const input = document.getElementById("receiptTxInput");
-  const statusEl = document.getElementById("receiptSubmitStatus");
-  const val = (input?.value || "").trim();
+let selectedReceiptFile = null;
 
-  if (!val) {
-    alert("Iltimos, Click/Payme tranzaksiya raqamini yoki Telegram @username profilingizni kiriting!");
+function handleReceiptFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    showToast("Faqat rasm fayllarini yuklash mumkin (JPG, PNG)!");
     return;
   }
 
-  statusEl.classList.remove("hidden");
-  statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Chek yuborilmoqda...';
+  if (file.size > 12 * 1024 * 1024) {
+    showToast("Rasm hajmi juda katta (maksimal 12MB)!");
+    return;
+  }
+
+  selectedReceiptFile = file;
+  const placeholder = document.getElementById("receiptUploadPlaceholder");
+  const previewBox = document.getElementById("receiptPreviewBox");
+  const previewImg = document.getElementById("receiptPreviewImg");
+  const fileName = document.getElementById("receiptFileName");
+  const fileSize = document.getElementById("receiptFileSize");
+
+  if (placeholder) placeholder.classList.add("hidden");
+  if (previewBox) previewBox.classList.remove("hidden");
+  if (fileName) fileName.innerText = file.name;
+  if (fileSize) fileSize.innerText = `${(file.size / 1024).toFixed(0)} KB • Tayyor ✓`;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (previewImg) previewImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function cancelReceiptFile(e) {
+  if (e) e.stopPropagation();
+  selectedReceiptFile = null;
+  const fileInput = document.getElementById("receiptFileInput");
+  if (fileInput) fileInput.value = "";
+
+  const placeholder = document.getElementById("receiptUploadPlaceholder");
+  const previewBox = document.getElementById("receiptPreviewBox");
+  if (placeholder) placeholder.classList.remove("hidden");
+  if (previewBox) previewBox.classList.add("hidden");
+}
+
+async function submitReceiptImage() {
+  if (!selectedReceiptFile) {
+    showToast("Iltimos, avval to'lov cheki rasmini tanlang!");
+    return;
+  }
+
+  const statusEl = document.getElementById("receiptSubmitStatus");
+  const btn = document.getElementById("sendReceiptBtn");
+
+  if (statusEl) {
+    statusEl.classList.remove("hidden");
+    statusEl.className = "text-[11px] font-bold text-amber-400 block text-center p-2.5 rounded-xl bg-slate-800 border border-slate-700";
+    statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Rasm adminga yuborilmoqda, kuting...';
+  }
+  if (btn) btn.disabled = true;
 
   try {
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    const res = await fetch("/api/payments/submit-receipt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        transactionId: val,
-        userContact: val,
-        userName: state.currentUser?.name || state.user?.name || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : "O'quvchi"),
-        userPhone: state.currentUser?.phone || "",
-        userId: tgUser?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : "") || "",
-        userUsername: tgUser?.username ? `@${tgUser.username}` : (state.currentUser?.username || ""),
-        tariffId: state.selectedTariff || "tariff_vip",
-        amount: state.selectedTariff === "tariff_standard" ? "49 000 UZS" : "89 000 UZS"
-      })
-    });
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64Data = reader.result;
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
 
-    const data = await res.json();
-    if (data.success) {
-      statusEl.className = "text-[11px] font-bold text-emerald-400 block";
-      statusEl.innerHTML = `✓ ${data.message} (Raqam: ${data.receiptId})`;
-      input.value = "";
-      showToast("To'lov ma'lumoti adminga yetkazildi! Tez orada faollashadi. 💎");
-    } else {
-      statusEl.className = "text-[11px] font-bold text-rose-500 block";
-      statusEl.innerText = data.error || "Xatolik yuz berdi.";
-    }
+        const res = await fetch("/api/payments/submit-receipt-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageBase64: base64Data,
+            userName: state.currentUser?.name || state.user?.name || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : "O'quvchi"),
+            userId: tgUser?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : "") || "",
+            userUsername: tgUser?.username ? `@${tgUser.username}` : (state.currentUser?.username || ""),
+            tariffId: state.selectedTariff || "tariff_vip",
+            amount: state.selectedTariff === "tariff_standard" ? "49 000 UZS" : "89 000 UZS"
+          })
+        });
+
+        const data = await res.json();
+        if (btn) btn.disabled = false;
+
+        if (data.success) {
+          if (statusEl) {
+            statusEl.className = "text-[11px] font-bold text-emerald-400 block text-center p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40";
+            statusEl.innerHTML = `✅ ${data.message}`;
+          }
+          showToast("To'lov cheki adminga yetkazildi! 💎");
+          cancelReceiptFile();
+        } else {
+          if (statusEl) {
+            statusEl.className = "text-[11px] font-bold text-rose-400 block text-center p-2 rounded-xl bg-rose-950/40 border border-rose-500/40";
+            statusEl.innerText = data.error || "Yuklashda xatolik yuz berdi.";
+          }
+        }
+      } catch (postErr) {
+        if (btn) btn.disabled = false;
+        if (statusEl) {
+          statusEl.className = "text-[11px] font-bold text-rose-400 block text-center p-2 rounded-xl bg-rose-950/40 border border-rose-500/40";
+          statusEl.innerText = "Yuborishda xatolik yuz berdi.";
+        }
+      }
+    };
+    reader.readAsDataURL(selectedReceiptFile);
   } catch (err) {
-    statusEl.className = "text-[11px] font-bold text-rose-500 block";
-    statusEl.innerText = "Aloqa xatosi. Iltimos adminga to'g'ridan-to'g'ri yozing: @Imomali_Mamatkulov";
+    if (btn) btn.disabled = false;
+    if (statusEl) {
+      statusEl.className = "text-[11px] font-bold text-rose-400 block text-center p-2 rounded-xl bg-rose-950/40 border border-rose-500/40";
+      statusEl.innerText = "Xatolik: Iltimos Telegram bot orqali yuboring.";
+    }
   }
 }
 

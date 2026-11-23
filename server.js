@@ -26,7 +26,8 @@ if (geminiApiKey) {
 }
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Brauzer keshini cheklash - yangilanishlar zudlik bilan ochilishi uchun
 app.use((req, res, next) => {
@@ -126,6 +127,29 @@ function getReceiptsList() {
 function saveReceiptsList(list) {
   inMemoryReceipts = list;
   safeWriteJSON('receipts.json', list);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function getApprovedVipIds() {
+  const list = safeReadJSON('approved_vip_users.json', []);
+  return Array.isArray(list) ? list.map(String) : [];
+}
+
+function addApprovedVipId(id) {
+  if (!id) return;
+  const list = getApprovedVipIds();
+  const strId = id.toString().trim().replace(/^TG-/, '');
+  if (!list.includes(strId)) {
+    list.push(strId);
+    safeWriteJSON('approved_vip_users.json', list);
+  }
 }
 
 // Statik fayllarni ulash
@@ -677,6 +701,94 @@ app.post('/api/payments/submit-receipt', async (req, res) => {
   }
 });
 
+// API: Mini Appdan to'lov cheki rasmini (Base64) qabul qilish va adminga yuborish
+app.post('/api/payments/submit-receipt-image', async (req, res) => {
+  const { imageBase64, userName, userId, userUsername, amount, tariffId } = req.body;
+  if (!imageBase64) {
+    return res.status(400).json({ error: "Chek rasmi tanlanmadi!" });
+  }
+
+  try {
+    const receipts = getReceiptsList();
+    const receiptId = "REC-" + Date.now();
+
+    const newReceipt = {
+      id: receiptId,
+      transactionId: "Rasm yuklandi",
+      userContact: userUsername || userId || "Telegram WebApp",
+      userName: userName || "O'quvchi",
+      userId: userId ? userId.toString() : "",
+      userUsername: userUsername || "",
+      tariffId: tariffId || "tariff_vip",
+      amount: amount || "89 000 UZS (VIP PRO)",
+      hasImage: true,
+      date: new Date().toISOString(),
+      status: "pending"
+    };
+
+    receipts.unshift(newReceipt);
+    saveReceiptsList(receipts);
+
+    // Adminlarga Telegram orqali rasmni yuborish
+    try {
+      const bot = getBotInstance();
+      if (bot && bot.token) {
+        const adminIds = typeof getAdminIds === 'function' ? getAdminIds() : ['8348657980'];
+        const adminCaption = `📥 <b>YANGI TO'LOV CHEKI (Mini App orqali)!</b> 💳\n\n` +
+          `👤 <b>Foydalanuvchi:</b> ${escapeHtml(newReceipt.userName)}\n` +
+          `🆔 <b>Telegram ID:</b> <code>${newReceipt.userId || 'Noma\'lum'}</code>\n` +
+          `📱 <b>Username:</b> ${newReceipt.userUsername || 'Mavjud emas'}\n` +
+          `💰 <b>Summa:</b> ${newReceipt.amount}\n` +
+          `📅 <b>Sana:</b> ${new Date().toLocaleString('uz-UZ')}\n` +
+          `🔢 <b>Chek ID:</b> <code>${newReceipt.id}</code>\n\n` +
+          `<i>Ushbu foydalanuvchiga VIP PRO berishni tasdiqlaysizmi?</i>`;
+
+        // Base64 dan Buffer va FormData tayyorlash
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+
+        for (const aId of adminIds) {
+          try {
+            const formData = new FormData();
+            formData.append('chat_id', aId);
+            formData.append('photo', new Blob([imageBuffer], { type: 'image/jpeg' }), 'receipt.jpg');
+            formData.append('caption', adminCaption);
+            formData.append('parse_mode', 'HTML');
+            formData.append('reply_markup', JSON.stringify({
+              inline_keyboard: [
+                [
+                  { text: "✅ Tasdiqlash (VIP PRO berish)", callback_data: `approve_receipt_${newReceipt.id}` },
+                  { text: "❌ Rad etish", callback_data: `reject_receipt_${newReceipt.id}` }
+                ],
+                [
+                  { text: "💬 Foydalanuvchiga yozish", url: newReceipt.userUsername ? `https://t.me/${newReceipt.userUsername.replace('@', '')}` : (newReceipt.userId ? `tg://user?id=${newReceipt.userId}` : "https://t.me/Imomali_Mamatkulov") }
+                ]
+              ]
+            }));
+
+            await fetch(`https://api.telegram.org/bot${bot.token}/sendPhoto`, {
+              method: 'POST',
+              body: formData
+            });
+          } catch (sendErr) {
+            console.error(`Admin ${aId} ga rasm yuborishda xato:`, sendErr.message);
+          }
+        }
+      }
+    } catch (botErr) {
+      console.error("Bot admin rasm yuborish xatosi:", botErr.message);
+    }
+
+    res.json({
+      success: true,
+      message: "Chek rasmi muvaffaqiyatli qabul qilindi! Admin ko'rib chiqib, 5–15 daqiqada VIP a'zoligingizni faollashtiradi.",
+      receiptId: newReceipt.id
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Chekni saqlashda xatolik: " + err.message });
+  }
+});
+
 // ==================== TARIFFS & AUTH API ====================
 
 // API: 3 ta Tariflar ro'yxati
@@ -772,19 +884,44 @@ app.get('/api/auth/profile/:id', (req, res) => {
     const users = getUsersList();
     const idParam = (req.params.id || '').toString().trim();
     const cleanId = idParam.replace(/^TG-/, '');
-    const user = users.find(u => 
+    const approvedVips = getApprovedVipIds();
+    const isApprovedVip = approvedVips.includes(cleanId) || approvedVips.includes(idParam);
+
+    let user = users.find(u => 
       (u.id && u.id.toString() === idParam) ||
       (u.id && u.id.toString() === `TG-${cleanId}`) ||
       (u.tgId && u.tgId.toString() === cleanId) ||
       (u.tgId && u.tgId.toString() === idParam)
     );
-    if (!user) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
+
+    if (!user) {
+      user = {
+        id: `TG-${cleanId}`,
+        tgId: cleanId,
+        name: "O'quvchi",
+        role: "Abituriyent",
+        plan: isApprovedVip ? "tariff_vip" : "START",
+        isVip: isApprovedVip
+      };
+    } else if (isApprovedVip) {
+      user.isVip = true;
+      user.plan = "tariff_vip";
+    }
 
     const { password: _, ...userWithoutPass } = user;
     res.json(userWithoutPass);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// API: VIP holatini tekshirish
+app.get('/api/check-vip-status', (req, res) => {
+  const userId = (req.query.userId || '').toString().trim();
+  const cleanId = userId.replace(/^TG-/, '');
+  const approvedVips = getApprovedVipIds();
+  const isVip = approvedVips.includes(cleanId) || approvedVips.includes(userId);
+  res.json({ isVip, plan: isVip ? "tariff_vip" : "tariff_start" });
 });
 
 // ==================== TELEGRAM WEBHOOK API ====================

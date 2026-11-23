@@ -1709,7 +1709,8 @@ class SimpleTelegramBot {
       // AI Ustozga savol berish (VIP foydalanuvchilarda CHEKSIZ, bepulda 2 ta limit)
       const allUsers = safeRead('users.json', []);
       const curUser = allUsers.find(u => (u.tgId && u.tgId.toString() === userId.toString()) || (u.id && u.id.toString() === `TG-${userId}`));
-      const isVipUser = isUserAdmin(userId) || (curUser && (curUser.isVip || curUser.plan === 'VIP PRO' || curUser.plan === 'tariff_vip'));
+      const approvedVips = safeRead('approved_vip_users.json', []).map(String);
+      const isVipUser = isUserAdmin(userId) || approvedVips.includes(userId.toString()) || (curUser && (curUser.isVip || curUser.plan === 'VIP PRO' || curUser.plan === 'tariff_vip'));
 
       const used = botUserAiCounts[userId] || 0;
       if (!isVipUser && used >= 2) {
@@ -1894,23 +1895,35 @@ class SimpleTelegramBot {
         }
         safeWrite('users.json', users);
 
+        const cleanUserId = targetUserIdStr.replace(/^TG-/, '');
+        if (cleanUserId) {
+          const approvedVips = safeRead('approved_vip_users.json', []);
+          if (!approvedVips.map(String).includes(cleanUserId)) {
+            approvedVips.push(cleanUserId);
+            safeWrite('approved_vip_users.json', approvedVips);
+          }
+        }
+
         // Foydalanuvchiga Telegramda chiroyli tasdiq xabari yuborish
         const targetChatId = receipt.chatId || receipt.userId;
+        const cleanBaseUrl = this.appUrl.replace(/\/+$/, '');
+        const vipAppUrl = `${cleanBaseUrl}/?vip=true&uid=${cleanUserId || targetUserIdStr || ''}`;
+
         if (targetChatId) {
           try {
             await this.sendMessage(targetChatId,
               `🎉 <b>TABRIKLAYMIZ! TO'LOVINGIZ TASDIQLANDI!</b> 👑\n\n` +
-              `Hurmatli <b>${escapeHtml(receipt.userName || "O'quvchi")}</b>, to'lovingiz admin tomonidan muvaffaqiyatli qabul qilindi!\n\n` +
+              `Hurmatli <b>${escapeHtml(receipt.userName || "O'quvchi")}</b>, to'lov chekingiz admin tomonidan tekshirilib, tasdiqlandi!\n\n` +
               `🌟 <b>Sizga VIP PRO tarifi to'liq faollashtirildi:</b>\n` +
               `• 📜 Barcha 40 ta Qonunchilik testlari (800 ta test) ochiq!\n` +
               `• 🎯 50 ta to'liq rasmiy BMBA imtihon variantlari ochiq!\n` +
               `• 🤖 AI Yuridik Ustoz bilan cheksiz muloqot!\n` +
               `• 🥊 Huquqiy Octagon cheksiz janglari!\n` +
               `• 🎓 Rasmiy elektron sertifikatlar generatsiyasi!\n\n` +
-              `<i>Platformani ochib, hoziroq tayyorgarlikni boshlang:</i> 👇`, {
+              `<i>Quyidagi tugmani bosing va platformani VIP PRO rejimida oching:</i> 👇`, {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: "🚀 Platformani ochish (VIP PRO)", web_app: { url: this.appUrl } }]
+                  [{ text: "🚀 Platformani ochish (VIP PRO Faol)", web_app: { url: vipAppUrl } }]
                 ]
               }
             });
