@@ -313,10 +313,10 @@
               </div>
               <div>
                 <div class="flex items-center space-x-2">
-                  <h3 class="text-sm font-black tracking-wide">AI Ustoz (ChatGPT kabi)</h3>
-                  <span class="px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 text-[9px] font-black uppercase"><i class="fa-solid fa-sparkles mr-0.5"></i> AQLLI AI</span>
+                  <h3 class="text-sm font-black tracking-wide">AI Ustoz (Mehribon & Qattiq Qo'l 🔥)</h3>
+                  <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[9px] font-black uppercase"><i class="fa-solid fa-fire mr-0.5"></i> QATTIQ QO'L AI</span>
                 </div>
-                <p class="text-[11px] text-indigo-100 mt-0.5">Xuddi ChatGPT kabi hamma narsaga javob beradi</p>
+                <p class="text-[11px] text-indigo-100 mt-0.5">ChatGPT kabi erkin suhbat yoki temir intizomli ustoz</p>
               </div>
             </div>
             <span class="px-2.5 py-1.5 rounded-xl bg-white text-indigo-900 font-extrabold text-xs shadow-sm whitespace-nowrap">
@@ -1012,21 +1012,33 @@
           <button onclick="showHome()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs transition">
             <i class="fa-solid fa-arrow-left"></i>
           </button>
-          <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base font-black shadow-inner">
+          <div id="aiTutorTopIcon" class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base font-black shadow-inner transition-all duration-300">
             <i class="fa-solid fa-robot"></i>
           </div>
           <div>
             <div class="flex items-center space-x-1.5">
-              <h3 class="text-xs font-black tracking-wide">AI Ustoz (ChatGPT Assistent)</h3>
+              <h3 id="aiTutorTitle" class="text-xs font-black tracking-wide">AI Ustoz (ChatGPT Assistent)</h3>
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
-            <p class="text-[10px] text-indigo-200">ChatGPT rejimida · Istalgan mavzuda savol bering</p>
+            <p id="aiTutorSubtitle" class="text-[10px] text-indigo-200">ChatGPT rejimida · Istalgan mavzuda savol bering</p>
           </div>
         </div>
 
         <button onclick="clearAiTutorChat()" title="Suhbatni tozalash" class="text-xs text-indigo-200 hover:text-white px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center space-x-1">
           <i class="fa-regular fa-trash-can"></i>
           <span class="hidden sm:inline text-[10px]">Tozalash</span>
+        </button>
+      </div>
+
+      <!-- AI Tutor Persona Switcher (Mehribon vs Qattiq Qo'l) -->
+      <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 shadow-inner">
+        <button type="button" onclick="setAiPersona('friendly')" id="btnPersonaFriendly" class="py-2 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-sm">
+          <span>💡 Mehribon Ustoz</span>
+        </button>
+        <button type="button" onclick="setAiPersona('strict')" id="btnPersonaStrict" class="py-2 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 text-slate-500 dark:text-slate-300 hover:text-rose-600">
+          <span class="animate-pulse">🔥</span>
+          <span>Qattiq Qo'l Ustoz</span>
+          <span class="px-1.5 py-0.5 bg-rose-500 text-white text-[8px] font-black rounded-md tracking-wider uppercase">Talabchan</span>
         </button>
       </div>
 
@@ -1043,9 +1055,12 @@
       <!-- Quick Question Suggestions Pills -->
       <div class="space-y-1.5">
         <p class="text-[10px] font-bold uppercase text-slate-400 px-1">Tezkor savollar va mavzular:</p>
-        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
-          <button onclick="askAiQuick('Assalomu alaykum! Siz nimalarga yordam bera olasiz?')" class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold whitespace-nowrap hover:bg-indigo-100 transition">
-            💡 ChatGPT imkoniyatlari
+        <div id="aiQuickPills" class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+          <button onclick="askAiQuick('Ustoz, meni milliy sertifikat bo\'yicha qattiq so\'roq qiling!')" class="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 font-bold whitespace-nowrap hover:bg-rose-100 transition">
+            🔥 Meni qattiq so'roq qiling!
+          </button>
+          <button onclick="askAiQuick('Ustoz, dangasalik qilyapman, menga qattiq dalda va intizom bering!')" class="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold whitespace-nowrap hover:bg-amber-100 transition">
+            ⚠️ Dangasalikni yo'qotish
           </button>
           <button onclick="askAiQuick('Mehnat shartnomasini bekor qilish tartibi va muddatlari qanday?')" class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold whitespace-nowrap hover:bg-emerald-100 transition">
             📋 Mehnat shartnomasi
@@ -1053,11 +1068,8 @@
           <button onclick="askAiQuick('Nikoh shartnomasi qanday tuziladi va unda qanday shartlar bo‘lishi mumkin?')" class="px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold whitespace-nowrap hover:bg-purple-100 transition">
             💍 Nikoh shartnomasi
           </button>
-          <button onclick="askAiQuick('BMBA Y-2 vaziyatli keyslarni tahlil qilishda nimalarga e’tibor berish kerak?')" class="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold whitespace-nowrap hover:bg-amber-100 transition">
+          <button onclick="askAiQuick('BMBA Y-2 vaziyatli keyslarni tahlil qilishda nimalarga e’tibor berish kerak?')" class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold whitespace-nowrap hover:bg-indigo-100 transition">
             ⚖️ Y-2 Keyslarni yechish
-          </button>
-          <button onclick="askAiQuick('Huquqshunoslik milliy sertifikatidagi 40 ta qonun qaysilar?')" class="px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 font-bold whitespace-nowrap hover:bg-sky-100 transition">
-            📜 40 ta Qonun ro'yxati
           </button>
         </div>
       </div>
@@ -2038,8 +2050,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/exam_data.js?v=40"></script>
-  <script src="js/flashcards.js?v=41"></script>
-  <script src="js/app.js?v=41"></script>
+  <script src="js/exam_data.js?v=42"></script>
+  <script src="js/flashcards.js?v=42"></script>
+  <script src="js/app.js?v=42"></script>
 </body>
 </html>

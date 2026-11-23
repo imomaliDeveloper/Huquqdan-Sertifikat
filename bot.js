@@ -10,6 +10,7 @@ const MANDATORY_CHANNELS = [
 
 const OFFICIAL_ADMIN_ID = '8348657980';
 const botUserAiCounts = {};
+const botUserPersona = {};
 const adminBroadcastState = {};
 const IMMANUEL_KEY = 'pfgehgxq';
 const IMMANUEL_URL = 'https://keyvalue.immanuel.co/api/KeyVal';
@@ -1915,6 +1916,38 @@ class SimpleTelegramBot {
         return await this.sendReferralMenu(chatId, userId);
       }
 
+      // Qattiq Qo'l Ustoz rejimini yoqish
+      if (text === '/qattiq' || text === '/talabchan' || text === '🔥 Qattiq Qo\'l Ustoz' || text === '/strict') {
+        botUserPersona[userId] = 'strict';
+        return await this.sendMessage(chatId,
+          `🔥 <b>QATTIQ QO'L USTOZ REJIMIGA O'TILDINGIZ!</b> ⚖️\n\n` +
+          `Qulog'ingni yaxshilab och! Bu yerda erkalanish, bahona to'qish yoki dangasalik o'tmaydi! Agar Yuridik Universitetga kirishni va ota-onangni yuzini yorug' qilishni xohlasang — <b>qattiq mehnat qilasan!</b> 👊\n\n` +
+          `Savoling bormi? Yoki bilimingni tekshirib, seni qattiq so'roq qilishimni xohlaysanmi? Hoziroq yoz, kutaman!\n\n` +
+          `<i>(Yumshoq rejimga qaytish uchun: /mehribon deb yozing)</i>`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "📲 Mini Appda ishlash", web_app: { url: this.appUrl } }],
+              [{ text: "💡 Mehribon rejimga o'tish", callback_data: "set_persona_friendly" }]
+            ]
+          }
+        });
+      }
+
+      // Mehribon Ustoz rejimiga qaytish
+      if (text === '/mehribon' || text === '/oddiy' || text === '💡 Mehribon Ustoz') {
+        botUserPersona[userId] = 'friendly';
+        return await this.sendMessage(chatId,
+          `💡 <b>Mehribon AI Ustoz rejimiga qaytildi.</b>\n\n` +
+          `Marhamat, huquq, qonunlar, testlar yoki istalgan mavzudagi savolingizni bering, barchasiga xushmuomalalik bilan tushuntirib beraman. 😊`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "🔥 Qattiq Qo'l rejimga o'tish", callback_data: "set_persona_strict" }],
+              [{ text: "📲 Mini Appni ochish", web_app: { url: this.appUrl } }]
+            ]
+          }
+        });
+      }
+
       // Platformani ochish (Mini App)
       if (text.includes("Platformani ochish") || text.includes("Mini App") || text === "/app" || text === "/webapp") {
         return await this.sendMessage(chatId,
@@ -2082,8 +2115,11 @@ class SimpleTelegramBot {
         });
       }
 
+      const userPersona = botUserPersona[userId] || 'friendly';
+      const isStrict = userPersona === 'strict';
+
       await this.callApi('sendChatAction', { chat_id: chatId, action: 'typing' });
-      const aiRes = await askAiTutor(text);
+      const aiRes = await askAiTutor(text, [], userPersona);
 
       let limitNote = "";
       if (isVipUser) {
@@ -2096,7 +2132,8 @@ class SimpleTelegramBot {
           : `\n\n<i>(⚠️ 2 ta bepul savol limitingiz tugadi. Cheksiz savol-javob uchun VIP PRO ga o'ting!)</i>`;
       }
 
-      const replyText = `🤖 <b>AI Huquqiy Ustoz:</b>\n\n${aiRes.reply}${limitNote}`;
+      const replyTitle = isStrict ? `🔥 <b>Qattiq Qo'l Ustoz:</b>` : `🤖 <b>AI Huquqiy Ustoz:</b>`;
+      const replyText = `${replyTitle}\n\n${aiRes.reply}${limitNote}`;
 
       return await this.sendMessage(chatId, replyText, {
         reply_markup: {
@@ -2508,6 +2545,22 @@ class SimpleTelegramBot {
         await this.answerCallbackQuery(q.id, "Fayl tayyorlanmoqda...");
         if (!isUserAdmin(userId)) return;
         await this.sendUsersExportFile(chatId);
+      } else if (q.data === 'set_persona_strict') {
+        botUserPersona[userId] = 'strict';
+        await this.answerCallbackQuery(q.id, "🔥 Qattiq Qo'l Ustoz rejimi yoqildi!");
+        await this.sendMessage(chatId,
+          `🔥 <b>QATTIQ QO'L USTOZ REJIMIGA O'TILDINGIZ!</b> ⚖️\n\n` +
+          `Qulog'ingni yaxshilab och! Bu yerda erkalanish, bahona to'qish yoki dangasalik o'tmaydi! Agar Yuridik Universitetga kirishni va ota-onangni yuzini yorug' qilishni xohlasang — <b>qattiq mehnat qilasan!</b> 👊\n\n` +
+          `Savoling bormi? Yoki bilimingni tekshirib, seni qattiq so'roq qilishimni xohlaysanmi? Hoziroq yoz, kutaman!\n\n` +
+          `<i>(Yumshoq rejimga qaytish uchun: /mehribon deb yozing)</i>`
+        );
+      } else if (q.data === 'set_persona_friendly') {
+        botUserPersona[userId] = 'friendly';
+        await this.answerCallbackQuery(q.id, "💡 Mehribon Ustoz rejimiga o'tildi.");
+        await this.sendMessage(chatId,
+          `💡 <b>Mehribon AI Ustoz rejimiga qaytildi.</b>\n\n` +
+          `Marhamat, huquq, qonunlar, testlar yoki istalgan mavzudagi savolingizni bering, barchasiga xushmuomalalik bilan tushuntirib beraman. 😊`
+        );
       } else {
         await this.answerCallbackQuery(q.id);
       }

@@ -3814,6 +3814,87 @@ function clearAiTutorChat() {
   }
 }
 
+let currentAiPersona = 'friendly';
+
+function setAiPersona(persona) {
+  currentAiPersona = persona;
+  const btnFriendly = document.getElementById("btnPersonaFriendly");
+  const btnStrict = document.getElementById("btnPersonaStrict");
+  const topIcon = document.getElementById("aiTutorTopIcon");
+  const title = document.getElementById("aiTutorTitle");
+  const subtitle = document.getElementById("aiTutorSubtitle");
+  const container = document.getElementById("aiTutorMessages");
+
+  if (persona === 'strict') {
+    if (btnFriendly) {
+      btnFriendly.className = "py-2 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 text-slate-500 dark:text-slate-300 hover:text-indigo-600";
+    }
+    if (btnStrict) {
+      btnStrict.className = "py-2 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md";
+    }
+    if (topIcon) {
+      topIcon.className = "w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 text-white flex items-center justify-center text-base font-black shadow-inner animate-pulse";
+      topIcon.innerHTML = `<i class="fa-solid fa-fire"></i>`;
+    }
+    if (title) {
+      title.innerText = "Qattiq Qo'l Ustoz 🔥 (Talabchan)";
+    }
+    if (subtitle) {
+      subtitle.innerText = "Temir intizom rejimi · Hech qanday bahonasiz so'roq!";
+    }
+
+    if (container && !document.getElementById("strictWelcomeMsg")) {
+      const bubble = document.createElement("div");
+      bubble.id = "strictWelcomeMsg";
+      bubble.className = "flex items-start space-x-2.5 animate-fade-in";
+      bubble.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div class="space-y-1.5 max-w-[88%]">
+          <div class="p-3.5 rounded-2xl rounded-tl-sm bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-slate-800 dark:text-slate-100 text-xs leading-relaxed shadow-xs">
+            <p class="font-black text-rose-600 dark:text-rose-400 mb-1 flex items-center">
+              <i class="fa-solid fa-fire mr-1.5"></i> QATTIQ QO'L USTOZ HUZURIDASAN!
+            </p>
+            Qulog'ingni yaxshilab och! Bu yerda erkalanish, bahona to'qish yoki dangasalik o'tmaydi!
+            <br><br>
+            Agar Yuridik Universitetga kirishni va ota-onangni yuzini yorug' qilishni xohlasang — <strong>qattiq mehnat qilasan!</strong>
+            <br><br>
+            👊 Savoling bormi? Yoki bilimingni tekshirib, seni qattiq so'roq qilishimni xohlaysanmi? Hoziroq yoz!
+          </div>
+          <span class="text-[9px] text-rose-500 font-semibold pl-1">Qattiq Qo'l Ustoz 🔥 · Faol</span>
+        </div>
+      `;
+      container.appendChild(bubble);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    if (typeof showToast === 'function') {
+      showToast("🔥 Qattiq Qo'l Ustoz rejimi yoqildi! Bahonalar qabul qilinmaydi!");
+    }
+  } else {
+    if (btnFriendly) {
+      btnFriendly.className = "py-2 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-sm";
+    }
+    if (btnStrict) {
+      btnStrict.className = "py-2 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 text-slate-500 dark:text-slate-300 hover:text-rose-600";
+    }
+    if (topIcon) {
+      topIcon.className = "w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base font-black shadow-inner";
+      topIcon.innerHTML = `<i class="fa-solid fa-robot"></i>`;
+    }
+    if (title) {
+      title.innerText = "AI Ustoz (ChatGPT Assistent)";
+    }
+    if (subtitle) {
+      subtitle.innerText = "ChatGPT rejimida · Istalgan mavzuda savol bering";
+    }
+    if (typeof showToast === 'function') {
+      showToast("💡 Mehribon Ustoz rejimiga o'tildi.");
+    }
+  }
+}
+
 function askAiQuick(questionText) {
   if (!checkAuthRequired("AI Ustoz")) return;
   const input = document.getElementById("aiTutorInput");
@@ -3845,13 +3926,14 @@ async function handleAiTutorSubmit(e) {
   }
 
   const nowTime = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+  const isStrict = currentAiPersona === 'strict';
 
   // 1. Foydalanuvchi xabarini ekranga chiqarish
   const userBubble = document.createElement("div");
   userBubble.className = "flex items-start justify-end space-x-2";
   userBubble.innerHTML = `
     <div class="space-y-1 max-w-[85%] text-right">
-      <div class="p-3.5 rounded-2xl rounded-tr-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs leading-relaxed text-left font-medium shadow-xs">
+      <div class="p-3.5 rounded-2xl rounded-tr-sm ${isStrict ? 'bg-gradient-to-r from-rose-600 to-amber-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600'} text-white text-xs leading-relaxed text-left font-medium shadow-xs">
         ${escapeHtml(question)}
       </div>
       <span class="text-[9px] text-slate-400 pr-1">${nowTime}</span>
@@ -3867,13 +3949,13 @@ async function handleAiTutorSubmit(e) {
   loadingBubble.id = loadingId;
   loadingBubble.className = "flex items-start space-x-2.5 animate-pulse";
   loadingBubble.innerHTML = `
-    <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-      <i class="fa-solid fa-robot"></i>
+    <div class="w-8 h-8 rounded-xl ${isStrict ? 'bg-gradient-to-tr from-rose-600 to-amber-500' : 'bg-emerald-600'} text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+      <i class="fa-solid ${isStrict ? 'fa-fire' : 'fa-robot'}"></i>
     </div>
     <div class="space-y-1.5 max-w-[85%]">
-      <div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-500 text-xs flex items-center space-x-2">
-        <i class="fa-solid fa-spinner fa-spin text-emerald-500"></i>
-        <span>ChatGPT kabi javob tayyorlanmoqda...</span>
+      <div class="p-3 rounded-2xl rounded-tl-sm ${isStrict ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200 text-rose-700' : 'bg-slate-100 dark:bg-slate-700/70 text-slate-500'} text-xs flex items-center space-x-2">
+        <i class="fa-solid fa-spinner fa-spin ${isStrict ? 'text-rose-500' : 'text-emerald-500'}"></i>
+        <span>${isStrict ? "Qattiq Qo'l Ustoz javob va so'roq tayyorlamoqda..." : "ChatGPT kabi javob tayyorlanmoqda..."}</span>
       </div>
     </div>
   `;
@@ -3888,7 +3970,8 @@ async function handleAiTutorSubmit(e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: question,
-        history: aiTutorHistory
+        history: aiTutorHistory,
+        persona: currentAiPersona
       })
     });
 
@@ -3897,7 +3980,7 @@ async function handleAiTutorSubmit(e) {
     if (loadingEl) loadingEl.remove();
 
     const replyText = data.reply || "Savolingiz bo'yicha javob topilmadi. Qayta urinib ko'ring.";
-    const replySource = data.source || "AI Ustoz (ChatGPT)";
+    const replySource = data.source || (isStrict ? "Qattiq Qo'l Ustoz 🔥" : "AI Ustoz (ChatGPT)");
     const replyTime = data.timestamp || nowTime;
 
     // Tarixga qo'shish
@@ -3924,15 +4007,15 @@ async function handleAiTutorSubmit(e) {
       .replace(/\n/g, '<br>');
 
     aiBubble.innerHTML = `
-      <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-        <i class="fa-solid fa-robot"></i>
+      <div class="w-8 h-8 rounded-xl ${isStrict ? 'bg-gradient-to-tr from-rose-600 to-amber-500' : 'bg-emerald-600'} text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 shadow-sm">
+        <i class="fa-solid ${isStrict ? 'fa-fire' : 'fa-robot'}"></i>
       </div>
       <div class="space-y-1.5 max-w-[88%]">
-        <div class="p-3.5 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700/70 text-slate-800 dark:text-slate-100 text-xs leading-relaxed shadow-xs">
+        <div class="p-3.5 rounded-2xl rounded-tl-sm ${isStrict ? 'bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-slate-800 dark:text-slate-100' : 'bg-slate-100 dark:bg-slate-700/70 text-slate-800 dark:text-slate-100'} text-xs leading-relaxed shadow-xs">
           ${formattedReply}
         </div>
         <div class="flex items-center space-x-2 text-[9px] text-slate-400 pl-1">
-          <span>${replySource} · ${replyTime}</span>
+          <span class="${isStrict ? 'text-rose-500 font-bold' : ''}">${replySource} · ${replyTime}</span>
           <button onclick="copyAiAnswer(this)" class="hover:text-emerald-500 font-semibold flex items-center ml-2">
             <i class="fa-regular fa-copy mr-0.5"></i> Nusxa
           </button>

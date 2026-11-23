@@ -509,13 +509,14 @@ app.post('/api/ai/explain-question', async (req, res) => {
 // ==================== AI USTOZ (CHATGPT KABI HAR QANDAY SAVOLGA JAVOB BERUVCHI AI) ====================
 
 app.post('/api/ai/tutor-chat', async (req, res) => {
-  const { message, history } = req.body;
+  const { message, history, persona, mode } = req.body;
 
   if (!message || !message.trim()) {
     return res.status(400).json({ error: "Savol matni kiritilmadi." });
   }
 
-  const result = await askAiTutor(message, history);
+  const selectedPersona = persona || mode || 'friendly';
+  const result = await askAiTutor(message, history, selectedPersona);
   return res.json(result);
 });
 

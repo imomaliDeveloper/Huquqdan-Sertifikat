@@ -15,9 +15,8 @@ if (geminiApiKey) {
 }
 
 const CANDIDATE_MODELS = [
-  'gemini-3.1-flash-lite',
   'gemini-3.8-flash',
-  'gemini-3.5-flash'
+  'gemini-3.1-flash-lite'
 ];
 
 async function generateAiContent({ prompt, systemInstruction, responseMimeType }) {
@@ -68,32 +67,53 @@ QOIDALAR:
 - Huquqqa oid savollarda qonun nomi va moddasiga aniq asoslaning.
 - Javobni chiroyli va o'qishga oson tuzilma bilan taqdim eting (kerakli joyda ro'yxatlar, qalin shriftlar, mos emojilar bilan).`;
 
-async function askAiTutor(message, history = []) {
+const STRICT_TUTOR_SYSTEM_INSTRUCTION = `Siz nihoyatda talabchan, qat'iyatli, jiddiy, intizomli va hech qanday erkalik yoki bahonalarni qabul qilmaydigan "QATTIQ QO'L USTOZ"siz (Temir intizomli Huquq Repetitori).
+Sizning yagona maqsadingiz — ushbu o'quvchini Yuridik Universitetga (yoki boshqa nufuzli OTMga) kirishini va Huquq Milliy Sertifikatidan eng yuqori "A+" (kamida "A") daraja olishini ta'minlash!
+
+SIZNING XARAKTERINGIZ VA USLUBINGIZ:
+1. "Qattiq qo'l, lekin o'quvchisining kelajagi va ota-onasining orzulari uchun chin dildan jon kuydiradigan talabchan ustoz".
+2. BAHONALARNI ASLO QABUL QILMAYSIZ:
+   - Agar o'quvchi "charchadim", "ulgurmayapman", "yodlash qiyin", "ertaga qilaman", "dangasalik qilyapman" desa — uni qattiq silkiting va tanqid qiling:
+     "Nima degani charchadim?! Ota-onang sen uchun qancha mashaqqat chekyapti! Imtihonga sanoqli kunlar qoldi, sen esa bo'shashyapsan! Bo'shashganlarga yuridik sohada o'rin yo'q! Tezda o'rningdan tur, kitobni och!"
+3. HAR BIR HUQUQIY SAVOLGA CHUQUR, ANIQ VA QAT'IY JAVOB BERING:
+   - Modda raqami, qonun nomi, amaliy qo'llanilishi va DTM/BMBA tuzoqlarini darhol fosh qilib bering.
+4. JAVOBINGIZ OXIRIDA DOIMO O'QUVCHINI TEKSHIRUVCHI "NAZORAT SAVOLI" (SO'ROQ) BERASIZ:
+   - "Xo'sh, tushundingmi? Tushungan bo'lsang hoziroq menga javob ber: [aniq qisqa sinov savoli]... Qani, ko'raylikchi, haqiqatdan miyangga kirdimi yoki shunchaki ko'z yugurtirib o'tib ketdingmi?!"
+5. AGAR TO'G'RI JAVOB BERSA:
+   - "Barakalla, lekin xomxayolga berilma! Bu faqat bittasi edi, haqiqiy imtihonda bundan o'n barobar qiyin bo'ladi. Davom etamiz!"
+6. AGAR NOTO'G'RI JAVOB BERSA YOKI BILMASA:
+   - "Noto'g'ri! Yana xato! Diqqating qayerda?! Mana bu moddani yaxshilab o'qi: [to'g'ri javob]. Hozir menga qaytadan tushuntirib ber, kutaman!"
+7. Murojaat: O'quvchiga "sen" deb, jiddiy, o'tkir, baquvvat gapirasiz. Emojilar: 🔥, ⚖️, ⚠️, 👊, 🎓.`;
+
+async function askAiTutor(message, history = [], persona = 'friendly') {
   if (!message || !message.trim()) {
     return {
       reply: "Savol kiritilmadi. Iltimos, savolingizni yozing.",
-      source: "AI Ustoz (ChatGPT)",
+      source: persona === 'strict' ? "Qattiq Qo'l Ustoz 🔥" : "AI Ustoz (ChatGPT)",
       timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
     };
   }
 
   const userQuery = message.trim();
+  const isStrict = persona === 'strict' || persona === 'qattiq';
+  const systemInstruction = isStrict ? STRICT_TUTOR_SYSTEM_INSTRUCTION : TUTOR_SYSTEM_INSTRUCTION;
+  const sourceName = isStrict ? "Qattiq Qo'l Ustoz 🔥" : "AI Ustoz (ChatGPT)";
 
   try {
     let prompt = "";
     if (Array.isArray(history) && history.length > 0) {
-      prompt += "Oldingi suhbat:\n" + history.slice(-6).map(h => `${h.role === 'user' ? 'Foydalanuvchi' : 'AI Ustoz'}: ${h.text}`).join("\n") + "\n\n";
+      prompt += "Oldingi suhbat:\n" + history.slice(-6).map(h => `${h.role === 'user' ? 'O\'quvchi' : 'Ustoz'}: ${h.text}`).join("\n") + "\n\n";
     }
-    prompt += `Foydalanuvchining savoli: "${userQuery}"\nAI Ustoz javobi:`;
+    prompt += `O'quvchining so'zi/savoli: "${userQuery}"\n${isStrict ? 'Qattiq Qo\'l Ustozning javobi va nazorat savoli:' : 'AI Ustoz javobi:'}`;
 
     const aiText = await generateAiContent({
       prompt,
-      systemInstruction: TUTOR_SYSTEM_INSTRUCTION
+      systemInstruction
     });
 
     return {
       reply: aiText.trim(),
-      source: "AI Ustoz (ChatGPT)",
+      source: sourceName,
       timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
     };
   } catch (err) {
@@ -101,15 +121,22 @@ async function askAiTutor(message, history = []) {
 
     // Fallback javob (faqat internet yoki API uzilganda)
     return {
-      reply: getTutorFallbackReply(userQuery),
-      source: "AI Ustoz (Zaxira rejim)",
+      reply: getTutorFallbackReply(userQuery, isStrict),
+      source: isStrict ? "Qattiq Qo'l Ustoz 🔥" : "AI Ustoz (Zaxira rejim)",
       timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
     };
   }
 }
 
-function getTutorFallbackReply(userQuery) {
+function getTutorFallbackReply(userQuery, isStrict = false) {
   const qLower = userQuery.toLowerCase();
+  if (isStrict) {
+    if (qLower.includes("charchadim") || qLower.includes("dangasa") || qLower.includes("qiyin") || qLower.includes("ertaga")) {
+      return `🔥 **Nima degani charchadim?!**\n\nQulog'ingni yaxshilab och: imtihonda senga hech kim rahm qilmaydi! Qonun moddalari "men charchagan edim" degan bahonangni qabul qilmaydi! Ota-onang sen uchun qancha intilyapti. O'rningdan tur, yuzingni yuv-da, 50 ta moddani ochib yodla! 👊\n\nSavoling bormi? Hoziroq ber, vaqtni bekorga ketkazma! ⚖️`;
+    }
+    return `🔥 **Qattiq Qo'l Ustoz tekshiruvi:**\n\nSavoling: **"${userQuery}"**\n\nDiqqat qil: bu masalada shunchaki quruq yodlash yetarli emas. Qonunning aniq moddasi va qaysi organning vakolatiga kirishini tushunishing shart!\n\n❓ **Xo'sh, aytchi:** Konstitutsiya yoki kodeksda ushbu masala qaysi qonuniy asosda belgilangan? Tezda javobingni yoz, ko'raylikchi! ⚖️`;
+  }
+
   if (qLower.includes("salom") || qLower.includes("assalom") || qLower.includes("qalaysiz") || qLower.includes("kim siz")) {
     return `Assalomu alaykum! Xush kelibsiz! 👋\n\nMen sizning universal **AI Ustozingizman** (ChatGPT kabi ishlayman). Menga xohlagan mavzuingizda savol berishingiz mumkin:\n\n• ⚖️ **Huquq va Qonunchilik:** BMBA sertifikati, 40 ta qonun, kodekslar va keyslar;\n• 📚 **Ta'lim va Fanlar:** Tarix, matematika, tillar va darsliklar;\n• 💡 **Maslahatlar:** Insho yozish, imtihonga tayyorlanish va boshqa barcha savollar.\n\nBugun sizga qaysi savol bo'yicha yordam beray?`;
   }
