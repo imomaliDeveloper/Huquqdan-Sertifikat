@@ -10,6 +10,54 @@ const MANDATORY_CHANNELS = [
 
 const OFFICIAL_ADMIN_ID = '8348657980';
 const botUserAiCounts = {};
+const adminBroadcastState = {};
+const IMMANUEL_KEY = 'pfgehgxq';
+const IMMANUEL_URL = 'https://keyvalue.immanuel.co/api/KeyVal';
+
+async function fetchCloudUsers() {
+  try {
+    const res = await fetch(`${IMMANUEL_URL}/GetValue/${IMMANUEL_KEY}/tg_users`, {
+      cache: 'no-store'
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data) return null;
+    const str = Buffer.from(data, 'base64').toString('utf8');
+    const parsed = JSON.parse(str);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function saveCloudUsers(newUsersList) {
+  try {
+    if (!newUsersList || !newUsersList.length) return;
+    const existing = await fetchCloudUsers() || [];
+    const map = new Map();
+    existing.forEach(u => {
+      const k = (u.tgId || u.id || '').toString();
+      if (k) map.set(k, u);
+    });
+    newUsersList.forEach(u => {
+      const k = (u.tgId || u.id || '').toString();
+      if (k) {
+        const prev = map.get(k) || {};
+        map.set(k, { ...prev, ...u, lastActive: u.lastActive || new Date().toISOString() });
+      }
+    });
+    const merged = Array.from(map.values());
+    const jsonStr = JSON.stringify(merged);
+    const b64 = Buffer.from(jsonStr).toString('base64');
+    await fetch(`${IMMANUEL_URL}/UpdateValue/${IMMANUEL_KEY}/tg_users/${encodeURIComponent(b64)}`, {
+      method: 'POST',
+      headers: { 'Content-Length': '0' }
+    });
+    return merged;
+  } catch (e) {
+    console.error('saveCloudUsers error:', e.message);
+  }
+}
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const webAppUrl = process.env.WEB_APP_URL || 'https://huquqdan-sertifikat.vercel.app';
@@ -102,13 +150,15 @@ function recordUser(fromUser) {
     const existingIndex = users.findIndex(u => (u.tgId && u.tgId.toString() === idStr) || (u.id && u.id.toString() === `TG-${idStr}`));
     const fullName = [fromUser.first_name, fromUser.last_name].filter(Boolean).join(' ') || fromUser.username || "O'quvchi";
 
+    let savedObj = null;
     if (existingIndex >= 0) {
       users[existingIndex].lastActive = new Date().toISOString();
       if (fromUser.username) users[existingIndex].username = `@${fromUser.username}`;
       if (fullName) users[existingIndex].name = fullName;
       if (!users[existingIndex].referrals) users[existingIndex].referrals = [];
+      savedObj = users[existingIndex];
     } else {
-      users.push({
+      savedObj = {
         id: `TG-${fromUser.id}`,
         tgId: fromUser.id,
         name: fullName,
@@ -124,9 +174,13 @@ function recordUser(fromUser) {
         registeredAt: new Date().toISOString(),
         lastActive: new Date().toISOString(),
         source: "telegram_bot"
-      });
+      };
+      users.push(savedObj);
     }
     safeWrite('users.json', users);
+    if (savedObj) {
+      saveCloudUsers([savedObj]).catch(() => {});
+    }
   } catch (err) {
     console.error("recordUser error:", err.message);
   }
@@ -538,14 +592,38 @@ class SimpleTelegramBot {
     }
   }
 
+  // Barcha foydalanuvchilar ro'yxatini (Lokal + Bulut) birlashtirib olish
+  async getAllUsersList() {
+    const localUsers = safeRead('users.json', []);
+    let cloudUsers = [];
+    try {
+      cloudUsers = await fetchCloudUsers() || [];
+    } catch (e) {}
+
+    const map = new Map();
+    localUsers.forEach(u => {
+      const key = (u.tgId || u.id || '').toString();
+      if (key) map.set(key, u);
+    });
+    cloudUsers.forEach(u => {
+      const key = (u.tgId || u.id || '').toString();
+      if (key) {
+        const existing = map.get(key) || {};
+        map.set(key, { ...existing, ...u });
+      }
+    });
+
+    return Array.from(map.values());
+  }
+
   // 3. ADMIN PANEL & STATISTIKA
   async sendAdminPanel(chatId) {
-    const users = safeRead('users.json', []);
+    const users = await this.getAllUsersList();
     const leaderboard = safeRead('leaderboard.json', []);
     const receipts = safeRead('receipts.json', []);
 
-    const tgUsersCount = users.filter(u => u.source === 'telegram_bot' || u.tgId).length;
-    const webUsersCount = users.filter(u => u.source !== 'telegram_bot').length;
+    const tgUsersCount = users.filter(u => u.source === 'telegram_bot' || u.tgId || (u.id && u.id.toString().startsWith('TG-'))).length;
+    const webUsersCount = users.filter(u => u.source !== 'telegram_bot' && !u.tgId).length;
     const pendingReceipts = receipts.filter(r => r.status === 'pending').length;
 
     let totalScoreSum = 0;
@@ -573,21 +651,22 @@ class SimpleTelegramBot {
 
     const keyboard = [
       [
-        { text: "👥 So'nggi foydalanuvchilar", callback_data: "admin_recent_users" },
+        { text: "👥 Barcha foydalanuvchilar ro'yxati", callback_data: "admin_all_users_0" },
         { text: "📥 To'lov cheklari", callback_data: "admin_receipts" }
+      ],
+      [
+        { text: "📄 Ro'yxatni yuklab olish (TXT)", callback_data: "admin_export_users" },
+        { text: "📢 Barchaga e'lon tarqatish", callback_data: "admin_start_broadcast" }
+      ],
+      [
+        { text: "⏰ O'quvchilarga motivatsiya & eslatma yuborish", callback_data: "admin_send_reminders" }
       ],
       [
         { text: "📢 Avto-Test Sozlamalari (Interval)", callback_data: "autopost_menu" },
         { text: "🎯 Kanalga test tashlash (Hozir)", callback_data: "autopost_send_now" }
       ],
       [
-        { text: "⏰ O'quvchilarga eslatma yuborish (Nazorat)", callback_data: "admin_send_reminders" }
-      ],
-      [
-        { text: "📢 Barchaga xabar tarqatish", callback_data: "admin_broadcast_help" },
-        { text: "🔄 Statistikani yangilash", callback_data: "admin_panel" }
-      ],
-      [
+        { text: "🔄 Yangilash", callback_data: "admin_panel" },
         { text: "🏠 Asosiy menyu", callback_data: "cmd_home" }
       ]
     ];
@@ -597,22 +676,107 @@ class SimpleTelegramBot {
     });
   }
 
+  // Barcha foydalanuvchilarni sahifama-sahifa ko'rsatish (Admin)
+  async sendAllUsersPaginated(chatId, page = 0) {
+    const allUsers = await this.getAllUsersList();
+    const tgUsers = allUsers.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
+    const pageSize = 10;
+    const totalPages = Math.ceil(tgUsers.length / pageSize) || 1;
+    const curPage = Math.max(0, Math.min(page, totalPages - 1));
+    const startIdx = curPage * pageSize;
+    const slice = tgUsers.slice(startIdx, startIdx + pageSize);
+
+    let text = `👥 <b>BOT FOYDALANUVCHILARI RO'YXATI</b>\n` +
+      `<i>(Bot ochilganidan beri qatnashgan barcha o'quvchilar)</i>\n\n` +
+      `📊 <b>Jami Telegram a'zolari:</b> ${tgUsers.length} ta\n` +
+      `📄 <b>Sahifa:</b> ${curPage + 1} / ${totalPages}\n\n`;
+
+    if (!slice.length) {
+      text += `<i>Hozircha ro'yxat bo'sh.</i>`;
+    } else {
+      slice.forEach((u, i) => {
+        const num = startIdx + i + 1;
+        const tgId = u.tgId || (u.id ? u.id.replace('TG-', '') : 'Noma\'lum');
+        const username = u.username ? ` (@${u.username.replace('@', '')})` : '';
+        const planBadge = u.isVip || u.plan === 'tariff_vip' ? '👑 VIP PRO' : '📱 START';
+        const dateStr = u.registeredAt ? new Date(u.registeredAt).toLocaleDateString('uz-UZ') : 'Yaqinda';
+        text += `<b>${num}.</b> 👤 <b>${escapeHtml(u.name || "O'quvchi")}</b>${username}\n` +
+          `   🆔 <code>${tgId}</code> | ${planBadge}\n` +
+          `   📅 Qo'shilgan: ${dateStr}\n\n`;
+      });
+    }
+
+    const navButtons = [];
+    if (curPage > 0) {
+      navButtons.push({ text: "⬅️ Oldingi", callback_data: `admin_all_users_${curPage - 1}` });
+    }
+    navButtons.push({ text: `📄 ${curPage + 1}/${totalPages}`, callback_data: `admin_all_users_${curPage}` });
+    if (curPage < totalPages - 1) {
+      navButtons.push({ text: "Keyingi ➡️", callback_data: `admin_all_users_${curPage + 1}` });
+    }
+
+    const keyboard = [
+      navButtons,
+      [
+        { text: "📥 TXT Faylda yuklab olish", callback_data: "admin_export_users" },
+        { text: "🔙 Admin panel", callback_data: "admin_panel" }
+      ]
+    ];
+
+    return await this.sendMessage(chatId, text, {
+      reply_markup: { inline_keyboard: keyboard }
+    });
+  }
+
+  // Barcha foydalanuvchilar ro'yxatini TXT fayl sifatida adminga yuborish
+  async sendUsersExportFile(chatId) {
+    const allUsers = await this.getAllUsersList();
+    const tgUsers = allUsers.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
+
+    let content = `======================================================\n` +
+      `HUQUQ MILLIY SERTIFIKAT - BARCHA FOYDALANUVCHILAR RO'YXATI\n` +
+      `Sana: ${new Date().toLocaleString('uz-UZ')}\n` +
+      `Jami Telegram a'zolari: ${tgUsers.length} ta\n` +
+      `======================================================\n\n`;
+
+    tgUsers.forEach((u, idx) => {
+      const tgId = u.tgId || (u.id ? u.id.replace('TG-', '') : 'Noma\'lum');
+      const plan = u.isVip || u.plan === 'tariff_vip' ? 'VIP PRO' : 'START';
+      const reg = u.registeredAt || 'Noma\'lum';
+      content += `${idx + 1}. Ism: ${u.name || "O'quvchi"} | ID: ${tgId} | Username: ${u.username || 'yo\'q'} | Tarif: ${plan} | Ro'yxatdan o'tgan: ${reg}\n`;
+    });
+
+    const exportPath = path.join('/tmp', 'huquq_bot_foydalanuvchilari.txt');
+    try {
+      fs.writeFileSync(exportPath, content, 'utf8');
+      return await this.sendLocalDocument(chatId, exportPath, 
+        `📄 <b>Barcha foydalanuvchilar ro'yxati (${tgUsers.length} ta a'zo)</b>\n\nFayl muvaffaqiyatli tayyorlandi. Marhamat, yuklab oling!`,
+        { reply_markup: { inline_keyboard: [[{ text: "🔙 Admin panel", callback_data: "admin_panel" }]] } }
+      );
+    } catch (e) {
+      return await this.sendMessage(chatId, `⚠️ Fayl yaratishda xatolik: ${e.message}`);
+    }
+  }
+
   // So'nggi foydalanuvchilar ro'yxati (Admin)
   async sendRecentUsers(chatId) {
-    const users = safeRead('users.json', []);
-    const recent = users.slice(-8).reverse();
+    const users = await this.getAllUsersList();
+    const recent = users.slice(-10).reverse();
 
     let text = `👥 <b>So'nggi ro'yxatdan o'tgan foydalanuvchilar:</b>\n\n`;
     recent.forEach((u, idx) => {
       const regTime = u.registeredAt ? new Date(u.registeredAt).toLocaleString('uz-UZ') : "Noma'lum";
-      text += `<b>${idx + 1}. ${u.name || "Nomsiz"}</b>\n` +
-        `• Tel/User: <code>${u.phone || u.username || u.id}</code>\n` +
-        `• Tarif: <b>${u.plan || "START"}</b> | Manba: <i>${u.source || "veb"}</i>\n` +
+      text += `<b>${idx + 1}. ${escapeHtml(u.name || "Nomsiz")}</b>\n` +
+        `• ID/User: <code>${u.tgId || u.phone || u.username || u.id}</code>\n` +
+        `• Tarif: <b>${u.isVip ? "VIP PRO" : (u.plan || "START")}</b>\n` +
         `• Vaqti: ${regTime}\n\n`;
     });
 
     const keyboard = [
-      [{ text: "🔙 Admin panelga qaytish", callback_data: "admin_panel" }]
+      [
+        { text: "👥 Barcha foydalanuvchilar", callback_data: "admin_all_users_0" },
+        { text: "🔙 Admin panel", callback_data: "admin_panel" }
+      ]
     ];
 
     return await this.sendMessage(chatId, text, {
@@ -662,30 +826,46 @@ class SimpleTelegramBot {
   }
 
   // Barcha foydalanuvchilarga xabar tarqatish (Broadcast)
-  async broadcastMessage(adminChatId, broadcastText) {
-    const users = safeRead('users.json', []);
-    const tgUsers = users.filter(u => u.tgId);
+  async broadcastMessage(adminChatId, broadcastData) {
+    const allUsers = await this.getAllUsersList();
+    const tgUsers = allUsers.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
 
     if (!tgUsers.length) {
       return await this.sendMessage(adminChatId, "⚠️ Tarqatish uchun Telegram foydalanuvchilari topilmadi.");
     }
 
-    await this.sendMessage(adminChatId, `📢 <b>Xabar tarqatilmoqda...</b>\nJami: ${tgUsers.length} ta foydalanuvchi.`);
+    await this.sendMessage(adminChatId, `📢 <b>Xabar tarqatilmoqda...</b>\nJami: <b>${tgUsers.length} ta</b> foydalanuvchiga yuboriladi.`);
 
     let successCount = 0;
     let failCount = 0;
 
+    const isObject = typeof broadcastData === 'object' && broadcastData !== null;
+    const textMsg = isObject ? (broadcastData.text || broadcastData.caption || '') : broadcastData;
+    const photoId = isObject ? broadcastData.photoId : null;
+
     for (const u of tgUsers) {
+      const targetId = u.tgId || (u.id ? u.id.replace('TG-', '') : null);
+      if (!targetId) continue;
+
       try {
-        const res = await this.sendMessage(u.tgId, broadcastText, {
+        let res;
+        const kb = {
           reply_markup: {
             inline_keyboard: [
               [{ text: "🚀 Platformani ochish", web_app: { url: this.appUrl } }]
             ]
           }
-        });
-        if (res.ok) successCount++;
+        };
+
+        if (photoId) {
+          res = await this.sendPhoto(targetId, photoId, textMsg, kb);
+        } else {
+          res = await this.sendMessage(targetId, textMsg, kb);
+        }
+
+        if (res && res.ok) successCount++;
         else failCount++;
+
         // Telegram API limitlariga tushmaslik uchun qisqa pauza
         await new Promise(r => setTimeout(r, 60));
       } catch (e) {
@@ -700,11 +880,11 @@ class SimpleTelegramBot {
     );
   }
 
-  // O'quvchilarga kunlik eslatma yuborish (Retention & Re-engagement)
+  // O'quvchilarga kunlik motivatsiya va eslatma yuborish (Retention & Motivation)
   async sendDailyRetentionReminders(triggeredByChatId = null) {
     try {
-      const users = safeRead('users.json', []);
-      const tgUsers = users.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
+      const allUsers = await this.getAllUsersList();
+      const tgUsers = allUsers.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
 
       if (!tgUsers.length) {
         if (triggeredByChatId) {
@@ -726,8 +906,8 @@ class SimpleTelegramBot {
         const lastActiveTime = u.lastActive ? new Date(u.lastActive).getTime() : 0;
         const diffHours = lastActiveTime > 0 ? (now - lastActiveTime) / (1000 * 60 * 60) : 999;
 
-        // Agar oxirgi 10 soat ichida faol bo'lgan bo'lsa va test ishlagan bo'lsa, o'tkazib yuboramiz
-        if (diffHours < 10 && u.testsCompleted && u.testsCompleted > 0) {
+        // Agar oxirgi 12 soat ichida faol bo'lgan bo'lsa, o'tkazib yuboramiz
+        if (diffHours < 12 && u.testsCompleted && u.testsCompleted > 0) {
           skippedCount++;
           continue;
         }
@@ -735,19 +915,20 @@ class SimpleTelegramBot {
         const firstName = u.name ? u.name.split(' ')[0] : "O'quvchi";
 
         let reminderText = "";
-        if (diffHours >= 72 || !u.lastActive) {
-          // 3 kundan ortiq kirmagan o'quvchilar uchun
+        if (diffHours >= 48 || !u.lastActive) {
+          // 2 kundan ortiq kirmagan o'quvchilar uchun
           reminderText =
             `👋 <b>Assalomu alaykum, ${firstName}!</b> ⚖️\n\n` +
             `🎯 <b>Huquqshunoslik Milliy Sertifikat imtihoni har kuni yaqinlashmoqda!</b>\n\n` +
             `Bir necha kundan beri test yechmadingiz. Do'stlaringiz va raqiblaringiz esa har kuni 40 ta qonun bo'yicha bilimlarini oshirib, umumiy reytingda oldinga intilmoqda! 🔥\n\n` +
             `Bugun kamida <b>1 ta qonun varianti</b>ni yechib, bilimingizni mustahkamlang va o'rningizni boy bermang! 🚀`;
         } else {
-          // 24 soat atrofida faol bo'lmagan o'quvchilar uchun
+          // 12-24 soat atrofida faol bo'lmagan o'quvchilar uchun
           reminderText =
             `🔔 <b>Kunlik Eslatma | BMBA Huquq Testlari</b> ⚖️\n\n` +
-            `Assalomu alaykum, <b>${firstName}</b>! Bugun hali test topshirmadingiz.\n\n` +
-            `🔥 <b>Kunlik streak (ketma-ketlik)ni boy bermang!</b> Kuniga 15-20 daqiqa test yechish — imtihonda yuqori sertifikat olishning eng ishonchli usulidir.\n\n` +
+            `Assalomu alaykum, <b>${firstName}</b>!\n\n` +
+            `💡 <i>"Muvaffaqiyat — bu har kuni takrorlanadigan kichik intilishlar yig'indisidir."</i>\n\n` +
+            `🔥 <b>Kunlik streak (ketma-ketlik)ni boy bermang!</b> Kuniga 15-20 daqiqa test yechish — imtihonda yuqori A+ sertifikat olishning eng ishonchli usulidir.\n\n` +
             `Platformadagi 40 ta qonun testlari yoki jonli duelda o'z kuchingizni sinab ko'ring! 👇`;
         }
 
@@ -1464,6 +1645,64 @@ class SimpleTelegramBot {
         }
       }
 
+      // ADMIN INTERFAOL E'LON TARQATISH REJIMI (Broadcast)
+      if (isUserAdmin(userId) && adminBroadcastState[userId]?.step === 'awaiting_content') {
+        if (text === '/cancel' || text === '❌ Bekor qilish') {
+          delete adminBroadcastState[userId];
+          return await this.sendMessage(chatId, `❌ Xabar tarqatish bekor qilindi.`, {
+            reply_markup: { inline_keyboard: [[{ text: "🔙 Admin panel", callback_data: "admin_panel" }]] }
+          });
+        }
+
+        const isPhoto = Array.isArray(msg.photo) && msg.photo.length > 0;
+        const photoId = isPhoto ? msg.photo[msg.photo.length - 1].file_id : null;
+        const captionText = msg.caption || text || '';
+
+        if (!captionText && !photoId) {
+          return await this.sendMessage(chatId, `⚠️ Iltimos, xabar matnini yoki rasm bilan birga izoh yozing.`);
+        }
+
+        const allUsers = await this.getAllUsersList();
+        const tgUsers = allUsers.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
+
+        adminBroadcastState[userId] = {
+          step: 'confirm',
+          text: captionText,
+          photoId: photoId
+        };
+
+        const previewText = `👁 <b>XABARNING KO'RINISHI (PREVIEW):</b>\n` +
+          `----------------------------------------\n` +
+          `${captionText}\n` +
+          `----------------------------------------\n\n` +
+          `📊 <b>Yuboriladigan a'zolar soni:</b> ${tgUsers.length} ta\n\n` +
+          `<i>Haqiqatdan ham ushbu e'lonni barcha foydalanuvchilarga yubormoqchimisiz?</i>`;
+
+        if (photoId) {
+          return await this.sendPhoto(chatId, photoId, previewText, {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: "🚀 Ha, barchaga yuborilsin", callback_data: "confirm_broadcast" },
+                  { text: "❌ Bekor qilish", callback_data: "cancel_broadcast" }
+                ]
+              ]
+            }
+          });
+        } else {
+          return await this.sendMessage(chatId, previewText, {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: "🚀 Ha, barchaga yuborilsin", callback_data: "confirm_broadcast" },
+                  { text: "❌ Bekor qilish", callback_data: "cancel_broadcast" }
+                ]
+              ]
+            }
+          });
+        }
+      }
+
       // ADMIN BUYRUQLARI (Faqat tasdiqlangan admin ID uchun)
       if (text.startsWith('/admin_login')) {
         return await this.sendMessage(chatId, `🔒 Adminlik faqat rasmiy Telegram ID (8348657980) orqali beriladi.`);
@@ -1479,12 +1718,24 @@ class SimpleTelegramBot {
         return await this.sendAdminPanel(chatId);
       }
 
-      if (text.startsWith('/broadcast ')) {
+      if (text.startsWith('/broadcast ') || text.startsWith('/elon ') || text.startsWith('/xabar ')) {
         if (!isUserAdmin(userId)) {
           return await this.sendMessage(chatId, `🔒 Bu buyruq faqat adminlar uchun.`);
         }
-        const bText = text.replace('/broadcast ', '').trim();
+        let bText = text;
+        if (text.startsWith('/broadcast ')) bText = text.replace('/broadcast ', '').trim();
+        else if (text.startsWith('/elon ')) bText = text.replace('/elon ', '').trim();
+        else if (text.startsWith('/xabar ')) bText = text.replace('/xabar ', '').trim();
+
+        if (!bText) {
+          return await this.sendMessage(chatId, `⚠️ Iltimos, e'lon matnini ham yozing. Masalan:\n<code>/elon Assalomu alaykum! Yangi testlar qo'shildi!</code>`);
+        }
         return await this.broadcastMessage(chatId, bText);
+      }
+
+      if (text === '/users' || text === '/foydalanuvchilar' || text === '/azolar') {
+        if (!isUserAdmin(userId)) return await this.sendMessage(chatId, `🔒 Bu buyruq faqat adminlar uchun.`);
+        return await this.sendAllUsersPaginated(chatId, 0);
       }
 
       if (text === '/send_reminders' || text === '/remind') {
@@ -2141,16 +2392,47 @@ class SimpleTelegramBot {
         await this.answerCallbackQuery(q.id, "Test kanalga tashlanmoqda...");
         if (!isUserAdmin(userId)) return;
         await this.postNextQuizToChannel(chatId, true);
-      } else if (q.data === 'admin_broadcast_help') {
+      } else if (q.data === 'admin_start_broadcast' || q.data === 'admin_broadcast_help') {
         await this.answerCallbackQuery(q.id);
         if (!isUserAdmin(userId)) return;
+        adminBroadcastState[userId] = { step: 'awaiting_content' };
         await this.sendMessage(chatId,
-          `📢 <b>Barcha foydalanuvchilarga xabar tarqatish:</b>\n\n` +
-          `Xabar tarqatish uchun quyidagi formatda yozing:\n` +
-          `<code>/broadcast Sizning xabaringiz matni</code>\n\n` +
-          `<i>Masalan:</i>\n` +
-          `<code>/broadcast Assalomu alaykum! Platformaga yangi 40 ta qonun testlari qo'shildi!</code>`
+          `📢 <b>BARCHA FOYDALANUVCHILARGA XABAR TARQATISH (BROADCAST)</b>\n\n` +
+          `Barcha o'quvchilarga yubormoqchi bo'lgan xabaringizni (matn yoki rasm bilan birga izoh) to'g'ridan-to'g'ri shu chatga yozib yuboring.\n\n` +
+          `Siz yuborgan xabar botning barcha ro'yxatdan o'tgan a'zolariga yetkaziladi.\n\n` +
+          `<i>Bekor qilish uchun:</i> /cancel deb yozing.`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "❌ Bekor qilish", callback_data: "cancel_broadcast" }]
+              ]
+            }
+          }
         );
+      } else if (q.data === 'confirm_broadcast') {
+        await this.answerCallbackQuery(q.id, "📢 Xabar tarqatilmoqda...");
+        if (!isUserAdmin(userId)) return;
+        const bState = adminBroadcastState[userId];
+        if (!bState || !bState.text) {
+          return await this.sendMessage(chatId, "⚠️ Tarqatish uchun saqlangan xabar topilmadi.");
+        }
+        delete adminBroadcastState[userId];
+        await this.broadcastMessage(chatId, bState);
+      } else if (q.data === 'cancel_broadcast') {
+        await this.answerCallbackQuery(q.id, "Xabar tarqatish bekor qilindi");
+        delete adminBroadcastState[userId];
+        await this.sendMessage(chatId, "❌ Xabar tarqatish bekor qilindi.", {
+          reply_markup: { inline_keyboard: [[{ text: "🔙 Admin panel", callback_data: "admin_panel" }]] }
+        });
+      } else if (q.data && q.data.startsWith('admin_all_users_')) {
+        await this.answerCallbackQuery(q.id);
+        if (!isUserAdmin(userId)) return;
+        const page = parseInt(q.data.replace('admin_all_users_', '')) || 0;
+        await this.sendAllUsersPaginated(chatId, page);
+      } else if (q.data === 'admin_export_users') {
+        await this.answerCallbackQuery(q.id, "Fayl tayyorlanmoqda...");
+        if (!isUserAdmin(userId)) return;
+        await this.sendUsersExportFile(chatId);
       } else {
         await this.answerCallbackQuery(q.id);
       }

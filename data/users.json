@@ -1,5 +1,18 @@
 [
   {
+    "id": "TG-8348657980",
+    "tgId": 8348657980,
+    "name": "Imomali Mamatqulov",
+    "username": "@Imomali_Mamatkulov",
+    "role": "Bosh Administrator",
+    "plan": "tariff_vip",
+    "isVip": true,
+    "registeredAt": "2026-11-18T10:00:00.000Z",
+    "lastActive": "2026-11-23T10:30:00.000Z",
+    "testsCompleted": 45,
+    "source": "telegram_bot"
+  },
+  {
     "id": "USR-1001",
     "name": "Imomali",
     "phone": "+998901234567",
