@@ -3,8 +3,10 @@ const path = require('path');
 const { GoogleGenAI } = require('@google/genai');
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
-let genAI = null;
+const openaiApiKey = process.env.OPENAI_API_KEY;
+const groqApiKey = process.env.GROQ_API_KEY;
 
+let genAI = null;
 if (geminiApiKey) {
   try {
     genAI = new GoogleGenAI({ apiKey: geminiApiKey });
@@ -14,20 +16,61 @@ if (geminiApiKey) {
   }
 }
 
+// 1. OpenAI (Haqiqiy ChatGPT)
+async function tryOpenAi(fullPrompt) {
+  if (!openaiApiKey) return null;
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: fullPrompt }],
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]?.message?.content) {
+      return data.choices[0].message.content.trim();
+    }
+  } catch (e) {}
+  return null;
+}
+
+// 2. Groq (Tezkor Llama-3.3-70B)
+async function tryGroq(fullPrompt) {
+  if (!groqApiKey) return null;
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: fullPrompt }],
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]?.message?.content) {
+      return data.choices[0].message.content.trim();
+    }
+  } catch (e) {}
+  return null;
+}
+
+// 3. Google Gemini
 const CANDIDATE_MODELS = [
   'gemini-3.5-flash-lite'
 ];
 
-async function generateAiContent({ prompt, systemInstruction, responseMimeType }) {
-  if (!genAI) {
-    throw new Error('GEMINI_API_KEY topilmadi yoki ulanmagan.');
-  }
-
-  // Google GenAI v2 da systemInstruction alohida berilganda 503 xatosi ko'p uchraydi.
-  // Shuning uchun yo'riqnomani to'g'ridan-to'g'ri prompt boshiga qo'shish eng barqaror va tezkor usuldir.
-  const fullPrompt = systemInstruction 
-    ? `${systemInstruction}\n\nFoydalanuvchi so'rovi:\n${prompt}\n\nJavob:`
-    : prompt;
+async function tryGemini(fullPrompt, responseMimeType) {
+  if (!genAI) return null;
 
   for (const model of CANDIDATE_MODELS) {
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -58,8 +101,27 @@ async function generateAiContent({ prompt, systemInstruction, responseMimeType }
       }
     }
   }
+  return null;
+}
 
-  throw new Error('AI API javob bera olmadi');
+async function generateAiContent({ prompt, systemInstruction, responseMimeType }) {
+  const fullPrompt = systemInstruction 
+    ? `${systemInstruction}\n\nFoydalanuvchi so'rovi:\n${prompt}\n\nJavob:`
+    : prompt;
+
+  // 1. OpenAI (ChatGPT)
+  const openAiReply = await tryOpenAi(fullPrompt);
+  if (openAiReply) return openAiReply;
+
+  // 2. Groq
+  const groqReply = await tryGroq(fullPrompt);
+  if (groqReply) return groqReply;
+
+  // 3. Gemini
+  const geminiReply = await tryGemini(fullPrompt, responseMimeType);
+  if (geminiReply) return geminiReply;
+
+  throw new Error('AI serverlarida vaqtinchalik yuklama yuqori.');
 }
 
 // ==================== BMBA SAVOLLARINI XOTIRAGA YUKLASH ====================
