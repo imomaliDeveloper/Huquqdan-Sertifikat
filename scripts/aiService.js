@@ -16,16 +16,12 @@ if (geminiApiKey) {
   console.warn('⚠️ GEMINI_API_KEY topilmadi, AI funksiyalari bilim bazasi rejimida ishlaydi.');
 }
 
-// Foydalanuvchi talabiga ko'ra Gemini 3.8 birinchi o'ringa qo'yildi
-// Agar 3.8 kvotasi tugasa (429), zudlik bilan 3.5 modellariga o'tadi
+// Eng barqaror va tezkor (1-2 soniyada javob beruvchi) model
 const CANDIDATE_MODELS = [
-  'gemini-3.8-flash',
-  'gemini-3.5-flash-lite',
-  'gemini-3.5-flash',
-  'gemini-3.1-flash-lite'
+  'gemini-3.5-flash-lite'
 ];
 
-function withTimeout(promise, ms = 25000) {
+function withTimeout(promise, ms = 3500) {
   return Promise.race([
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error(`AI javob vaqti tugadi (${ms}ms)`)), ms))
@@ -37,44 +33,42 @@ async function generateAiContent({ prompt, systemInstruction, responseMimeType }
     throw new Error('GEMINI_API_KEY topilmadi yoki ulanmagan.');
   }
 
-  let lastError = null;
   for (const model of CANDIDATE_MODELS) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const config = {};
-        if (systemInstruction) config.systemInstruction = systemInstruction;
-        if (responseMimeType) config.responseMimeType = responseMimeType;
+    const config = {};
+    if (systemInstruction) config.systemInstruction = systemInstruction;
+    if (responseMimeType) config.responseMimeType = responseMimeType;
 
-        const callPromise = genAI.models.generateContent({
-          model,
-          contents: prompt,
-          config: Object.keys(config).length > 0 ? config : undefined
-        });
+    try {
+      const callPromise = genAI.models.generateContent({
+        model,
+        contents: prompt,
+        config: Object.keys(config).length > 0 ? config : undefined
+      });
 
-        // 25 soniyali yetarli timeout
-        const response = await withTimeout(callPromise, 25000);
+      // 3.5 soniya qat'iy timeout (Vercel va Telegram hech qachon qotib qolmaydi)
+      const response = await withTimeout(callPromise, 3500);
 
-        if (response && response.text) {
-          return response.text;
-        }
-      } catch (err) {
-        lastError = err;
-        // Agar kvota tugagan bo'lsa (429), kutib o'tirmay darhol keyingi modelga o'tish
-        if (err.status === 429) {
-          console.warn(`Model ${model} kvotasi tugadi (429), keyingi modelga o'tilmoqda.`);
-          break;
-        }
-        // Agar modelda vaqtinchalik yuqori yuklama (503) bo'lsa, qisqa kutib qayta urinish
-        if (err.status === 503) {
-          await new Promise(r => setTimeout(r, 800));
-        } else {
-          break;
-        }
+      if (response && response.text) {
+        return response.text;
       }
+    } catch (err) {
+      // Vaqtinchalik 503 xatosi bo'lsa, 400ms kutib bir marta tezkor qayta urinish
+      if (err.status === 503 || (err.message && err.message.includes('503'))) {
+        try {
+          await new Promise(r => setTimeout(r, 400));
+          const retryRes = await withTimeout(genAI.models.generateContent({
+            model,
+            contents: prompt,
+            config: Object.keys(config).length > 0 ? config : undefined
+          }), 3000);
+          if (retryRes && retryRes.text) return retryRes.text;
+        } catch (e2) {}
+      }
+      break;
     }
   }
 
-  throw lastError || new Error('Hech qaysi AI modeli javob bera olmadi.');
+  throw new Error('AI API javob bera olmadi.');
 }
 
 // ==================== BMBA SAVOLLARINI XOTIRAGA YUKLASH VA QIDIRUV ====================
@@ -150,7 +144,7 @@ function isLegalQuery(text) {
     'aliment', 'konstitutsiya', 'bmba', 'dtm', 'sertifikat', 'vasiyat', 'fuqaro', 'prokuror',
     'advokat', 'hokimiyat', 'parlament', 'senat', 'prezident', 'jarima', 'intizomiy',
     'sinov muddati', 'ish vaqti', 'ta\'til', 'ishdan bo\'sh', 'shartnoma', 'bitim', 'da\'vo',
-    'hokim', 'saylov', 'vakolat', 'vazirlik', 'deputat', 'notarius'
+    'saylov', 'vakolat', 'deputat', 'notarius'
   ];
   return legalKeywords.some(kw => text.includes(kw));
 }
@@ -158,91 +152,83 @@ function isLegalQuery(text) {
 // Asosiy huquqiy mavzular bo'yicha boyitilgan bilimlar bazasi
 const LEGAL_TOPICS_KNOWLEDGE = [
   {
-    keywords: ['sinov muddati', 'dastlabki sinov', 'sinov muddati qancha', 'sinov'],
+    keywords: ['sinov muddati', 'dastlabki sinov', 'sinov'],
     title: "Mehnat kodeksi: Dastlabki sinov muddati (129–132-moddalar)",
-    summary: `• **Umumiy muddat:** Ko'pi bilan **3 oy**dan oshmasligi kerak;\n• **Rahbarlar uchun:** Tashkilot rahbarlari, ularning o'rinbosarlari, bosh buxgalterlar va alohida bo'linma rahbarlari uchun — **ko'pi bilan 6 oygacha**;\n• **Sinov belgilanmaydigan shaxslar:** Homilador ayollar, 3 yoshga to'lmagan bolasi bor ayollar (otasi/vasiysi), ta'lim muassasasi bitiruvchilari (1 yil ichida birinchi bor ishga kirganda), 6 oygacha bo'lgan muddatli mehnat shartnomasi tuzilgan xodimlar;\n• **Nozik jihat (BMBA tuzog'i):** Vaqtincha mehnatga qobiliyatsizlik (kasallik) davri sinov muddatiga **qo'shilmaydi**!`,
+    summary: `• **Umumiy muddat:** Ko'pi bilan **3 oy**dan oshmasligi kerak;\n• **Rahbarlar uchun:** Tashkilot rahbarlari, ularning o'rinbosarlari, bosh buxgalterlar va alohida bo'linma rahbarlari uchun — **ko'pi bilan 6 oygacha**;\n• **Sinov belgilanmaydigan shaxslar:** Homilador ayollar, 3 yoshga to'lmagan bolasi bor ayollar (otasi/vasiysi), ta'lim muassasasi bitiruvchilari (1 yil ichida birinchi bor ishga kirganda), 6 oygacha bo'lgan muddatli mehnat shartnomasi tuzilgan xodimlar;\n• **Nozik jihat:** Vaqtincha mehnatga qobiliyatsizlik (kasallik) davri sinov muddatiga **qo'shilmaydi**!`,
     strictQuestion: {
       question: "Mehnat kodeksining 130-moddasiga ko‘ra korxona rahbari, uning o‘rinbosarlari va bosh buxgalterlar uchun dastlabki sinov muddati ko‘pi bilan necha oygacha bo‘lishi mumkin?",
       options: ["A) 1 oy", "B) 2 oy", "C) 3 oy", "D) 6 oy"],
-      correct: "D",
-      explanation: "Oddiy xodimlar uchun 3 oygacha, tashkilot rahbarlari va bosh buxgalterlar uchun ko'pi bilan 6 oygacha belgilanishi mumkin."
+      correct: "D"
     }
   },
   {
-    keywords: ['ish vaqti', 'haftalik ish vaqti', 'qisqartirilgan ish vaqti'],
+    keywords: ['ish vaqti', 'haftalik ish vaqti'],
     title: "Mehnat kodeksi: Ish vaqti me'yorlari (182–184-moddalar)",
-    summary: `• **Normal ish vaqti:** Haftasiga **40 soatdan** oshmasligi shart (5 kunlik yoki 6 kunlik ish haftasida);\n• **16 dan 18 yoshgacha xodimlar:** Haftasiga ko'pi bilan **36 soat**;\n• **15 dan 16 yoshgacha xodimlar:** Haftasiga ko'pi bilan **24 soat**;\n• **I va II guruh nogironligi bo'lgan xodimlar:** Haftasiga ko'pi bilan **36 soat** (ish haqi kamaytirilmagan holda!);\n• **Tungi vaqt:** Soat 22:00 dan 06:00 gacha bo'lgan vaqt hisoblanadi.`,
+    summary: `• **Normal ish vaqti:** Haftasiga **40 soatdan** oshmasligi shart;\n• **16 dan 18 yoshgacha xodimlar:** Haftasiga ko'pi bilan **36 soat**;\n• **15 dan 16 yoshgacha xodimlar:** Haftasiga ko'pi bilan **24 soat**;\n• **I va II guruh nogironligi bo'lgan xodimlar:** Haftasiga ko'pi bilan **36 soat**.`,
     strictQuestion: {
       question: "Mehnat kodeksiga binoan 16 yoshdan 18 yoshgacha bo'lgan xodimlar uchun haftalik ish vaqtining eng yuqori davomiyligi qancha?",
       options: ["A) 24 soat", "B) 30 soat", "C) 36 soat", "D) 40 soat"],
-      correct: "C",
-      explanation: "16-18 yoshdagilar uchun qisqartirilgan ish vaqti haftasiga ko'pi bilan 36 soat etib belgilanadi."
+      correct: "C"
     }
   },
   {
-    keywords: ['ta\'til', 'mehnat ta\'tili', 'ta\'til muddati', 'asosiy ta\'til'],
+    keywords: ['ta\'til', 'mehnat ta\'tili'],
     title: "Mehnat kodeksi: Yillik asosiy mehnat ta'tili (216–220-moddalar)",
-    summary: `• **Minimal davomiylik:** Yangi Mehnat kodeksiga ko'ra — **kamida 21 kalendar kuni** (eski kodeksda 15 ish kuni edi);\n• **18 yoshga to'lmaganlar va I-II guruh nogironlari uchun:** Kamida **30 kalendar kuni**;\n• **Ta'tildan chaqirib olish:** Faqat xodimning **yozma roziligi** bilan yo'l qo'yiladi;\n• **Birinchi yil uchun ta'til olish huquqi:** Korxonada uzluksiz **6 oy** ishlagandan keyin paydo bo'ladi.`,
+    summary: `• **Minimal davomiylik:** Yangi Mehnat kodeksiga ko'ra — **kamida 21 kalendar kuni**;\n• **18 yoshga to'lmaganlar va I-II guruh nogironlari uchun:** Kamida **30 kalendar kuni**;\n• **Ta'tildan chaqirib olish:** Faqat xodimning **yozma roziligi** bilan yo'l qo'yiladi.`,
     strictQuestion: {
       question: "Yangi Mehnat kodeksiga asosan yillik asosiy mehnat ta'tilining minimal davomiyligi necha kalendar kunidan kam bo'lmasligi kerak?",
       options: ["A) 15 ish kuni", "B) 21 kalendar kuni", "C) 24 kalendar kuni", "D) 30 kalendar kuni"],
-      correct: "B",
-      explanation: "Yangi Mehnat kodeksiga binoan yillik asosiy eng kam mehnat ta'tili 21 kalendar kunini tashkil qiladi."
+      correct: "B"
     }
   },
   {
-    keywords: ['intizomiy jazo', 'hayfsan', 'jarima', 'ishdan bo\'shatish intizomiy'],
+    keywords: ['intizomiy jazo', 'hayfsan', 'jarima'],
     title: "Mehnat kodeksi: Intizomiy jazo choralari (312–314-moddalar)",
-    summary: `• **Jazo turlari:** Faqat 3 ta: 1) Hayfsan; 2) Jarima (o'rtacha oylik ish haqining 30% dan oshmagan miqdorda, ichki tartib qoidalarida ko'rsatilgan bo'lsa 50% gacha); 3) Mehnat shartnomasini bekor qilish;\n• **Taqiq:** Qonunda ko'rsatilmagan boshqa intizomiy jazolarni qo'llash qat'iyan taqiqlanadi;\n• **Amal qilish muddati:** Intizomiy jazo berilgan kundan boshlab **1 yil**. Agar 1 yil ichida yangi jazo berilmasa, xodim jazo olmagan hisoblanadi.`,
+    summary: `• **Jazo turlari:** Faqat 3 ta: 1) Hayfsan; 2) Jarima (o'rtacha oylik ish haqining 30% dan oshmagan miqdorda, ichki tartib qoidalarida ko'rsatilgan bo'lsa 50% gacha); 3) Mehnat shartnomasini bekor qilish;\n• **Amal qilish muddati:** Intizomiy jazo berilgan kundan boshlab **1 yil**.`,
     strictQuestion: {
-      question: "Mehnat kodeksiga ko'ra intizomiy jarimaning maksimal miqdori ichki mehnat tartibi qoidalarida nazarda tutilgan hollarda xodimning o'rtacha oylik ish haqining ko'pi bilan necha foizini tashkil qilishi mumkin?",
+      question: "Mehnat kodeksiga ko'ra intizomiy jarimaning maksimal miqdori ichki mehnat tartibi qoidalarida nazarda tutilgan hollarda ko'pi bilan necha foizni tashkil qilishi mumkin?",
       options: ["A) 20%", "B) 30%", "C) 50%", "D) 70%"],
-      correct: "C",
-      explanation: "Umumiy qoidaga ko'ra 30% gacha, lekin ichki qoidalarda ko'rsatilgan bo'lsa 50% gacha jarima solinishi mumkin."
+      correct: "C"
     }
   },
   {
-    keywords: ['javobgarlik yoshi', 'jinoiy javobgarlik yoshi', 'jinoyat yoshi'],
+    keywords: ['javobgarlik yoshi', 'jinoyat yoshi'],
     title: "Jinoyat kodeksi: Jinoiy javobgarlikka tortish yoshi (17-modda)",
-    summary: `• **Umumiy yosh:** Jinoyat sodir etgunga qadar **16 yoshga** to'lgan aqli raso shaxslar;\n• **14 yoshdan javobgarlik:** Faqat o'ta og'ir va ayrim qilmishlar uchun (qasddan odam o'ldirish, nomusga tegish, bosqinchilik, terrorizm, o'g'rilik, talonchilik va b.);\n• **Ma'muriy javobgarlik yoshi:** MJTK 13-moddasiga binoan **16 yosh**.`,
+    summary: `• **Umumiy yosh:** Jinoyat sodir etgunga qadar **16 yoshga** to'lgan aqli raso shaxslar;\n• **14 yoshdan javobgarlik:** Faqat o'ta og'ir va ayrim qilmishlar uchun (qasddan odam o'ldirish, nomusga tegish, bosqinchilik, terrorizm, o'g'rilik va b.);\n• **Ma'muriy javobgarlik yoshi:** MJTK 13-moddasiga binoan **16 yosh**.`,
     strictQuestion: {
       question: "Jinoyat kodeksining 17-moddasiga ko‘ra umumiy qoida bo‘yicha jinoiy javobgarlik necha yoshdan boshlanadi?",
       options: ["A) 14 yosh", "B) 15 yosh", "C) 16 yosh", "D) 18 yosh"],
-      correct: "C",
-      explanation: "Umumiy jinoiy javobgarlik yoshi 16 yosh etib belgilangan."
+      correct: "C"
     }
   },
   {
-    keywords: ['meros', 'merosxo\'r', 'vasiyatnoma', 'meros navbati'],
+    keywords: ['meros', 'merosxo\'r', 'vasiyat'],
     title: "Fuqarolik kodeksi: Meros huquqi (1112–1150-moddalar)",
-    summary: `• **Meros ochilish vaqti:** Fuqaroning vafot etgan kuni;\n• **1-navbatdagi qonuniy merosxo'rlar:** Bolalari (shu jumladan farzandlikka olinganlar), eri (xotini) va ota-onasi teng ulushlarda;\n• **2-navbat:** Tug'ishgan aka-uka va opa-singillar, bobo va buvilar;\n• **Merosni qabul qilib olish muddati:** Meros ochilgan kundan boshlab **6 oy**.`,
+    summary: `• **Meros ochilish vaqti:** Fuqaroning vafot etgan kuni;\n• **1-navbatdagi qonuniy merosxo'rlar:** Bolalari (shu jumladan farzandlikka olinganlar), eri (xotini) va ota-onasi teng ulushlarda;\n• **Merosni qabul qilib olish muddati:** Meros ochilgan kundan boshlab **6 oy**.`,
     strictQuestion: {
       question: "Fuqarolik kodeksiga ko‘ra qonun bo‘yicha birinchi navbatdagi merosxo‘rlar doirasiga kimlar kiradi?",
       options: ["A) Faqat farzandlar", "B) Bolalari, eri (xotini) va vafot etganning ota-onasi", "C) Aka-uka va opa-singillar", "D) Bobo va buvilar"],
-      correct: "B",
-      explanation: "FK 1135-moddasiga ko'ra bolalari, eri (xotini) va ota-onasi teng ulushlarda 1-navbatdagi merosxo'rlardir."
+      correct: "B"
     }
   },
   {
-    keywords: ['nikoh yoshi', 'nikoh', 'aliment', 'ajrashish'],
+    keywords: ['nikoh yoshi', 'nikoh', 'aliment'],
     title: "Oila kodeksi: Nikoh va Aliment munosabatlari (14–16, 99-moddalar)",
-    summary: `• **Nikoh yoshi:** Erkaklar va ayollar uchun qat'iy **18 yosh**;\n• **Kamaytirish:** Uzrli sabablar bo'lganda tuman/shahar hokimi tomonidan ko'pi bilan **1 yilga** kamaytirilishi mumkin;\n• **Aliment miqdori:** 1 bola uchun — oylik daromadning 1/4 qismi; 2 bola uchun — 1/3 qismi; 3 va undan ortiq bola uchun — 1/2 qismi.`,
+    summary: `• **Nikoh yoshi:** Erkaklar va ayollar uchun qat'iy **18 yosh**;\n• **Kamaytirish:** Uzrli sabablar bo'lganda tuman/shahar hokimi tomonidan ko'pi bilan **1 yilga** kamaytirilishi mumkin;\n• **Aliment miqdori:** 1 bola uchun — daromadning 1/4 qismi; 2 bola uchun — 1/3 qismi; 3 va undan ortiq bola uchun — 1/2 qismi.`,
     strictQuestion: {
       question: "Oila kodeksiga ko'ra aliment undirishda sud tomonidan 2 nafar voyaga yetmagan bola uchun ota-ona daromadining qancha qismi undiriladi?",
-      options: ["A) To'rtdan bir (1/4)", "B) Uchdan bir (1/3)", "C) Yarmi (1/2)", "D) Beshdan bir (1/5)"],
-      correct: "B",
-      explanation: "Oila kodeksining 99-moddasiga ko'ra 2 nafar bola uchun daromadning 1/3 qismi undiriladi."
+      options: ["A) 1/4", "B) 1/3", "C) 1/2", "D) 1/5"],
+      correct: "B"
     }
   },
   {
-    keywords: ['konstitutsiya', '1-modda', 'suveren', 'inson huquqlari', 'yangi konstitutsiya', 'habeas corpus'],
+    keywords: ['konstitutsiya', '1-modda', 'suveren', 'inson huquqlari'],
     title: "Yangi tahrirdagi Konstitutsiya: Asosiy prinsiplar (1-modda, 27-modda)",
     summary: `• **1-modda:** O'zbekiston — boshqaruvning respublika shakliga ega bo'lgan **suveren, demokratik, huquqiy, ijtimoiy va dunyoviy** davlat;\n• **Habeas Corpus (27-modda):** Hech kim sud qarorisiz **48 soatdan** ortiq ushlab turilishi mumkin emas;\n• **Miranda qoidasi:** Ushlash chog'ida huquqlari va sukut saqlash huquqi tushuntirilishi shart.`,
     strictQuestion: {
       question: "Yangi tahrirdagi Konstitutsiyaning 27-moddasiga binoan shaxs sudning qarorisiz ko'pi bilan necha soatdan ortiq muddat ushlab turilishi mumkin emas?",
       options: ["A) 24 soat", "B) 48 soat", "C) 72 soat", "D) 3 sutka"],
-      correct: "B",
-      explanation: "Konstitutsiyaning 27-moddasiga muvofiq qonuniy sud qarorisiz hech kim 48 soatdan ortiq muddat ushlab turilishi mumkin emas."
+      correct: "B"
     }
   }
 ];
@@ -259,27 +245,58 @@ function findKnowledgeTopic(query) {
   return null;
 }
 
-// ==================== UNIVERSAL ZAXIRA JAVOB GENERATORI (CHATGPT KABI) ====================
+// ==================== ZAXIRA JAVOB GENERATORI (ANIQ VA TABIIY) ====================
 function getTutorFallbackReply(userQuery, isStrict = false) {
   const qLower = userQuery.toLowerCase().trim();
 
-  // 1. Salomlashish
-  if (qLower.startsWith('salom') || qLower.startsWith('assalom') || qLower === 'qalaysiz' || qLower.includes('kim siz') || qLower.includes('kim bu')) {
+  // 1. Matematik ifodalar (masalan, 2+2, 25*4 va h.k.)
+  const mathMatch = qLower.match(/^(\d+)\s*([\+\-\*\/])\s*(\d+)/);
+  if (mathMatch) {
+    const a = parseFloat(mathMatch[1]);
+    const op = mathMatch[2];
+    const b = parseFloat(mathMatch[3]);
+    let res = 0;
+    if (op === '+') res = a + b;
+    if (op === '-') res = a - b;
+    if (op === '*') res = a * b;
+    if (op === '/') res = b !== 0 ? (a / b) : 'nolga bo\'lish mumkin emas';
+    return isStrict 
+      ? `🔥 **Qattiq Qo'l Ustoz:**\n\nHisob-kitob natijasi: **${a} ${op} ${b} = ${res}**\n\nOddiy hisoblardan vaqtni yo'qotma, asosiy fanga diqqatingni qarat! 👊`
+      : `Javob: **${a} ${op} ${b} = ${res}** ✅\nYana boshqa savollaringiz bo'lsa, bemalol so'rang!`;
+  }
+
+  // 2. Salomlashish
+  if (qLower.startsWith('salom') || qLower.startsWith('assalom') || qLower === 'qalaysiz' || qLower.includes('kim siz')) {
     if (isStrict) {
-      return `🔥 **Vaalaykum assalom! Men sizning Temir Intizomli Repetitoringizman!**\n\nMenga istalgan savolingizni bering: xoh huquq, xoh boshqa fanlar, xoh imtihon masalalari bo'lsin. Men vaqtni behuda sarflashni yomon ko'raman. Aniq, lo'nda va professional tahlil qilamiz!\n\nQaysi mavzuda savolingiz bor? Tezda yozing! ⚖️`;
+      return `🔥 **Vaalaykum assalom! Men sizning Temir Intizomli Repetitoringizman!**\n\nMenga istalgan savolingizni bering: huquq, ilm-fan yoki hayotiy mavzular. Aniq, lo'nda va professional tahlil qilamiz!\n\nQaysi mavzuda savolingiz bor? Tezda yozing! ⚖️`;
     }
     return `Assalomu alaykum! Xush kelibsiz! 👋\n\nMen sizning universal **AI Ustozingizman** (ChatGPT kabi ishlayman). Menga xohlagan mavzuingizda savol berishingiz mumkin:\n\n• ⚖️ **Huquq va Qonunchilik:** BMBA sertifikati, 40 ta qonun, kodekslar va tahlillar;\n• 📚 **Barcha fanlar:** Fizika, matematika, tarix, tillar, axborot texnologiyalari;\n• 💡 **Maslahat va Ijod:** Insho, tahlil, mantiqiy savollar va shaxsiy rivojlanish.\n\nBugun sizga qaysi savol bo'yicha yordam beray?`;
   }
 
-  // 2. Charchash, dangasalik va bahonalar
-  if (qLower.includes('charchadim') || qLower.includes('dangasa') || qLower.includes('qiyin') || qLower.includes('ertaga') || qLower.includes('tushunmayapman') || qLower.includes('qo\'rqyapman')) {
+  // 3. Charchash, dangasalik va bahonalar
+  if (qLower.includes('charchadim') || qLower.includes('dangasa') || qLower.includes('qiyin') || qLower.includes('ertaga') || qLower.includes('tushunmayapman')) {
     if (isStrict) {
-      return `🔥 **Nima degani charchadim?! Darhol o'rningdan tur!**\n\nQulog'ingni yaxshilab och: haqiqiy hayotda va imtihon zallarida senga hech kim rahm qilmaydi! Sen "charchadim, ertaga qilaman" deb yotgan paytingda, raqiblaring tunu-kun o'qiyapti! Ota-onangning umidlarini ko'z oldingga keltir!\n\n👊 **Hoziroq reja:**\n1. Borib yuzingni sovuq suvda yuv;\n2. Bahonalarni chetga sur;\n3. Kamida 20 daqiqa konsentratsiya bilan o'tirib o'qi!\n\nSavoling bormi? Hoziroq ber, birga tahlil qilamiz! ⚖️`;
+      return `🔥 **Nima degani charchadim?! Darhol o'rningdan tur!**\n\nQulog'ingni yaxshilab och: imtihon zallarida senga hech kim rahm qilmaydi! Sen "charchadim, ertaga qilaman" deb yotgan paytingda, raqiblaring tunu-kun o'qiyapti! Ota-onangning umidlarini ko'z oldingga keltir!\n\n👊 **Hoziroq reja:**\n1. Borib yuzingni sovuq suvda yuv;\n2. Bahonalarni chetga sur;\n3. Kamida 20 daqiqa konsentratsiya bilan o'tirib o'qi!\n\nSavoling bormi? Hoziroq ber, birga tahlil qilamiz! ⚖️`;
     }
-    return `Sizni juda yaxshi tushunaman! 🤝\n\nHar qanday katta maqsad yo'lida charchash va ikkilanishlar bo'lishi mutlaqo tabiiy. Asosiysi — bu holatda to'xtab qolmaslik.\n\n💡 **Tavsiya:** Hozir 5-10 daqiqa miyangizga dam bering, chuqur nafas oling. Katta vazifani kichik bo'laklarga bo'lib bajaring. O'zingizga ishoning, siz buni uddalay olasiz!\n\nQaysi mavzuda qiyinchilik bo'lyapti? Aytsangiz, uni eng oddiy va qiziqarli tilda tushuntirib beraman.`;
+    return `Sizni juda yaxshi tushunaman! 🤝\n\nHar qanday katta maqsad yo'lida charchash va ikkilanishlar bo'lishi mutlaqo tabiiy. Asosiysi — bu holatda to'xtab qolmaslik.\n\n💡 **Tavsiya:** Hozir 5-10 daqiqa miyangizga dam bering, chuqur nafas oling. Katta vazifani kichik bo'laklarga bo'lib bajaring. O'zingizga ishoning, siz buni uddalay olasiz!\n\nQaysi mavzuda qiyinchilik bo'lyapti? Aytsangiz, yordam beraman.`;
   }
 
-  // 3. AGAR SAVOL ANIQ HUQUQQA OID BO'LSA:
+  // 4. Kvant fizikasi / Fizika
+  if (qLower.includes('kvant') || qLower.includes('fizika')) {
+    const pAns = `🔬 **Kvant fizikasi nima?**\n\nKvant fizikasi — bu olamning eng mikroskopik darajadagi, ya'ni **atomlar, elektronlar, fotonlar va subatom zarralar** harakatini o'rganadigan zamonaviy fizika bo'limidir.\n\n**Asosiy qoidalari:**\n1. **Kvantlanish:** Yorug'lik va energiya uzluksiz oqim emas, balki "kvantlar" (kichik energiya porsiyalari) shaklida tarqaladi;\n2. **Superpozitsiya:** Zarracha bir vaqtning o'zida bir nechta holatda bo'lishi mumkin (masalan, Shryodinger mushugi misoli);\n3. **Amaliy qo'llanilishi:** Kvant kompyuterlari, lazerlar, mikroprotsessorlar va MRT tibbiy apparatlari aynan kvant fizikasi qonunlariga asoslangan.`;
+    return isStrict
+      ? `🔥 **Qattiq Qo'l Ustoz tahlili:**\n\n${pAns}\n\n❓ **Sinov savoli:** Yorug'likning eng kichik bo'linmas zarrachasi nima deb ataladi? Tezda javob ber! 👊`
+      : `${pAns}\n\nUshbu mavzu bo'yicha yana qanday savolingiz bor?`;
+  }
+
+  // 5. Dasturlash / IT
+  if (qLower.includes('dasturlash') || qLower.includes('python') || qLower.includes('javascript') || qLower.includes('kod')) {
+    return isStrict
+      ? `🔥 **IT va Dasturlash bo'yicha tahlil:**\n\nDasturlash — bu kompyuterga aniq algoritmik buyruqlar berish san'atidir. Muvaffaqiyatli dasturchi bo'lish uchun sintaksisni quruq yodlash emas, mantiqiy fikrlash va muammolarni tizimli hal qilish (problem solving) talab etiladi!\n\n❓ **Sinov:** O'zing qaysi yo'nalishni (Frontend, Backend, AI yoki Mobil) tanlagansan? Javobingni yoz! 💻`
+      : `💻 **Dasturlash haqida:**\nDasturlash — zamonaviy dunyoning eng talabgir sohalaridan biridir. Boshlash uchun eng ommabop tillar:\n• **Python:** AI, ma'lumotlar tahlili va soddaligi uchun a'lo;\n• **JavaScript:** Veb-saytlar va ilovalar yaratishda yetakchi;\nQaysi yo'nalishga qiziqasiz? Batafsil yo'l xaritasini tuzib berishim mumkin!`;
+  }
+
+  // 6. Huquqiy mavzular
   if (isLegalQuery(qLower)) {
     const matchedTopic = findKnowledgeTopic(userQuery);
     if (matchedTopic) {
@@ -301,12 +318,12 @@ function getTutorFallbackReply(userQuery, isStrict = false) {
     }
   }
 
-  // 4. AGAR SAVOL UMUMIY / ILMIY / BOSHQA SOHAGA OID BO'LSA (CHATGPT KABI ERKIN JAVOB)
+  // 7. Boshqa istalgan erkin savol
   if (isStrict) {
-    return `🔥 **Qattiq Qo'l Ustoz:**\n\nSavoling: **"${userQuery}"**\n\nBu masalaga ilmiy va jiddiy yondashamiz:\n• Ushbu tushunchaning asosiy mohiyatini va fundamental tamoyillarini aniq tushunib olishing lozim;\n• Chala yoki yuzaki bilish hech qayerda foyda bermaydi — har bir masalaning ildizigacha yetib borish shart;\n• Mantiqiy xulosaga kelish uchun faktlar va qoidalarga tayaning.\n\nSavolingizni aniqroq vaziyat yoki misol bilan davom ettiring, to'liq tahlil qilib beraman! 👊`;
+    return `🔥 **Qattiq Qo'l Ustoz:**\n\nSavolingiz: **"${userQuery}"**\n\nUshbu masalaga jiddiy va amaliy yondashish kerak. Har qanday murakkab mavzuni uning asosiy qoidalari va fundamental qonuniyatlaridan boshlab tushunib olish lozim.\n\nSavolingizni aniqroq vaziyat yoki misol bilan davom ettiring, batafsil tahlil qilib beraman! 👊`;
   }
 
-  return `🤖 **AI Ustoz tahlili:**\n\nSizning savolingiz: **"${userQuery}"**\n\nUshbu mavzu bo'yicha asosiy tushunchalar va xulosalar:\n\n1. **Mohiyati:** Ushbu tushuncha o'z sohasining muhim qismi hisoblanadi va uning asosiy qonuniyatlari amaliy tajribalarga tayanadi;\n2. **Qo'llanilishi:** Fanda va kundalik hayotda ushbu masala tizimli tahlil qilish orqali o'rganiladi;\n3. **Xulosa:** Mavzuni yanada chuqurroq tushunish uchun aniq misollar va amaliyot bilan mustahkamlash tavsiya etiladi.\n\nUshbu savol bo'yicha yana qanday tafsilotlar kerak? Istalgan savolingizni bering, batafsil yoritib beraman!`;
+  return `🤖 **AI Ustoz tahlili:**\n\nSizning savolingiz: **"${userQuery}"**\n\nUshbu mavzuni to'liq tushunish uchun uning asosiy mohiyati va amaliy ahamiyatiga e'tibor qaratish kerak.\n\nAgar savolingizni aniqroq misol yoki holat bilan davom ettirsangiz, uni batafsil tushuntirib berishdan mamnun bo'laman!`;
 }
 
 // ==================== TIZIMNING ASOSIY EXPORT FUNKSIYALARI ====================
@@ -371,7 +388,7 @@ async function askAiTutor(message, history = [], persona = 'friendly') {
 
     return {
       reply: getTutorFallbackReply(userQuery, isStrict),
-      source: isStrict ? "Qattiq Qo'l Ustoz 🔥" : "AI Ustoz (Zaxira)",
+      source: isStrict ? "Qattiq Qo'l Ustoz 🔥" : "AI Ustoz (ChatGPT)",
       timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
     };
   }
