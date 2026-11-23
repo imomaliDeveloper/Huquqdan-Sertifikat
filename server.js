@@ -1075,13 +1075,9 @@ app.all('/api/cron/reminders', async (req, res) => {
       output.channelQuiz = await bot.checkAndPostScheduledQuiz();
     }
 
-    // 2. Kunlik eslatmalar (Har kuni UTC 14:00 = Toshkent 19:00 da yoki force qilinganda)
-    const currentUtcHour = new Date().getUTCHours();
-    if (currentUtcHour === 14 || req.query.force_reminders === 'true') {
-      output.dailyReminders = await bot.sendDailyRetentionReminders();
-    } else {
-      output.dailyReminders = { status: "scheduled_at_19_00", currentUtcHour };
-    }
+    // 2. Kunlik motivatsion eslatmalar
+    const isForce = req.query.force_reminders === 'true' || req.query.force === 'true';
+    output.dailyReminders = await bot.sendDailyRetentionReminders(null, isForce);
 
     res.json(output);
   } catch (err) {
@@ -1129,13 +1125,9 @@ app.all('/api/cron/runner', async (req, res) => {
     // 1. Kanalga avtomatik test tashlashni tekshirish
     results.channelQuiz = await bot.checkAndPostScheduledQuiz();
 
-    // 2. Kunlik eslatmalar (Har kuni UTC 14:00 = Toshkent 19:00 da)
-    const currentUtcHour = new Date().getUTCHours();
-    if (currentUtcHour === 14 || req.query.reminders === 'true') {
-      results.dailyReminders = await bot.sendDailyRetentionReminders();
-    } else {
-      results.dailyReminders = { status: "waiting_evening_time", currentUtcHour };
-    }
+    // 2. Kunlik eslatmalar
+    const isForce = req.query.reminders === 'true' || req.query.force === 'true';
+    results.dailyReminders = await bot.sendDailyRetentionReminders(null, isForce);
 
     res.json({
       success: true,

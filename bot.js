@@ -883,7 +883,7 @@ class SimpleTelegramBot {
   }
 
   // O'quvchilarga kunlik motivatsiya va eslatma yuborish (Retention & Motivation)
-  async sendDailyRetentionReminders(triggeredByChatId = null) {
+  async sendDailyRetentionReminders(triggeredByChatId = null, force = false) {
     try {
       const allUsers = await this.getAllUsersList();
       const tgUsers = allUsers.filter(u => u.tgId || (u.id && u.id.toString().startsWith('TG-')));
@@ -904,17 +904,19 @@ class SimpleTelegramBot {
         const targetId = u.tgId || (u.id ? u.id.replace('TG-', '') : null);
         if (!targetId) continue;
 
-        // Oxirgi faollik vaqtini tekshirish
-        const lastActiveTime = u.lastActive ? new Date(u.lastActive).getTime() : 0;
-        const diffHours = lastActiveTime > 0 ? (now - lastActiveTime) / (1000 * 60 * 60) : 999;
-
-        // Agar oxirgi 12 soat ichida faol bo'lgan bo'lsa, o'tkazib yuboramiz
-        if (diffHours < 12 && u.testsCompleted && u.testsCompleted > 0) {
-          skippedCount++;
-          continue;
+        // Agar admin majburiy (force) yubormagan bo'lsa, bugun allaqachon motivatsiya olganlarni o'tkazib yuboramiz
+        if (!force && u.lastMotivationSentAt) {
+          const lastSentTime = new Date(u.lastMotivationSentAt).getTime();
+          const hoursSinceLastMotivation = (now - lastSentTime) / (1000 * 60 * 60);
+          if (hoursSinceLastMotivation < 18) {
+            skippedCount++;
+            continue;
+          }
         }
 
         const firstName = u.name ? u.name.split(' ')[0] : "O'quvchi";
+        const lastActiveTime = u.lastActive ? new Date(u.lastActive).getTime() : 0;
+        const diffHours = lastActiveTime > 0 ? (now - lastActiveTime) / (1000 * 60 * 60) : 999;
 
         let reminderText = "";
         if (diffHours >= 48 || !u.lastActive) {
@@ -925,7 +927,7 @@ class SimpleTelegramBot {
             `Bir necha kundan beri test yechmading. Do'stlaring va raqiblaring esa har kuni yangi moddalarni o'rganib, reytingda oldinga intilmoqda! 🔥\n\n` +
             `Kel, hozir atigi 5 daqiqa ajratib, 5 ta muhim savolni takrorlab olamiz. Tayyormisan? 🚀`;
         } else {
-          // 12-24 soat atrofida faol bo'lmagan o'quvchilar uchun
+          // 12-24 soat atrofida faol bo'lgan yoki doimiy o'quvchilar uchun
           reminderText =
             `👋 <b>Salom, bo'lajak yurist ${firstName}!</b> ⚖️\n\n` +
             `Qalaysan, charchamayapsanmi? Bilaman, huquqdan moddalarni, sanalarni yodlash oson emas. Lekin talabalik baxti, ota-onangning yuzidagi quvonchni tasavvur qil — bunga arziydi!\n\n` +
@@ -945,6 +947,7 @@ class SimpleTelegramBot {
 
           if (res && res.ok) {
             sentCount++;
+            u.lastMotivationSentAt = new Date().toISOString();
           } else {
             failCount++;
           }
@@ -956,13 +959,22 @@ class SimpleTelegramBot {
         await new Promise(r => setTimeout(r, 60));
       }
 
+      // Holatni faylga saqlab qo'yish
+      try {
+        const reminderState = safeRead('daily_reminder_state.json', {});
+        reminderState.lastSentDate = new Date().toISOString().slice(0, 10);
+        reminderState.lastSentAt = new Date().toISOString();
+        reminderState.totalSent = sentCount;
+        safeWrite('daily_reminder_state.json', reminderState);
+      } catch (e) {}
+
       if (triggeredByChatId) {
         await this.sendMessage(triggeredByChatId,
-          `✅ <b>O'quvchilarga eslatma yuborish yakunlandi!</b>\n\n` +
+          `✅ <b>O'quvchilarga motivatsion eslatma yuborish yakunlandi!</b>\n\n` +
           `• Jami o'quvchilar: <b>${tgUsers.length} nafar</b>\n` +
           `• Muvaffaqiyatli yetkazildi: <b>${sentCount} nafar</b>\n` +
-          `• Bugun faol bo'lgani uchun o'tkazib yuborildi: <b>${skippedCount} nafar</b>\n` +
-          `• Yetkazib bo'lmadi (botni bloklagan): <b>${failCount} nafar</b>\n\n` +
+          (skippedCount ? `• Yaqinda olgani uchun o'tkazib yuborildi: <b>${skippedCount} nafar</b>\n` : '') +
+          `• Yetkazib bo'lmadi (bloklangan): <b>${failCount} nafar</b>\n\n` +
           `<i>Barcha o'quvchilar o'qish va test yechishga qayta jalb qilindi! 🎯</i>`
         );
       }
@@ -1541,6 +1553,24 @@ class SimpleTelegramBot {
       // Foydalanuvchini bazaga kiritish / yangilash
       recordUser(msg.from);
 
+      // Har kuni avtomatik bir marta kunlik motivatsiya yuborilganligini tekshirish (Toshkent vaqti)
+      try {
+        const tashkentTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" });
+        const tashkentDate = new Date(tashkentTimeStr);
+        const tashkentHour = tashkentDate.getHours();
+        const todayStr = tashkentDate.toISOString().slice(0, 10);
+
+        if (tashkentHour >= 10 && tashkentHour <= 22) {
+          const reminderState = safeRead('daily_reminder_state.json', { lastSentDate: null });
+          if (reminderState.lastSentDate !== todayStr) {
+            reminderState.lastSentDate = todayStr;
+            reminderState.lastSentAt = new Date().toISOString();
+            safeWrite('daily_reminder_state.json', reminderState);
+            this.sendDailyRetentionReminders(null, false).catch(err => console.error("Auto motivation error:", err));
+          }
+        }
+      } catch (e) {}
+
       // 0. TO'LOV CHEKI (RASM YOKI HUJJAT) QABUL QILISH VA ADMINGA YUBORISH
       const isPhoto = Array.isArray(msg.photo) && msg.photo.length > 0;
       const isDocImage = msg.document && (msg.document.mime_type?.startsWith('image/') || msg.document.mime_type === 'application/pdf');
@@ -1751,12 +1781,12 @@ class SimpleTelegramBot {
         return await this.sendAllUsersPaginated(chatId, 0);
       }
 
-      if (text === '/send_reminders' || text === '/remind') {
+      if (text === '/send_reminders' || text === '/remind' || text === '/motivation' || text === '/motivatsiya' || text === '/eslatma') {
         if (!isUserAdmin(userId)) {
           return await this.sendMessage(chatId, `🔒 Bu buyruq faqat adminlar uchun.`);
         }
-        await this.sendMessage(chatId, `⏳ O'quvchilarga eslatmalar yuborilmoqda, biroz kuting...`);
-        return await this.sendDailyRetentionReminders(chatId);
+        await this.sendMessage(chatId, `⏳ O'quvchilarga motivatsion eslatmalar yuborilmoqda, biroz kuting...`);
+        return await this.sendDailyRetentionReminders(chatId, true);
       }
 
       if (text === '/autopost' || text === '/interval') {
@@ -2360,7 +2390,7 @@ class SimpleTelegramBot {
         await this.answerCallbackQuery(q.id, "Eslatmalar yuborilmoqda...");
         if (!isUserAdmin(userId)) return;
         await this.sendMessage(chatId, `⏳ O'quvchilarga motivatsion eslatmalar yuborilmoqda, biroz kuting...`);
-        await this.sendDailyRetentionReminders(chatId);
+        await this.sendDailyRetentionReminders(chatId, true);
       } else if (q.data === 'autopost_menu') {
         await this.answerCallbackQuery(q.id);
         if (!isUserAdmin(userId)) return;
