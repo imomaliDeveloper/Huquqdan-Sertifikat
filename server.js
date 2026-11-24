@@ -543,7 +543,7 @@ app.post('/api/voice-agent/talk', async (req, res) => {
       message: cleanMsg,
       history: Array.isArray(history) ? history : [],
       persona: persona || 'angry',
-      voice: voice || 'Kore'
+      voice: voice || 'uz-UZ-SardorNeural'
     });
 
     return res.json(result);

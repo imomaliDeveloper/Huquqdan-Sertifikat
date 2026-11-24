@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { GoogleGenAI } = require('@google/genai');
+const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 let ai = null;
@@ -17,7 +18,7 @@ if (geminiApiKey) {
 const PERSONA_CONFIGS = {
   angry: {
     name: "G'azablangan Ustoz 🔥",
-    voice: "Kore",
+    voice: "uz-UZ-SardorNeural",
     style: "furious, strict, yelling, demanding, fast-paced teacher, angry tone, uzbek language",
     systemInstruction: `Sen — O'quvchilarni temir intizom bilan tayyorlaydigan, o'ta talabchan, g'azablangan va kesatuvchi "Qattiqqo'l Ustoz"san (xuddi GoPrep Angry AI rejimidek).
 Foydalanuvchi bilan real-vaqtda og'zaki ovozli muloqot qilasan.
@@ -33,7 +34,7 @@ Qat'iy qoidalar:
 
   judge: {
     name: "Qattiqqo'l Sudya ⚖️",
-    voice: "Kore",
+    voice: "uz-UZ-SardorNeural",
     style: "deep, authoritative, serious, solemn, judicial, dignified tone, uzbek language",
     systemInstruction: `Sen — O'zbekiston Respublikasi Huquq tizimi bo'yicha qat'iyatli, sovuqqon va talabchan "Bosh Sudya"san.
 Foydalanuvchi bilan og'zaki ovozli muloqot qilasan.
@@ -47,7 +48,7 @@ Qoidalar:
 
   coach: {
     name: "Jo'shqin Murabbiy ⚡",
-    voice: "Kore",
+    voice: "uz-UZ-MadinaNeural",
     style: "energetic, motivating, intense, confident, loud, uzbek language",
     systemInstruction: `Sen — Har qanday o'quvchini yuqori cho'qqiga va A+ sertifikatiga olib chiquvchi o'ta talabchan, jo'shqin va tinib-tinchimas "Murabbiy"san.
 Foydalanuvchi bilan og'zaki muloqot qilasan.
@@ -125,48 +126,86 @@ async function generateTutorReply(userMessage, history = [], personaKey = 'angry
 }
 
 /**
- * Matnni Ovozga aylantirish (Gemini 3.8 Flash TTS)
+ * Matnni Ovozga aylantirish (Tabiiy O'zbek Tili Neural TTS + Gemini TTS Fallback)
  */
 async function textToSpeech(text, personaKey = 'angry', customVoice = null) {
-  if (!ai) return null;
-
   const config = PERSONA_CONFIGS[personaKey] || PERSONA_CONFIGS.angry;
-  const voiceName = customVoice || config.voice || 'Kore';
+  const voiceName = customVoice || config.voice || 'uz-UZ-SardorNeural';
   const cleanSpeechText = text.replace(/[*_#`~[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!cleanSpeechText) return null;
 
+  // 1. Eng tezkor va tabiiy O'zbek tili Neural TTS (msedge-tts, mutlaqo bepul va chegarasiz)
   try {
-    const ttsPromise = ai.interactions.create({
-      model: 'gemini-3.8-flash-tts',
-      input: [{
-        type: 'user_input',
-        content: [{
-          type: 'text',
-          text: cleanSpeechText,
-          annotations: [{
-            type: 'speech_metadata',
-            style: config.style,
-          }],
-        }],
-      }],
-      response_format: { type: 'audio' },
-      generation_config: {
-        speech_config: [
-          { voice: voiceName },
-        ],
-      },
+    const tts = new MsEdgeTTS();
+    await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    const msPromise = new Promise((resolve, reject) => {
+      const { audioStream } = tts.toStream(cleanSpeechText, { rate: '+12%' });
+      const chunks = [];
+      audioStream.on('data', d => chunks.push(d));
+      audioStream.on('end', () => {
+        try { tts.close(); } catch (e) {}
+        resolve({
+          audioBase64: Buffer.concat(chunks).toString('base64'),
+          format: 'audio/mp3'
+        });
+      });
+      audioStream.on('error', err => {
+        try { tts.close(); } catch (e) {}
+        reject(err);
+      });
     });
 
-    // Tezkor javob berish uchun: 2500ms dan ortiq kutmaymiz!
-    const resp = await Promise.race([
-      ttsPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('TTS_TIMEOUT')), 2500))
+    const result = await Promise.race([
+      msPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('MSEDGE_TTS_TIMEOUT')), 5000))
     ]);
 
-    if (resp && resp.output_audio?.data) {
-      return resp.output_audio.data;
+    if (result && result.audioBase64 && result.audioBase64.length > 500) {
+      return result;
     }
-  } catch (err) {
-    // Agar Gemini TTS sekin ishlasa, client darhol o'zi ovoz chiqaradi
+  } catch (msErr) {
+    console.warn("msedge-tts xatosi:", msErr.message);
+  }
+
+  // 2. Fallback: Gemini 3.8 Flash TTS
+  if (ai) {
+    try {
+      const geminiVoice = customVoice || 'Kore';
+      const ttsPromise = ai.interactions.create({
+        model: 'gemini-3.8-flash-tts',
+        input: [{
+          type: 'user_input',
+          content: [{
+            type: 'text',
+            text: cleanSpeechText,
+            annotations: [{
+              type: 'speech_metadata',
+              style: config.style,
+            }],
+          }],
+        }],
+        response_format: { type: 'audio' },
+        generation_config: {
+          speech_config: [
+            { voice: geminiVoice },
+          ],
+        },
+      });
+
+      const resp = await Promise.race([
+        ttsPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('GEMINI_TTS_TIMEOUT')), 3500))
+      ]);
+
+      if (resp && resp.output_audio?.data) {
+        return {
+          audioBase64: resp.output_audio.data,
+          format: 'audio/wav'
+        };
+      }
+    } catch (gErr) {
+      // Gemini TTS ham o'tmadi
+    }
   }
 
   return null;
@@ -188,9 +227,9 @@ async function processVoiceAgentInteraction({ message, history = [], persona = '
   const { replyText, config } = await generateTutorReply(cleanMessage, history, personaKey);
 
   // 2. Javobni jonli ovozga (TTS) aylantirish
-  let audioBase64 = null;
+  let ttsResult = null;
   try {
-    audioBase64 = await textToSpeech(replyText, personaKey, voice);
+    ttsResult = await textToSpeech(replyText, personaKey, voice);
   } catch (e) {
     console.warn("TTS generatsiya e'tiborsiz xatosi:", e.message);
   }
@@ -199,7 +238,8 @@ async function processVoiceAgentInteraction({ message, history = [], persona = '
     success: true,
     userMessage: cleanMessage,
     replyText,
-    audioBase64, // browser <audio> da to'g'ridan-to'g'ri ijro etiladi
+    audioBase64: ttsResult?.audioBase64 || null, // browser <audio> da to'g'ridan-to'g'ri ijro etiladi
+    audioFormat: ttsResult?.format || 'audio/mp3',
     persona: {
       key: personaKey,
       name: config.name,

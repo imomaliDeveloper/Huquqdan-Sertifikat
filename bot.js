@@ -324,9 +324,11 @@ class SimpleTelegramBot {
 
   async sendVoiceBuffer(chatId, buffer, caption = '', options = {}) {
     try {
+      const mime = options.mime || 'audio/mp3';
+      const filename = mime.includes('wav') ? 'voice.wav' : (mime.includes('ogg') ? 'voice.ogg' : 'voice.mp3');
       const formData = new FormData();
       formData.append('chat_id', chatId);
-      formData.append('voice', new Blob([buffer], { type: 'audio/wav' }), 'voice.wav');
+      formData.append('voice', new Blob([buffer], { type: mime }), filename);
       if (caption) formData.append('caption', caption);
       formData.append('parse_mode', options.parse_mode || 'HTML');
       if (options.reply_markup) {
@@ -1791,13 +1793,14 @@ class SimpleTelegramBot {
           const result = await processVoiceAgentInteraction({
             message: userSpeechText,
             persona: persona,
-            voice: 'Kore'
+            voice: 'uz-UZ-SardorNeural'
           });
 
           if (result && result.audioBase64) {
-            const wavBuffer = Buffer.from(result.audioBase64, 'base64');
+            const audioBuffer = Buffer.from(result.audioBase64, 'base64');
             const caption = `🔥 <b>Ustoz (GoPrep Angry) javobi:</b>\n\n<i>"${result.replyText}"</i>`;
-            return await this.sendVoiceBuffer(chatId, wavBuffer, caption, {
+            return await this.sendVoiceBuffer(chatId, audioBuffer, caption, {
+              mime: result.audioFormat || 'audio/mp3',
               reply_markup: {
                 inline_keyboard: [
                   [{ text: "🎙️ Mini Appda Jonli Gaplashish 🔥", web_app: { url: `${this.appUrl}/voice_agent.html` } }]

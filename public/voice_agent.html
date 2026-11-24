@@ -419,8 +419,11 @@
     }
 
     function primeAudio() {
-      if (audioPlayer && audioPlayer.paused) {
+      if (audioPlayer) {
         try {
+          if (!audioPlayer.src || audioPlayer.src === "" || audioPlayer.src.endsWith(window.location.href)) {
+            audioPlayer.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+          }
           const p = audioPlayer.play();
           if (p !== undefined) {
             p.then(() => {
@@ -462,9 +465,12 @@
         rec.interimResults = true;
         rec.maxAlternatives = 1;
 
+        let latestInterim = '';
+
         rec.onstart = () => {
           isRecording = true;
           speechBuffer = '';
+          latestInterim = '';
           setVisualState('listening');
         };
 
@@ -472,12 +478,13 @@
           let interimTranscript = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
-              speechBuffer += event.results[i][0].transcript;
+              speechBuffer += ' ' + event.results[i][0].transcript;
             } else {
-              interimTranscript += event.results[i][0].transcript;
+              interimTranscript += ' ' + event.results[i][0].transcript;
             }
           }
-          const textToShow = speechBuffer || interimTranscript;
+          latestInterim = interimTranscript.trim();
+          const textToShow = (speechBuffer + ' ' + latestInterim).trim();
           if (textToShow && isSubtitlesOn) {
             speakerLabel.innerHTML = '<i class="fa-solid fa-microphone text-blue-400 mr-1"></i> Siz:';
             subtitlesText.innerText = `"${textToShow}"`;
@@ -496,8 +503,11 @@
 
         rec.onend = () => {
           isRecording = false;
-          if (speechBuffer && speechBuffer.trim()) {
-            sendToGemini(speechBuffer.trim());
+          const finalText = (speechBuffer + ' ' + latestInterim).trim();
+          speechBuffer = '';
+          latestInterim = '';
+          if (finalText) {
+            sendToGemini(finalText);
           } else {
             setVisualState('idle');
           }
@@ -545,7 +555,10 @@
     // Mikrofonni to'xtatish
     function stopListening() {
       if (recognition && isRecording) {
-        try { recognition.stop(); } catch(e){}
+        // 350ms kutish: mikrofondan kelgan oxirgi so'zlar to'liq qabul bo'lsin
+        setTimeout(() => {
+          try { recognition.stop(); } catch(e){}
+        }, 350);
       }
       isRecording = false;
     }
@@ -566,7 +579,7 @@
             message: cleanText,
             history: conversationHistory.slice(-8),
             persona: currentPersona,
-            voice: 'Kore'
+            voice: 'uz-UZ-SardorNeural'
           })
         });
 
@@ -579,7 +592,7 @@
           subtitlesText.innerText = `"${data.replyText}"`;
 
           if (data.audioBase64) {
-            playTtsAudio(data.audioBase64, data.replyText);
+            playTtsAudio(data.audioBase64, data.replyText, data.audioFormat);
           } else {
             fallbackSpeak(data.replyText);
           }
@@ -592,10 +605,17 @@
       }
     }
 
-    // Gemini 3.8 Flash TTS Audiosini ijro etish
-    function playTtsAudio(base64Wav, textFallback) {
+    // Ovozli javobni (TTS) ijro etish
+    function playTtsAudio(base64Audio, textFallback, audioFormat = 'audio/mp3') {
       setVisualState('speaking');
-      audioPlayer.src = "data:audio/wav;base64," + base64Wav;
+      if (!audioPlayer) {
+        fallbackSpeak(textFallback);
+        return;
+      }
+
+      const mime = audioFormat || (base64Audio.startsWith('//O') || base64Audio.startsWith('SUQz') ? 'audio/mp3' : 'audio/wav');
+      audioPlayer.src = base64Audio.startsWith('data:') ? base64Audio : `data:${mime};base64,${base64Audio}`;
+      audioPlayer.volume = 1.0;
       
       const p = audioPlayer.play();
       if (p !== undefined) {
@@ -607,6 +627,7 @@
 
       audioPlayer.onended = () => {
         setVisualState('idle');
+        if (isHandsFree) setTimeout(startListening, 800);
       };
 
       audioPlayer.onerror = () => {
@@ -621,10 +642,25 @@
           window.speechSynthesis.cancel();
           window.speechSynthesis.resume();
           const utter = new SpeechSynthesisUtterance(text);
-          utter.lang = 'uz-UZ';
+
+          const voices = window.speechSynthesis.getVoices() || [];
+          const bestVoice = voices.find(v => v.lang.startsWith('uz')) ||
+                            voices.find(v => v.lang.startsWith('tr')) ||
+                            voices.find(v => v.lang.startsWith('ru')) ||
+                            voices[0];
+          if (bestVoice) {
+            utter.voice = bestVoice;
+            utter.lang = bestVoice.lang;
+          } else {
+            utter.lang = 'uz-UZ';
+          }
+
           utter.rate = 1.15;
           utter.pitch = 1.1;
-          utter.onend = () => setVisualState('idle');
+          utter.onend = () => {
+            setVisualState('idle');
+            if (isHandsFree) setTimeout(startListening, 800);
+          };
           utter.onerror = () => setVisualState('idle');
           window.speechSynthesis.speak(utter);
           return;

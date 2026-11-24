@@ -4124,18 +4124,24 @@ function openVoiceAgentInsideMiniApp() {
 }
 
 function primeVoiceAudio() {
-  const audio = document.getElementById("embVoiceAudio");
-  if (audio && audio.paused) {
-    try {
-      const p = audio.play();
-      if (p !== undefined) {
-        p.then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-        }).catch(() => {});
-      }
-    } catch (e) {}
+  let audio = document.getElementById("embVoiceAudio");
+  if (!audio) {
+    audio = new Audio();
+    audio.id = "embVoiceAudio";
+    document.body.appendChild(audio);
   }
+  try {
+    if (!audio.src || audio.src === "" || audio.src.endsWith(window.location.href)) {
+      audio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+    }
+    const p = audio.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(() => {});
+    }
+  } catch (e) {}
 }
 
 function embSetVisualState(state) {
@@ -4223,6 +4229,8 @@ async function embRequestMicPermissionOnce() {
   return true;
 }
 
+let embLatestInterim = '';
+
 function getOrCreateRecognition() {
   if (embGlobalRecognition) return embGlobalRecognition;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -4237,6 +4245,8 @@ function getOrCreateRecognition() {
 
     rec.onstart = () => {
       embSpeechBuffer = '';
+      embLatestInterim = '';
+      embIsRecording = true;
       embSetVisualState('listening');
     };
 
@@ -4244,12 +4254,13 @@ function getOrCreateRecognition() {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          embSpeechBuffer += event.results[i][0].transcript;
+          embSpeechBuffer += ' ' + event.results[i][0].transcript;
         } else {
-          interim += event.results[i][0].transcript;
+          interim += ' ' + event.results[i][0].transcript;
         }
       }
-      const textToShow = embSpeechBuffer || interim;
+      embLatestInterim = interim.trim();
+      const textToShow = (embSpeechBuffer + ' ' + embLatestInterim).trim();
       if (textToShow && embIsSubtitlesOn) {
         const lbl = document.getElementById("embSpeakerLabel");
         const sub = document.getElementById("embSubtitlesText");
@@ -4270,8 +4281,11 @@ function getOrCreateRecognition() {
 
     rec.onend = () => {
       embIsRecording = false;
-      if (embSpeechBuffer && embSpeechBuffer.trim()) {
-        embSendVoiceToGemini(embSpeechBuffer.trim());
+      const finalText = (embSpeechBuffer + ' ' + embLatestInterim).trim();
+      embSpeechBuffer = '';
+      embLatestInterim = '';
+      if (finalText) {
+        embSendVoiceToGemini(finalText);
       } else {
         embSetVisualState('idle');
       }
@@ -4320,9 +4334,12 @@ async function embStartListening() {
 
 function embStopListening() {
   if (embGlobalRecognition && embIsRecording) {
-    try {
-      embGlobalRecognition.stop();
-    } catch (e) {}
+    // 350ms kutish: mikrofondan kelgan oxirgi so'zlarni recognition to'liq qabul qilsin
+    setTimeout(() => {
+      try {
+        if (embGlobalRecognition) embGlobalRecognition.stop();
+      } catch (e) {}
+    }, 350);
   }
   embIsRecording = false;
 }
@@ -4343,7 +4360,7 @@ async function embSendVoiceToGemini(text) {
         message: cleanInput,
         history: embVoiceHistory.slice(-8),
         persona: 'angry',
-        voice: 'Kore'
+        voice: 'uz-UZ-SardorNeural'
       })
     });
     const data = await resp.json();
@@ -4358,7 +4375,7 @@ async function embSendVoiceToGemini(text) {
       if (sub) sub.innerText = `"${data.replyText}"`;
 
       if (data.audioBase64) {
-        embPlayTtsAudio(data.audioBase64, data.replyText);
+        embPlayTtsAudio(data.audioBase64, data.replyText, data.audioFormat);
       } else {
         embFallbackSpeak(data.replyText);
       }
@@ -4371,15 +4388,18 @@ async function embSendVoiceToGemini(text) {
   }
 }
 
-function embPlayTtsAudio(base64Wav, textFallback) {
+function embPlayTtsAudio(base64Audio, textFallback, audioFormat = 'audio/mp3') {
   embSetVisualState('speaking');
-  const audio = document.getElementById("embVoiceAudio");
+  let audio = document.getElementById("embVoiceAudio");
   if (!audio) {
-    embFallbackSpeak(textFallback);
-    return;
+    audio = new Audio();
+    audio.id = "embVoiceAudio";
+    document.body.appendChild(audio);
   }
 
-  audio.src = "data:audio/wav;base64," + base64Wav;
+  const mime = audioFormat || (base64Audio.startsWith('//O') || base64Audio.startsWith('SUQz') ? 'audio/mp3' : 'audio/wav');
+  audio.src = base64Audio.startsWith('data:') ? base64Audio : `data:${mime};base64,${base64Audio}`;
+  audio.volume = 1.0;
   
   const playPromise = audio.play();
   if (playPromise !== undefined) {
@@ -4391,10 +4411,13 @@ function embPlayTtsAudio(base64Wav, textFallback) {
 
   audio.onended = () => {
     embSetVisualState('idle');
+    if (embIsHandsFree) {
+      setTimeout(embStartListening, 800);
+    }
   };
 
-  audio.onerror = () => {
-    console.warn("Audio element error, using fallback voice");
+  audio.onerror = (err) => {
+    console.warn("Audio element error, using fallback voice:", err);
     embFallbackSpeak(textFallback);
   };
 }
@@ -4406,17 +4429,39 @@ function embFallbackSpeak(text) {
       window.speechSynthesis.cancel();
       window.speechSynthesis.resume();
       const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'uz-UZ';
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      const bestVoice = voices.find(v => v.lang.startsWith('uz')) ||
+                        voices.find(v => v.lang.startsWith('tr')) ||
+                        voices.find(v => v.lang.startsWith('ru')) ||
+                        voices[0];
+      if (bestVoice) {
+        utter.voice = bestVoice;
+        utter.lang = bestVoice.lang;
+      } else {
+        utter.lang = 'uz-UZ';
+      }
+
       utter.rate = 1.15; // shiddatli tezlik
       utter.pitch = 1.1;
-      utter.onend = () => embSetVisualState('idle');
-      utter.onerror = () => embSetVisualState('idle');
+      utter.onend = () => {
+        embSetVisualState('idle');
+        if (embIsHandsFree) setTimeout(embStartListening, 800);
+      };
+      utter.onerror = () => {
+        embSetVisualState('idle');
+      };
       window.speechSynthesis.speak(utter);
       return;
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Fallback speak xatosi:", e);
+    }
   }
   // Agar audio mutlaqo bo'lmasa 3 soniyada qaytish
-  setTimeout(() => embSetVisualState('idle'), 3500);
+  setTimeout(() => {
+    embSetVisualState('idle');
+    if (embIsHandsFree) setTimeout(embStartListening, 800);
+  }, 3500);
 }
 
 function embSendQuickPrompt(promptText) {
