@@ -4100,7 +4100,7 @@ function switchAiMode(mode) {
     if (btnVoice) {
       btnVoice.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white shadow-md";
     }
-    initEmbSpeech();
+    embRequestMicPermissionOnce();
     initEmbTouchEvents();
   } else {
     if (chatContent) chatContent.classList.remove("hidden");
@@ -4202,38 +4202,45 @@ function embSetVisualState(state) {
   }
 }
 
-function embStartListening() {
-  primeVoiceAudio();
+let embActiveMicStream = null;
+let embMicPermissionGranted = false;
+let embGlobalRecognition = null;
 
-  // Eski tinglovchi bo'lsa to'xtatamiz
-  if (embRecognition) {
-    try { embRecognition.abort(); } catch (e) {}
-    embRecognition = null;
+async function embRequestMicPermissionOnce() {
+  if (embMicPermissionGranted && embActiveMicStream && embActiveMicStream.active) {
+    return true;
   }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    const input = document.getElementById("embQuickInput");
-    if (input) {
-      input.focus();
-      input.placeholder = "Brauzer ovozni qo'llab-quvvatlamadi, bu yerga yozing:";
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      embActiveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      embMicPermissionGranted = true;
+      return true;
+    } catch (e) {
+      console.warn("Mikrofon ruxsati berilmadi:", e);
+      return false;
     }
-    return;
   }
+  return true;
+}
+
+function getOrCreateRecognition() {
+  if (embGlobalRecognition) return embGlobalRecognition;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return null;
 
   try {
-    embRecognition = new SpeechRecognition();
-    embRecognition.lang = 'uz-UZ';
-    embRecognition.continuous = false;
-    embRecognition.interimResults = true;
-    embRecognition.maxAlternatives = 1;
+    const rec = new SpeechRecognition();
+    rec.lang = 'uz-UZ';
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
 
-    embRecognition.onstart = () => {
+    rec.onstart = () => {
       embSpeechBuffer = '';
       embSetVisualState('listening');
     };
 
-    embRecognition.onresult = (event) => {
+    rec.onresult = (event) => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
@@ -4251,7 +4258,7 @@ function embStartListening() {
       }
     };
 
-    embRecognition.onerror = (e) => {
+    rec.onerror = (e) => {
       console.warn("Speech recognition warning:", e.error);
       embIsRecording = false;
       if (e.error === 'no-speech' && embIsHandsFree) {
@@ -4261,9 +4268,8 @@ function embStartListening() {
       }
     };
 
-    embRecognition.onend = () => {
+    rec.onend = () => {
       embIsRecording = false;
-      embRecognition = null;
       if (embSpeechBuffer && embSpeechBuffer.trim()) {
         embSendVoiceToGemini(embSpeechBuffer.trim());
       } else {
@@ -4271,21 +4277,52 @@ function embStartListening() {
       }
     };
 
-    embRecognition.start();
+    embGlobalRecognition = rec;
+    return embGlobalRecognition;
+  } catch (e) {
+    console.warn("Recognition init error:", e);
+    return null;
+  }
+}
+
+async function embStartListening() {
+  primeVoiceAudio();
+
+  // Bir marta ruxsat olib, oqimni saqlab qolamiz (har suhbatda ruxsat so'ramasligi uchun)
+  if (!embMicPermissionGranted) {
+    await embRequestMicPermissionOnce();
+  }
+
+  const rec = getOrCreateRecognition();
+  if (!rec) {
+    const input = document.getElementById("embQuickInput");
+    if (input) {
+      input.focus();
+      input.placeholder = "Brauzer ovozni qo'llab-quvvatlamadi, bu yerga yozing:";
+    }
+    return;
+  }
+
+  if (embIsRecording) return; // Allaqachon yozib olayotgan bo'lsa
+
+  try {
+    rec.start();
   } catch (err) {
-    console.warn("Speech recognition start xatosi:", err.message);
-    embIsRecording = false;
-    embRecognition = null;
-    embSetVisualState('idle');
+    if (err.name === 'InvalidStateError') {
+      // Allaqachon boshlangan bo'lsa davom etaveradi
+    } else {
+      console.warn("Recognition start xatosi:", err.message);
+      embIsRecording = false;
+      embSetVisualState('idle');
+    }
   }
 }
 
 function embStopListening() {
-  if (embRecognition) {
+  if (embGlobalRecognition && embIsRecording) {
     try {
-      embRecognition.stop();
+      embGlobalRecognition.stop();
     } catch (e) {}
-    embRecognition = null;
   }
   embIsRecording = false;
 }

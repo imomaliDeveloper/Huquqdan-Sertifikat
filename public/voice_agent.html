@@ -432,36 +432,43 @@
       }
     }
 
-    // Mikrofonni ishga tushirish (Har doim toza va yangi instansiya bilan)
-    function startListening() {
-      primeAudio();
-      if (isSpeaking || isThinking) {
-        try { audioPlayer.pause(); } catch(e){}
-        isSpeaking = false;
+    let activeMicStream = null;
+    let micPermissionGranted = false;
+
+    async function requestMicPermissionOnce() {
+      if (micPermissionGranted && activeMicStream && activeMicStream.active) return true;
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          activeMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          micPermissionGranted = true;
+          return true;
+        } catch (e) {
+          console.warn("Mikrofon ruxsati berilmadi:", e);
+          return false;
+        }
       }
+      return true;
+    }
 
-      stopListening();
-
+    function getOrCreateRecognition() {
+      if (recognition) return recognition;
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        toggleTextInput(true);
-        return;
-      }
+      if (!SpeechRecognition) return null;
 
       try {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'uz-UZ';
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
+        const rec = new SpeechRecognition();
+        rec.lang = 'uz-UZ';
+        rec.continuous = false;
+        rec.interimResults = true;
+        rec.maxAlternatives = 1;
 
-        recognition.onstart = () => {
+        rec.onstart = () => {
           isRecording = true;
           speechBuffer = '';
           setVisualState('listening');
         };
 
-        recognition.onresult = (event) => {
+        rec.onresult = (event) => {
           let interimTranscript = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
@@ -477,7 +484,7 @@
           }
         };
 
-        recognition.onerror = (e) => {
+        rec.onerror = (e) => {
           console.warn('Speech recognition warning:', e.error);
           isRecording = false;
           if (e.error === 'no-speech' && isHandsFree) {
@@ -487,9 +494,8 @@
           }
         };
 
-        recognition.onend = () => {
+        rec.onend = () => {
           isRecording = false;
-          recognition = null;
           if (speechBuffer && speechBuffer.trim()) {
             sendToGemini(speechBuffer.trim());
           } else {
@@ -497,20 +503,49 @@
           }
         };
 
-        recognition.start();
+        recognition = rec;
+        return recognition;
       } catch (err) {
-        console.warn("Mic start err:", err);
-        isRecording = false;
-        recognition = null;
-        setVisualState('idle');
+        console.warn("Recognition init error:", err);
+        return null;
+      }
+    }
+
+    // Mikrofonni ishga tushirish (1 marta ruxsat bilan)
+    async function startListening() {
+      primeAudio();
+      if (isSpeaking || isThinking) {
+        try { audioPlayer.pause(); } catch(e){}
+        isSpeaking = false;
+      }
+
+      if (!micPermissionGranted) {
+        await requestMicPermissionOnce();
+      }
+
+      const rec = getOrCreateRecognition();
+      if (!rec) {
+        toggleTextInput(true);
+        return;
+      }
+
+      if (isRecording) return;
+
+      try {
+        rec.start();
+      } catch (err) {
+        if (err.name !== 'InvalidStateError') {
+          console.warn("Mic start err:", err);
+          isRecording = false;
+          setVisualState('idle');
+        }
       }
     }
 
     // Mikrofonni to'xtatish
     function stopListening() {
-      if (recognition) {
+      if (recognition && isRecording) {
         try { recognition.stop(); } catch(e){}
-        recognition = null;
       }
       isRecording = false;
     }
