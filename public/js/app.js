@@ -144,6 +144,8 @@ function handleRouteHash() {
     openMistakesTrainer();
   } else if (hash === '#cases' || hash === '#keys') {
     switchView('viewCases');
+  } else if (hash === '#tariffs' || hash === '#vip' || hash === '#premium') {
+    openTariffsModal();
   }
 }
 
@@ -169,6 +171,7 @@ async function syncUserProfile() {
         }
         initAuthUI();
         if (typeof updateAiLimitUI === 'function') updateAiLimitUI();
+        if (typeof updateVoiceTimerUI === 'function') updateVoiceTimerUI();
         if (state.laws && state.laws.length > 0 && typeof renderLawsList === 'function') {
           renderLawsList(state.laws);
         }
@@ -192,6 +195,7 @@ async function syncUserProfile() {
         }
         initAuthUI();
         if (typeof updateAiLimitUI === 'function') updateAiLimitUI();
+        if (typeof updateVoiceTimerUI === 'function') updateVoiceTimerUI();
         if (state.laws && state.laws.length > 0 && typeof renderLawsList === 'function') {
           renderLawsList(state.laws);
         }
@@ -4114,6 +4118,7 @@ function switchAiMode(mode) {
     if (btnVoice) {
       btnVoice.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white shadow-md";
     }
+    updateVoiceTimerUI();
     embRequestMicPermissionOnce();
     initEmbTouchEvents();
   } else {
@@ -4156,6 +4161,127 @@ function primeVoiceAudio() {
       }).catch(() => {});
     }
   } catch (e) {}
+}
+
+// ==================== OVOZLI AI 1 MINUT BEPUL LIMITI VA TIMERI ====================
+const VOICE_FREE_LIMIT_SECONDS = 60;
+let embVoiceSessionTimer = null;
+
+function isVoiceUnlimited() {
+  return state.userPlan === "tariff_vip" || 
+         state.isPremium === true || 
+         localStorage.getItem("huquq_premium_active") === "true";
+}
+
+function getVoiceSecondsUsed() {
+  const val = parseInt(localStorage.getItem("huquq_voice_seconds_used") || "0", 10);
+  return isNaN(val) ? 0 : val;
+}
+
+function setVoiceSecondsUsed(secs) {
+  localStorage.setItem("huquq_voice_seconds_used", Math.max(0, secs).toString());
+  updateVoiceTimerUI();
+}
+
+function addVoiceSecondsUsed(secs = 1) {
+  if (isVoiceUnlimited()) return 0;
+  const current = getVoiceSecondsUsed();
+  const updated = current + secs;
+  setVoiceSecondsUsed(updated);
+  return updated;
+}
+
+function updateVoiceTimerUI() {
+  const badge = document.getElementById("embVoiceTimerBadge");
+  const timeEl = document.getElementById("embVoiceTimeLeft");
+  if (!badge) return;
+
+  if (isVoiceUnlimited()) {
+    badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-950/70 border border-amber-500/50 text-amber-300 text-[11px] font-bold shadow-xs shrink-0";
+    badge.innerHTML = `<i class="fa-solid fa-crown text-amber-400"></i> <span>VIP: Cheksiz</span>`;
+    return;
+  }
+
+  const used = getVoiceSecondsUsed();
+  const remaining = Math.max(0, VOICE_FREE_LIMIT_SECONDS - used);
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+  if (timeEl) timeEl.innerText = formatted;
+
+  if (remaining <= 0) {
+    badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-red-600 border border-red-400 text-white text-[11px] font-black shadow-md animate-pulse shrink-0";
+    badge.innerHTML = `<i class="fa-solid fa-lock text-yellow-300"></i> <span>Vaqt tugadi!</span>`;
+  } else if (remaining <= 15) {
+    badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-red-950 border border-red-500 text-red-300 text-[11px] font-bold shadow-xs shrink-0";
+    badge.innerHTML = `<i class="fa-solid fa-stopwatch text-red-400 animate-spin"></i> <span>Sinov: <b class="text-red-200 font-mono">${formatted}</b></span>`;
+  } else {
+    badge.className = "cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-[11px] font-bold shadow-xs shrink-0 transition hover:border-red-500";
+    badge.innerHTML = `<i class="fa-solid fa-stopwatch text-amber-400"></i> <span>Sinov: <b id="embVoiceTimeLeft" class="text-amber-300 font-mono">${formatted}</b></span>`;
+  }
+}
+
+function checkVoiceSessionTimer() {
+  if (isVoiceUnlimited()) {
+    stopVoiceSessionTimer();
+    updateVoiceTimerUI();
+    return;
+  }
+
+  if (embIsRecording || embIsSpeaking) {
+    if (!embVoiceSessionTimer) {
+      embVoiceSessionTimer = setInterval(() => {
+        if (isVoiceUnlimited()) {
+          stopVoiceSessionTimer();
+          updateVoiceTimerUI();
+          return;
+        }
+
+        const used = addVoiceSecondsUsed(1);
+        if (used >= VOICE_FREE_LIMIT_SECONDS) {
+          stopVoiceSessionTimer();
+          embStopListening();
+          const audio = document.getElementById("embVoiceAudio");
+          if (audio) {
+            try { audio.pause(); } catch (e) {}
+          }
+          if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+          }
+          embIsHandsFree = false;
+          embSetVisualState('idle');
+          updateVoiceTimerUI();
+          openVoicePaywallModal();
+        }
+      }, 1000);
+    }
+  } else {
+    stopVoiceSessionTimer();
+  }
+}
+
+function stopVoiceSessionTimer() {
+  if (embVoiceSessionTimer) {
+    clearInterval(embVoiceSessionTimer);
+    embVoiceSessionTimer = null;
+  }
+}
+
+function openVoicePaywallModal() {
+  const modal = document.getElementById("voicePaywallModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+}
+
+function closeVoicePaywallModal() {
+  const modal = document.getElementById("voicePaywallModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
 }
 
 function embSetVisualState(state) {
@@ -4210,8 +4336,9 @@ function embSetVisualState(state) {
       mouth.classList.remove("talking-mouth");
       mouth.style.height = "5px";
     }
-
   }
+
+  checkVoiceSessionTimer();
 }
 
 let embMicPermissionGranted = false;
@@ -4258,6 +4385,11 @@ async function embEnsureMicPermission() {
 }
 
 async function embStartListening() {
+  if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+    embSetVisualState('idle');
+    openVoicePaywallModal();
+    return;
+  }
   if (embIsSpeaking || embIsThinking) return;
   primeVoiceAudio();
   embCancelHandsFreeTimer();
@@ -4429,6 +4561,11 @@ function embStopListening() {
 }
 
 async function embSendAudioBlobToGemini(audioBlob) {
+  if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+    embSetVisualState('idle');
+    openVoicePaywallModal();
+    return;
+  }
   embSetVisualState('thinking');
   const reader = new FileReader();
   reader.readAsDataURL(audioBlob);
@@ -4440,6 +4577,7 @@ async function embSendAudioBlobToGemini(audioBlob) {
         if (embIsHandsFree) scheduleHandsFreeNextTurn(600);
         return;
       }
+      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : null);
       const resp = await fetch('/api/voice-agent/talk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -4448,10 +4586,24 @@ async function embSendAudioBlobToGemini(audioBlob) {
           audioMimeType: audioBlob.type || 'audio/webm',
           history: embVoiceHistory.slice(-8),
           persona: 'angry',
-          voice: currentSelectedVoice
+          voice: currentSelectedVoice,
+          userId: tgId,
+          isVip: isVoiceUnlimited(),
+          userPlan: state.userPlan
         })
       });
       const data = await resp.json();
+      if (data && data.limitExceeded) {
+        setVoiceSecondsUsed(VOICE_FREE_LIMIT_SECONDS);
+        embSetVisualState('idle');
+        openVoicePaywallModal();
+        return;
+      }
+      if (data && data.voiceUsage && !isVoiceUnlimited()) {
+        if (typeof data.voiceUsage.secondsUsed === 'number') {
+          setVoiceSecondsUsed(Math.max(getVoiceSecondsUsed(), data.voiceUsage.secondsUsed));
+        }
+      }
       if (data && data.replyText) {
         embLastReply = data.replyText;
         embVoiceHistory.push({ role: 'model', text: data.replyText });
@@ -4477,12 +4629,18 @@ async function embSendAudioBlobToGemini(audioBlob) {
 }
 
 async function embSendVoiceToGemini(text) {
+  if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+    embSetVisualState('idle');
+    openVoicePaywallModal();
+    return;
+  }
   const cleanInput = (text && text.trim()) ? text.trim() : "Ustoz, men jim turibman!";
   embSetVisualState('thinking');
 
   embVoiceHistory.push({ role: 'user', text: cleanInput });
 
   try {
+    const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || state.currentUser?.tgId || (state.currentUser?.id ? state.currentUser.id.replace('TG-', '') : null);
     const resp = await fetch('/api/voice-agent/talk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4490,10 +4648,24 @@ async function embSendVoiceToGemini(text) {
         message: cleanInput,
         history: embVoiceHistory.slice(-8),
         persona: 'angry',
-        voice: currentSelectedVoice
+        voice: currentSelectedVoice,
+        userId: tgId,
+        isVip: isVoiceUnlimited(),
+        userPlan: state.userPlan
       })
     });
     const data = await resp.json();
+    if (data && data.limitExceeded) {
+      setVoiceSecondsUsed(VOICE_FREE_LIMIT_SECONDS);
+      embSetVisualState('idle');
+      openVoicePaywallModal();
+      return;
+    }
+    if (data && data.voiceUsage && !isVoiceUnlimited()) {
+      if (typeof data.voiceUsage.secondsUsed === 'number') {
+        setVoiceSecondsUsed(Math.max(getVoiceSecondsUsed(), data.voiceUsage.secondsUsed));
+      }
+    }
 
     if (data && data.replyText) {
       embLastReply = data.replyText;
@@ -4596,6 +4768,11 @@ function embFallbackSpeak(text) {
 }
 
 function embSendQuickPrompt(promptText) {
+  if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+    embSetVisualState('idle');
+    openVoicePaywallModal();
+    return;
+  }
   primeVoiceAudio();
   const lbl = document.getElementById("embSpeakerLabel");
   const sub = document.getElementById("embSubtitlesText");
@@ -4605,6 +4782,11 @@ function embSendQuickPrompt(promptText) {
 }
 
 function embSubmitQuickInput() {
+  if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+    embSetVisualState('idle');
+    openVoicePaywallModal();
+    return;
+  }
   primeVoiceAudio();
   const input = document.getElementById("embQuickInput");
   if (!input) return;
@@ -4630,6 +4812,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function embToggleHandsFree() {
+  if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+    embSetVisualState('idle');
+    openVoicePaywallModal();
+    return;
+  }
   embIsHandsFree = !embIsHandsFree;
   const status = document.getElementById("embHandsFreeStatus");
   const btn = document.getElementById("embHandsFreeBtn");

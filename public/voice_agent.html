@@ -114,6 +114,11 @@
 
     <!-- Right Actions -->
     <div class="flex items-center gap-2">
+      <!-- ⏱️ 1 MINUT BEPUL LIMIT / VIP BADGE -->
+      <div id="voiceTimerBadge" onclick="openVoicePaywallModal()" class="cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold transition-all shadow-xs hover:border-red-500">
+        <i class="fa-solid fa-stopwatch text-amber-400"></i>
+        <span>Sinov: <b id="voiceTimeLeft" class="text-amber-300 font-mono">01:00</b></span>
+      </div>
       <a href="/" class="text-xs text-neutral-400 hover:text-white px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 transition">
         <i class="fa-solid fa-house mr-1"></i> Asosiy
       </a>
@@ -272,6 +277,56 @@
   <!-- HIDDEN AUDIO ELEMENT FOR GEMINI VOICE PLAYBACK -->
   <audio id="audioPlayer" class="hidden" playsinline></audio>
 
+  <!-- ⏱️ GOPREP VOICE AI TARIFF PAYWALL MODAL -->
+  <div id="voicePaywallModal" class="fixed inset-0 z-50 bg-neutral-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-neutral-900 border-2 border-red-500/60 rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.3)] relative overflow-hidden animate-fade-in">
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-44 rounded-full bg-red-600/20 blur-3xl pointer-events-none"></div>
+
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 via-orange-600 to-amber-500 text-white mx-auto flex items-center justify-center text-3xl shadow-lg relative z-10">
+        <i class="fa-solid fa-fire text-amber-200"></i>
+      </div>
+
+      <div class="space-y-1 relative z-10">
+        <h3 class="text-base font-black text-white">⏱️ 1 Daqiqalik Bepul Suhbat Tugadi!</h3>
+        <p class="text-xs text-neutral-300 leading-relaxed">
+          Siz Qattiqqo'l Ovozli AI Ustoz bilan <strong>1 daqiqalik bepul sinov suhbatidan</strong> to'liq foydalandingiz.
+        </p>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-800 text-left text-[11px] space-y-2 text-neutral-200 relative z-10">
+        <p class="font-extrabold text-amber-400 flex items-center">
+          <i class="fa-solid fa-crown mr-1.5 text-amber-400"></i> VIP PRO tarifida cheksiz imkoniyatlar:
+        </p>
+        <p class="flex items-center text-neutral-300">
+          <i class="fa-solid fa-microphone-lines text-red-500 mr-2 text-[11px]"></i>
+          <span><b>Cheksiz Ovozli AI Ustoz</b> (Hands-Free va 24/7)</span>
+        </p>
+        <p class="flex items-center text-neutral-300">
+          <i class="fa-solid fa-bolt text-amber-400 mr-2 text-[11px]"></i>
+          <span><b>Gemini 3.8 & Studio HD</b> tabiiy jonli ovozlar</span>
+        </p>
+        <p class="flex items-center text-neutral-300">
+          <i class="fa-solid fa-scale-balanced text-emerald-400 mr-2 text-[11px]"></i>
+          <span><b>40 ta Qonun</b> va 30 ta Rasmiy BMBA varianti</span>
+        </p>
+      </div>
+
+      <div class="space-y-2 pt-1 relative z-10">
+        <a href="/#tariffs" class="w-full py-3 rounded-2xl bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:opacity-95 text-white font-black text-xs shadow-lg shadow-red-600/30 transition active:scale-95 flex items-center justify-center space-x-2 block">
+          <i class="fa-solid fa-crown text-amber-200"></i>
+          <span>VIP PRO Tarifini Faollashtirish (89 000 so'm)</span>
+        </a>
+        <a href="/#profile" class="w-full py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold text-xs transition flex items-center justify-center space-x-1.5 border border-amber-500/30 block">
+          <i class="fa-solid fa-gift text-amber-400"></i>
+          <span>10 ta Do'st = VIP Bepul Qo'lga Kiritish</span>
+        </a>
+        <button onclick="closeVoicePaywallModal()" class="w-full py-1.5 text-neutral-400 hover:text-neutral-200 font-semibold text-xs transition">
+          Keyinroq
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC (GEMINI VOICE AGENT) -->
   <script>
     // Global State
@@ -282,6 +337,125 @@
     let isThinking = false;
     let isSpeaking = false;
     let conversationHistory = [];
+
+    // ==================== 1 MINUT BEPUL LIMIT VA TIMER ====================
+    const VOICE_FREE_LIMIT_SECONDS = 60;
+    let voiceSessionTimer = null;
+
+    function isVoiceUnlimited() {
+      return localStorage.getItem("huquq_premium_active") === "true" ||
+             localStorage.getItem("huquq_user_plan") === "tariff_vip";
+    }
+
+    function getVoiceSecondsUsed() {
+      const val = parseInt(localStorage.getItem("huquq_voice_seconds_used") || "0", 10);
+      return isNaN(val) ? 0 : val;
+    }
+
+    function setVoiceSecondsUsed(secs) {
+      localStorage.setItem("huquq_voice_seconds_used", Math.max(0, secs).toString());
+      updateVoiceTimerUI();
+    }
+
+    function addVoiceSecondsUsed(secs = 1) {
+      if (isVoiceUnlimited()) return 0;
+      const current = getVoiceSecondsUsed();
+      const updated = current + secs;
+      setVoiceSecondsUsed(updated);
+      return updated;
+    }
+
+    function updateVoiceTimerUI() {
+      const badge = document.getElementById("voiceTimerBadge");
+      const timeEl = document.getElementById("voiceTimeLeft");
+      if (!badge) return;
+
+      if (isVoiceUnlimited()) {
+        badge.className = "cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-950/70 border border-amber-500/50 text-amber-300 text-xs font-bold shadow-xs";
+        badge.innerHTML = `<i class="fa-solid fa-crown text-amber-400"></i> <span>VIP: Cheksiz</span>`;
+        return;
+      }
+
+      const used = getVoiceSecondsUsed();
+      const remaining = Math.max(0, VOICE_FREE_LIMIT_SECONDS - used);
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      if (timeEl) timeEl.innerText = formatted;
+
+      if (remaining <= 0) {
+        badge.className = "cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-600 border border-red-400 text-white text-xs font-black shadow-md animate-pulse";
+        badge.innerHTML = `<i class="fa-solid fa-lock text-yellow-300"></i> <span>Vaqt tugadi!</span>`;
+      } else if (remaining <= 15) {
+        badge.className = "cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-950 border border-red-500 text-red-300 text-xs font-bold shadow-xs";
+        badge.innerHTML = `<i class="fa-solid fa-stopwatch text-red-400 animate-spin"></i> <span>Sinov: <b class="text-red-200 font-mono">${formatted}</b></span>`;
+      } else {
+        badge.className = "cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold shadow-xs hover:border-red-500";
+        badge.innerHTML = `<i class="fa-solid fa-stopwatch text-amber-400"></i> <span>Sinov: <b id="voiceTimeLeft" class="text-amber-300 font-mono">${formatted}</b></span>`;
+      }
+    }
+
+    function checkVoiceSessionTimer() {
+      if (isVoiceUnlimited()) {
+        stopVoiceSessionTimer();
+        updateVoiceTimerUI();
+        return;
+      }
+
+      if (isRecording || isSpeaking) {
+        if (!voiceSessionTimer) {
+          voiceSessionTimer = setInterval(() => {
+            if (isVoiceUnlimited()) {
+              stopVoiceSessionTimer();
+              updateVoiceTimerUI();
+              return;
+            }
+
+            const used = addVoiceSecondsUsed(1);
+            if (used >= VOICE_FREE_LIMIT_SECONDS) {
+              stopVoiceSessionTimer();
+              stopListening();
+              if (audioPlayer) {
+                try { audioPlayer.pause(); } catch (e) {}
+              }
+              if ('speechSynthesis' in window) {
+                try { window.speechSynthesis.cancel(); } catch (e) {}
+              }
+              isHandsFree = false;
+              setVisualState('idle');
+              updateVoiceTimerUI();
+              openVoicePaywallModal();
+            }
+          }, 1000);
+        }
+      } else {
+        stopVoiceSessionTimer();
+      }
+    }
+
+    function stopVoiceSessionTimer() {
+      if (voiceSessionTimer) {
+        clearInterval(voiceSessionTimer);
+        voiceSessionTimer = null;
+      }
+    }
+
+    function openVoicePaywallModal() {
+      const modal = document.getElementById("voicePaywallModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeVoicePaywallModal() {
+      const modal = document.getElementById("voicePaywallModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
     
     // Web Speech Recognition
     let recognition = null;
@@ -412,6 +586,8 @@
         mouth.classList.remove('talking-mouth');
         mouth.style.height = '6px';
       }
+
+      checkVoiceSessionTimer();
     }
 
     function primeAudio() {
@@ -473,6 +649,11 @@
     }
 
     async function startListening() {
+      if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+        setVisualState('idle');
+        openVoicePaywallModal();
+        return;
+      }
       if (isSpeaking || isThinking) return;
       primeAudio();
       cancelHandsFreeTimer();
@@ -637,6 +818,11 @@
     }
 
     async function sendAudioBlobToGemini(audioBlob) {
+      if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+        setVisualState('idle');
+        openVoicePaywallModal();
+        return;
+      }
       setVisualState('thinking');
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
@@ -648,6 +834,7 @@
             if (isHandsFree) scheduleHandsFreeNextTurn(600);
             return;
           }
+          const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
           const resp = await fetch('/api/voice-agent/talk', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -656,10 +843,23 @@
               audioMimeType: audioBlob.type || 'audio/webm',
               history: conversationHistory.slice(-8),
               persona: currentPersona,
-              voice: currentVoice || 'uz-UZ-MadinaNeural'
+              voice: currentVoice || 'uz-UZ-MadinaNeural',
+              userId: tgId,
+              isVip: isVoiceUnlimited()
             })
           });
           const data = await resp.json();
+          if (data && data.limitExceeded) {
+            setVoiceSecondsUsed(VOICE_FREE_LIMIT_SECONDS);
+            setVisualState('idle');
+            openVoicePaywallModal();
+            return;
+          }
+          if (data && data.voiceUsage && !isVoiceUnlimited()) {
+            if (typeof data.voiceUsage.secondsUsed === 'number') {
+              setVoiceSecondsUsed(Math.max(getVoiceSecondsUsed(), data.voiceUsage.secondsUsed));
+            }
+          }
           if (data && data.replyText) {
             conversationHistory.push({ role: 'model', text: data.replyText });
 
@@ -683,6 +883,11 @@
 
     // Gemini Voice Agent Backendiga so'rov yuborish
     async function sendToGemini(text) {
+      if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+        setVisualState('idle');
+        openVoicePaywallModal();
+        return;
+      }
       const cleanText = (text && text.trim()) ? text.trim() : "Ustoz, men jim turibman!";
       setVisualState('thinking');
       liveTimestamp.innerText = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
@@ -690,6 +895,7 @@
       conversationHistory.push({ role: 'user', text: cleanText });
 
       try {
+        const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
         const resp = await fetch('/api/voice-agent/talk', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -697,11 +903,24 @@
             message: cleanText,
             history: conversationHistory.slice(-8),
             persona: currentPersona,
-            voice: currentVoice || 'uz-UZ-MadinaNeural'
+            voice: currentVoice || 'uz-UZ-MadinaNeural',
+            userId: tgId,
+            isVip: isVoiceUnlimited()
           })
         });
 
         const data = await resp.json();
+        if (data && data.limitExceeded) {
+          setVoiceSecondsUsed(VOICE_FREE_LIMIT_SECONDS);
+          setVisualState('idle');
+          openVoicePaywallModal();
+          return;
+        }
+        if (data && data.voiceUsage && !isVoiceUnlimited()) {
+          if (typeof data.voiceUsage.secondsUsed === 'number') {
+            setVoiceSecondsUsed(Math.max(getVoiceSecondsUsed(), data.voiceUsage.secondsUsed));
+          }
+        }
 
         if (data && data.replyText) {
           conversationHistory.push({ role: 'model', text: data.replyText });
@@ -821,6 +1040,10 @@
     }
 
     function submitManualText() {
+      if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+        openVoicePaywallModal();
+        return;
+      }
       const input = document.getElementById('manualInputText');
       const val = input.value.trim();
       if (val) {
@@ -858,6 +1081,10 @@
 
     // Hands-Free rejimini yoqish/o'chirish
     handsFreeBtn.addEventListener('click', () => {
+      if (!isVoiceUnlimited() && getVoiceSecondsUsed() >= VOICE_FREE_LIMIT_SECONDS) {
+        openVoicePaywallModal();
+        return;
+      }
       isHandsFree = !isHandsFree;
       handsFreeStatus.innerText = isHandsFree ? 'Yoqiq' : "O'chiq";
       handsFreeStatus.className = isHandsFree ? 'text-[9px] text-green-400 font-bold' : 'text-[9px] text-neutral-500';
@@ -935,6 +1162,7 @@
     // Sahifa yuklanganda ishga tushirish
     window.addEventListener('DOMContentLoaded', () => {
       initSpeech();
+      updateVoiceTimerUI();
       setVisualState('idle');
     });
   </script>

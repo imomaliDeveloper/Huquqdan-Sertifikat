@@ -1085,12 +1085,14 @@ class SimpleTelegramBot {
     const text = `👑 <b>HUQUQ SERTIFIKAT TAYYORLOV TARIFLARI:</b>\n\n` +
       `1️⃣ <b>START (Bepul):</b>\n` +
       `• 1-variant (Konstitutsiya) va T-760 rasmiy namunaviy test\n` +
+      `• 1 daqiqalik bepul sinov Ovozli AI Ustoz muloqoti\n` +
       `• 2 ta bepul AI Ustoz konsultatsiyasi\n\n` +
       `2️⃣ <b>STANDARD (49 000 UZS / 1 oy):</b>\n` +
       `• Barcha 40 ta Qonunchilik variantlari\n` +
       `• 50 ta to'liq rasmiy mock variantlari\n` +
       `• Vaziyatli keyslar va xatolar banki\n\n` +
       `3️⃣ <b>VIP PRO (89 000 UZS / Imtihongacha):</b>\n` +
+      `• 🎙️ <b>CHEKSIZ QATTIQQO'L OVOZLI AI USTOZ (Hands-Free va 24/7)</b>\n` +
       `• Cheksiz AI Ustoz (har qanday savolga tahliliy javob)\n` +
       `• Barcha 40 ta Qonun testi va 50 ta variantga cheksiz kirish\n` +
       `• Huquqiy Duel (Octagon) cheksiz janglar\n` +

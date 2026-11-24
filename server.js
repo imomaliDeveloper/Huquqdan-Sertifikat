@@ -153,6 +153,31 @@ function addApprovedVipId(id) {
   }
 }
 
+// ==================== OVOZLI AI FOYDALANISH VA 1 MINUT BEPUL LIMITI ====================
+const VOICE_FREE_LIMIT_SECONDS = 60;
+
+function getVoiceUsageMap() {
+  return safeReadJSON('voice_usage.json', {});
+}
+
+function getVoiceUsage(userId) {
+  if (!userId) return 0;
+  const map = getVoiceUsageMap();
+  const cleanId = userId.toString().trim().replace(/^TG-/, '');
+  return parseInt(map[cleanId] || 0, 10);
+}
+
+function recordVoiceUsage(userId, secondsToAdd = 12) {
+  if (!userId) return 0;
+  const map = getVoiceUsageMap();
+  const cleanId = userId.toString().trim().replace(/^TG-/, '');
+  const current = parseInt(map[cleanId] || 0, 10);
+  const updated = current + Math.max(1, Math.round(secondsToAdd));
+  map[cleanId] = updated;
+  safeWriteJSON('voice_usage.json', map);
+  return updated;
+}
+
 // Statik fayllarni ulash va Keshni butunlay to'xtatish (Har doim eng yangi versiya yuklanishi uchun)
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -532,9 +557,62 @@ app.get('/api/voice-agent/personas', (req, res) => {
   res.json({ personas });
 });
 
+// API: Foydalanuvchining ovozli AI dan foydalanish vaqti (1 minut bepul limit)
+app.get('/api/voice-agent/usage', (req, res) => {
+  try {
+    const rawUserId = (req.query.userId || '').toString().trim();
+    const cleanId = rawUserId.replace(/^TG-/, '');
+    const approvedVips = getApprovedVipIds();
+    const isVip = (cleanId && approvedVips.includes(cleanId)) || (rawUserId && approvedVips.includes(rawUserId));
+    const secondsUsed = cleanId ? getVoiceUsage(cleanId) : 0;
+    res.json({
+      secondsUsed,
+      limitSeconds: VOICE_FREE_LIMIT_SECONDS,
+      remainingSeconds: isVip ? 999999 : Math.max(0, VOICE_FREE_LIMIT_SECONDS - secondsUsed),
+      isVip: Boolean(isVip)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/voice-agent/talk', async (req, res) => {
   try {
-    const { message, audioBase64Input, audioMimeType, history, persona, voice } = req.body;
+    const { message, audioBase64Input, audioMimeType, history, persona, voice, userId, elapsedSeconds } = req.body;
+
+    // VIP tekshiruvi
+    const rawUserId = (userId || req.headers['x-telegram-user-id'] || '').toString().trim();
+    const cleanId = rawUserId.replace(/^TG-/, '');
+    const approvedVips = getApprovedVipIds();
+    const isVip = (cleanId && approvedVips.includes(cleanId)) || 
+                  (rawUserId && approvedVips.includes(rawUserId)) ||
+                  req.body.isVip === true || 
+                  req.body.userPlan === 'tariff_vip';
+
+    // 1 minut bepul suhbat limiti (Oddiy foydalanuvchilar uchun)
+    if (!isVip && cleanId) {
+      const currentUsage = getVoiceUsage(cleanId);
+      if (currentUsage >= VOICE_FREE_LIMIT_SECONDS) {
+        return res.json({
+          success: false,
+          limitExceeded: true,
+          replyText: "1 daqiqalik bepul suhbat vaqtingiz tugadi! Qattiqqo'l Ovozli Ustoz bilan to'xtovsiz, cheksiz jonli muloqot qilish uchun VIP PRO tarifiga obuna bo'ling!",
+          audioBase64: null,
+          persona: {
+            key: persona || 'angry',
+            name: "G'azablangan Ustoz 🔥",
+            voice: 'Kore'
+          },
+          voiceUsage: {
+            secondsUsed: currentUsage,
+            limitSeconds: VOICE_FREE_LIMIT_SECONDS,
+            remainingSeconds: 0,
+            isVip: false
+          }
+        });
+      }
+    }
+
     const cleanMsg = (message && typeof message === 'string' && message.trim()) 
       ? message.trim() 
       : (audioBase64Input ? "" : "Ustoz, men jim turibman yoki hech narsa demadim...");
@@ -548,7 +626,22 @@ app.post('/api/voice-agent/talk', async (req, res) => {
       voice: voice || 'uz-UZ-MadinaNeural'
     });
 
-    return res.json(result);
+    // Foydalanilgan vaqtni yozib boramiz (agar VIP bo'lmasa)
+    let newUsage = 0;
+    if (!isVip && cleanId) {
+      const addedSecs = (typeof elapsedSeconds === 'number' && elapsedSeconds > 0) ? Math.min(30, elapsedSeconds) : 10;
+      newUsage = recordVoiceUsage(cleanId, addedSecs);
+    }
+
+    return res.json({
+      ...result,
+      voiceUsage: {
+        secondsUsed: isVip ? 0 : (cleanId ? getVoiceUsage(cleanId) : 0),
+        limitSeconds: VOICE_FREE_LIMIT_SECONDS,
+        remainingSeconds: isVip ? 999999 : Math.max(0, VOICE_FREE_LIMIT_SECONDS - (cleanId ? getVoiceUsage(cleanId) : 0)),
+        isVip: Boolean(isVip)
+      }
+    });
   } catch (err) {
     console.error("Voice agent API xatosi:", err.message);
     // 24/7 Har doim muvaffaqiyatli javob qaytarish (hech qachon qotib qolmasligi uchun)
