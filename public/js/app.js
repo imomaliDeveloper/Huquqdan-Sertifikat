@@ -4367,6 +4367,7 @@ function embFallbackSpeak(text) {
   if ('speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = 'uz-UZ';
       utter.rate = 1.15; // shiddatli tezlik

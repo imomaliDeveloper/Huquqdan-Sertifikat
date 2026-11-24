@@ -67,42 +67,40 @@ async function generateTutorReply(userMessage, history = [], personaKey = 'angry
   if (!ai) throw new Error("Gemini API kaliti ulanmagan");
 
   const config = PERSONA_CONFIGS[personaKey] || PERSONA_CONFIGS.angry;
-  const candidateModels = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+  const candidateModels = ['gemini-3.5-flash-lite', 'gemini-3.5-flash'];
 
   let conversationPrompt = "";
   if (Array.isArray(history) && history.length > 0) {
-    conversationPrompt += "Oldingi suhbat:\n" + history.slice(-6).map(h => `${h.role === 'user' ? 'Talaba' : 'Ustoz'}: ${h.text}`).join("\n") + "\n\n";
+    conversationPrompt += "Oldingi suhbat:\n" + history.slice(-4).map(h => `${h.role === 'user' ? 'Talaba' : 'Ustoz'}: ${h.text}`).join("\n") + "\n\n";
   }
-  conversationPrompt += `Talaba aytdi: "${userMessage}"\n\nUstoz (1-3 ta shiddatli og'zaki jumla bilan javob ber):`;
+  conversationPrompt += `Talaba aytdi: "${userMessage}"\n\nUstoz (faqat 1 ta juda qisqa, shiddatli gap bilan darhol javob ber):`;
 
   let replyText = null;
 
   for (const model of candidateModels) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const resp = await ai.models.generateContent({
-          model,
-          contents: conversationPrompt,
-          config: {
-            systemInstruction: config.systemInstruction,
-            temperature: 0.8,
-            maxOutputTokens: 250
-          }
-        });
+    try {
+      const callPromise = ai.models.generateContent({
+        model,
+        contents: conversationPrompt,
+        config: {
+          systemInstruction: config.systemInstruction,
+          temperature: 0.7,
+          maxOutputTokens: 60 // Chaqmoqdek tez javob berish uchun 60 token
+        }
+      });
 
-        if (resp && resp.text) {
-          replyText = resp.text.trim();
-          break;
-        }
-      } catch (err) {
-        if (attempt === 1 && (err.status === 503 || err.status === 429)) {
-          await new Promise(r => setTimeout(r, 600));
-          continue;
-        }
+      const resp = await Promise.race([
+        callPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('LLM_TIMEOUT')), 2500))
+      ]);
+
+      if (resp && resp.text) {
+        replyText = resp.text.trim();
         break;
       }
+    } catch (err) {
+      continue;
     }
-    if (replyText) break;
   }
 
   // Favqulodda fallback agar internet/kvota muammosi bo'lsa
@@ -134,42 +132,41 @@ async function textToSpeech(text, personaKey = 'angry', customVoice = null) {
 
   const config = PERSONA_CONFIGS[personaKey] || PERSONA_CONFIGS.angry;
   const voiceName = customVoice || config.voice || 'Kore';
-  // TTS uchun toza matn (keraksiz belgilarni olib tashlash)
   const cleanSpeechText = text.replace(/[*_#`~[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const resp = await ai.interactions.create({
-        model: 'gemini-3.8-flash-tts',
-        input: [{
-          type: 'user_input',
-          content: [{
-            type: 'text',
-            text: cleanSpeechText,
-            annotations: [{
-              type: 'speech_metadata',
-              style: config.style,
-            }],
+  try {
+    const ttsPromise = ai.interactions.create({
+      model: 'gemini-3.8-flash-tts',
+      input: [{
+        type: 'user_input',
+        content: [{
+          type: 'text',
+          text: cleanSpeechText,
+          annotations: [{
+            type: 'speech_metadata',
+            style: config.style,
           }],
         }],
-        response_format: { type: 'audio' },
-        generation_config: {
-          speech_config: [
-            { voice: voiceName },
-          ],
-        },
-      });
+      }],
+      response_format: { type: 'audio' },
+      generation_config: {
+        speech_config: [
+          { voice: voiceName },
+        ],
+      },
+    });
 
-      if (resp.output_audio?.data) {
-        return resp.output_audio.data; // Base64 WAV audio
-      }
-    } catch (err) {
-      if (attempt === 1) {
-        await new Promise(r => setTimeout(r, 400));
-        continue;
-      }
-      console.warn("TTS xatosi (attempt " + attempt + "):", err.message);
+    // Tezkor javob berish uchun: 2500ms dan ortiq kutmaymiz!
+    const resp = await Promise.race([
+      ttsPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('TTS_TIMEOUT')), 2500))
+    ]);
+
+    if (resp && resp.output_audio?.data) {
+      return resp.output_audio.data;
     }
+  } catch (err) {
+    // Agar Gemini TTS sekin ishlasa, client darhol o'zi ovoz chiqaradi
   }
 
   return null;
