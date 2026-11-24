@@ -4636,7 +4636,6 @@ function embToggleHandsFree() {
     embStopListening();
     embSetVisualState('idle');
   }
-  }
 }
 
 function embToggleSubtitles() {
