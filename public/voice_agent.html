@@ -411,10 +411,6 @@
         soundBars.classList.add('opacity-0');
         mouth.classList.remove('talking-mouth');
         mouth.style.height = '6px';
-        
-        if (isHandsFree && !isRecording && !isSpeaking) {
-          setTimeout(startListening, 600);
-        }
       }
     }
 
@@ -435,14 +431,37 @@
       }
     }
 
-    let activeMicStream = null;
     let micPermissionGranted = false;
+    let activeRecognition = null;
+    let activeMediaRecorder = null;
+    let recordedAudioChunks = [];
+    let activeMediaStream = null;
+    let handsFreeTimer = null;
+
+    function cancelHandsFreeTimer() {
+      if (handsFreeTimer) {
+        clearTimeout(handsFreeTimer);
+        handsFreeTimer = null;
+      }
+    }
+
+    function scheduleHandsFreeNextTurn(delayMs = 600) {
+      cancelHandsFreeTimer();
+      if (!isHandsFree) return;
+      handsFreeTimer = setTimeout(() => {
+        handsFreeTimer = null;
+        if (isHandsFree && !isSpeaking && !isThinking && !isRecording) {
+          startListening();
+        }
+      }, delayMs);
+    }
 
     async function requestMicPermissionOnce() {
-      if (micPermissionGranted && activeMicStream && activeMicStream.active) return true;
+      if (micPermissionGranted) return true;
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
-          activeMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach(t => t.stop());
           micPermissionGranted = true;
           return true;
         } catch (e) {
@@ -453,38 +472,55 @@
       return true;
     }
 
-    function getOrCreateRecognition() {
-      if (recognition) return recognition;
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return null;
+    async function startListening() {
+      if (isSpeaking || isThinking) return;
+      primeAudio();
+      cancelHandsFreeTimer();
+
+      await requestMicPermissionOnce();
+
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (SpeechRec) {
+        startSpeechRecognition(SpeechRec);
+      } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        startMediaRecorder();
+      } else {
+        toggleTextInput(true);
+      }
+    }
+
+    function startSpeechRecognition(SpeechRec) {
+      if (activeRecognition) {
+        try { activeRecognition.abort(); } catch (e) {}
+        activeRecognition = null;
+      }
 
       try {
-        const rec = new SpeechRecognition();
+        const rec = new SpeechRec();
         rec.lang = 'uz-UZ';
         rec.continuous = false;
         rec.interimResults = true;
         rec.maxAlternatives = 1;
 
-        let latestInterim = '';
+        let buffer = '';
+        let interim = '';
 
         rec.onstart = () => {
           isRecording = true;
-          speechBuffer = '';
-          latestInterim = '';
           setVisualState('listening');
         };
 
         rec.onresult = (event) => {
-          let interimTranscript = '';
+          interim = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
-              speechBuffer += ' ' + event.results[i][0].transcript;
+              buffer += ' ' + event.results[i][0].transcript;
             } else {
-              interimTranscript += ' ' + event.results[i][0].transcript;
+              interim += ' ' + event.results[i][0].transcript;
             }
           }
-          latestInterim = interimTranscript.trim();
-          const textToShow = (speechBuffer + ' ' + latestInterim).trim();
+          const textToShow = (buffer + ' ' + interim).trim();
           if (textToShow && isSubtitlesOn) {
             speakerLabel.innerHTML = '<i class="fa-solid fa-microphone text-blue-400 mr-1"></i> Siz:';
             subtitlesText.innerText = `"${textToShow}"`;
@@ -494,8 +530,9 @@
         rec.onerror = (e) => {
           console.warn('Speech recognition warning:', e.error);
           isRecording = false;
-          if (e.error === 'no-speech' && isHandsFree) {
-            setTimeout(startListening, 1000);
+          activeRecognition = null;
+          if (e.error === 'no-speech' && isHandsFree && !isSpeaking && !isThinking) {
+            scheduleHandsFreeNextTurn(500);
           } else {
             setVisualState('idle');
           }
@@ -503,64 +540,145 @@
 
         rec.onend = () => {
           isRecording = false;
-          const finalText = (speechBuffer + ' ' + latestInterim).trim();
-          speechBuffer = '';
-          latestInterim = '';
+          activeRecognition = null;
+          const finalText = (buffer + ' ' + interim).trim();
           if (finalText) {
             sendToGemini(finalText);
           } else {
             setVisualState('idle');
+            if (isHandsFree && !isSpeaking && !isThinking) {
+              scheduleHandsFreeNextTurn(600);
+            }
           }
         };
 
-        recognition = rec;
-        return recognition;
-      } catch (err) {
-        console.warn("Recognition init error:", err);
-        return null;
-      }
-    }
-
-    // Mikrofonni ishga tushirish (1 marta ruxsat bilan)
-    async function startListening() {
-      primeAudio();
-      if (isSpeaking || isThinking) {
-        try { audioPlayer.pause(); } catch(e){}
-        isSpeaking = false;
-      }
-
-      if (!micPermissionGranted) {
-        await requestMicPermissionOnce();
-      }
-
-      const rec = getOrCreateRecognition();
-      if (!rec) {
-        toggleTextInput(true);
-        return;
-      }
-
-      if (isRecording) return;
-
-      try {
+        activeRecognition = rec;
         rec.start();
       } catch (err) {
-        if (err.name !== 'InvalidStateError') {
-          console.warn("Mic start err:", err);
-          isRecording = false;
-          setVisualState('idle');
+        console.warn("Recognition start xatosi:", err.message);
+        isRecording = false;
+        activeRecognition = null;
+        setVisualState('idle');
+        if (isHandsFree && !isSpeaking && !isThinking) {
+          scheduleHandsFreeNextTurn(1000);
         }
       }
     }
 
-    // Mikrofonni to'xtatish
+    async function startMediaRecorder() {
+      if (activeMediaRecorder && activeMediaRecorder.state === 'recording') return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        activeMediaStream = stream;
+        recordedAudioChunks = [];
+
+        const mimeType = (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) ? 'audio/webm;codecs=opus' :
+                         (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported('audio/mp4')) ? 'audio/mp4' : '';
+
+        const options = mimeType ? { mimeType } : {};
+        const mr = new MediaRecorder(stream, options);
+
+        mr.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) recordedAudioChunks.push(e.data);
+        };
+
+        mr.onstart = () => {
+          isRecording = true;
+          setVisualState('listening');
+        };
+
+        mr.onstop = async () => {
+          isRecording = false;
+          if (activeMediaStream) {
+            activeMediaStream.getTracks().forEach(t => t.stop());
+            activeMediaStream = null;
+          }
+          if (recordedAudioChunks.length > 0) {
+            const audioBlob = new Blob(recordedAudioChunks, { type: mimeType || 'audio/webm' });
+            sendAudioBlobToGemini(audioBlob);
+          } else {
+            setVisualState('idle');
+            if (isHandsFree && !isSpeaking && !isThinking) {
+              scheduleHandsFreeNextTurn(600);
+            }
+          }
+        };
+
+        activeMediaRecorder = mr;
+        mr.start();
+
+        if (isHandsFree) {
+          setTimeout(() => {
+            if (activeMediaRecorder && activeMediaRecorder.state === 'recording') {
+              stopListening();
+            }
+          }, 4000);
+        }
+      } catch (err) {
+        console.warn("MediaRecorder start error:", err);
+        isRecording = false;
+        setVisualState('idle');
+      }
+    }
+
     function stopListening() {
-      if (recognition && isRecording) {
-        // 350ms kutish: mikrofondan kelgan oxirgi so'zlar to'liq qabul bo'lsin
+      if (activeRecognition) {
         setTimeout(() => {
-          try { recognition.stop(); } catch(e){}
+          try {
+            if (activeRecognition) activeRecognition.stop();
+          } catch (e) {}
         }, 350);
       }
-      isRecording = false;
+      if (activeMediaRecorder && activeMediaRecorder.state === 'recording') {
+        try {
+          activeMediaRecorder.stop();
+        } catch (e) {}
+      }
+    }
+
+    async function sendAudioBlobToGemini(audioBlob) {
+      setVisualState('thinking');
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        try {
+          const base64Data = (reader.result || '').split(',')[1];
+          if (!base64Data) {
+            setVisualState('idle');
+            if (isHandsFree) scheduleHandsFreeNextTurn(600);
+            return;
+          }
+          const resp = await fetch('/api/voice-agent/talk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              audioBase64Input: base64Data,
+              audioMimeType: audioBlob.type || 'audio/webm',
+              history: conversationHistory.slice(-8),
+              persona: currentPersona,
+              voice: 'uz-UZ-SardorNeural'
+            })
+          });
+          const data = await resp.json();
+          if (data && data.replyText) {
+            conversationHistory.push({ role: 'model', text: data.replyText });
+
+            speakerLabel.innerHTML = `<i class="fa-solid fa-fire text-red-500 mr-1"></i> ${data.persona?.name || "Ustoz"}:`;
+            subtitlesText.innerText = `"${data.replyText}"`;
+
+            if (data.audioBase64) {
+              playTtsAudio(data.audioBase64, data.replyText, data.audioFormat);
+            } else {
+              fallbackSpeak(data.replyText);
+            }
+          } else {
+            fallbackSpeak("Sen ahmoq! Nega gapirmay vaqtimni o'g'irlayapsan?! Tezroq gapir, yaramas!");
+          }
+        } catch (e) {
+          console.error("Audio yuborish xatosi:", e);
+          fallbackSpeak("Menga qara! Bosh chayqab o'tirmasdan, og'zingni ochib aniq gapir! Dars o'tyaptimi bu yerda?!");
+        }
+      };
     }
 
     // Gemini Voice Agent Backendiga so'rov yuborish
@@ -627,7 +745,7 @@
 
       audioPlayer.onended = () => {
         setVisualState('idle');
-        if (isHandsFree) setTimeout(startListening, 800);
+        if (isHandsFree) scheduleHandsFreeNextTurn(600);
       };
 
       audioPlayer.onerror = () => {
@@ -659,13 +777,18 @@
           utter.pitch = 1.1;
           utter.onend = () => {
             setVisualState('idle');
-            if (isHandsFree) setTimeout(startListening, 800);
+            if (isHandsFree) scheduleHandsFreeNextTurn(600);
           };
-          utter.onerror = () => setVisualState('idle');
+          utter.onerror = () => {
+            setVisualState('idle');
+            if (isHandsFree) scheduleHandsFreeNextTurn(800);
+          };
           window.speechSynthesis.speak(utter);
           return;
         } catch (e) {}
       }
+      simulateSpeakingVisual(3500);
+    }
       simulateSpeakingVisual(3500);
     }
 
@@ -745,6 +868,7 @@
       if (isHandsFree) {
         startListening();
       } else {
+        cancelHandsFreeTimer();
         stopListening();
         setVisualState('idle');
       }

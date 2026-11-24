@@ -62,19 +62,37 @@ Qoidalar:
 };
 
 /**
- * Matn yaratish (LLM)
+ * Matn yaratish (LLM) - Matn yoki to'g'ridan-to'g'ri Audio orqali
  */
-async function generateTutorReply(userMessage, history = [], personaKey = 'angry') {
+async function generateTutorReply(input, history = [], personaKey = 'angry') {
   if (!ai) throw new Error("Gemini API kaliti ulanmagan");
 
   const config = PERSONA_CONFIGS[personaKey] || PERSONA_CONFIGS.angry;
   const candidateModels = ['gemini-3.5-flash-lite', 'gemini-3.5-flash'];
 
-  let conversationPrompt = "";
-  if (Array.isArray(history) && history.length > 0) {
-    conversationPrompt += "Oldingi suhbat:\n" + history.slice(-4).map(h => `${h.role === 'user' ? 'Talaba' : 'Ustoz'}: ${h.text}`).join("\n") + "\n\n";
+  let userMessage = typeof input === 'string' ? input : (input?.userMessage || '');
+  let audioBase64Input = typeof input === 'object' ? input?.audioBase64Input : null;
+  let audioMimeType = typeof input === 'object' ? input?.audioMimeType : null;
+
+  let contents;
+  if (audioBase64Input) {
+    contents = [
+      {
+        inlineData: {
+          data: audioBase64Input,
+          mimeType: audioMimeType || 'audio/webm'
+        }
+      },
+      `Talabaning ushbu ovozli gapini eshit. Qattiqqo'l, talabchan va g'azablangan GoPrep ustoz sifatida unga darhol FAQAT 1 TA QISQA, KESKIN GAP bilan o'zbek tilida og'zaki javob ber (uzog'i 10-15 ta so'z)!`
+    ];
+  } else {
+    let conversationPrompt = "";
+    if (Array.isArray(history) && history.length > 0) {
+      conversationPrompt += "Oldingi suhbat:\n" + history.slice(-4).map(h => `${h.role === 'user' ? 'Talaba' : 'Ustoz'}: ${h.text}`).join("\n") + "\n\n";
+    }
+    conversationPrompt += `Talaba aytdi: "${userMessage}"\n\nUstoz (faqat 1 ta juda qisqa, shiddatli gap bilan darhol javob ber):`;
+    contents = conversationPrompt;
   }
-  conversationPrompt += `Talaba aytdi: "${userMessage}"\n\nUstoz (faqat 1 ta juda qisqa, shiddatli gap bilan darhol javob ber):`;
 
   let replyText = null;
 
@@ -82,7 +100,7 @@ async function generateTutorReply(userMessage, history = [], personaKey = 'angry
     try {
       const callPromise = ai.models.generateContent({
         model,
-        contents: conversationPrompt,
+        contents,
         config: {
           systemInstruction: config.systemInstruction,
           temperature: 0.7,
@@ -92,7 +110,7 @@ async function generateTutorReply(userMessage, history = [], personaKey = 'angry
 
       const resp = await Promise.race([
         callPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('LLM_TIMEOUT')), 2500))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('LLM_TIMEOUT')), 3000))
       ]);
 
       if (resp && resp.text) {
@@ -214,17 +232,21 @@ async function textToSpeech(text, personaKey = 'angry', customVoice = null) {
 /**
  * Asosiy Voice Agent Funksiyasi (24/7 Har doim ishlash kafolati)
  */
-async function processVoiceAgentInteraction({ message, history = [], persona = 'angry', voice = null }) {
+async function processVoiceAgentInteraction({ message, audioBase64Input = null, audioMimeType = null, history = [], persona = 'angry', voice = null }) {
   const personaKey = PERSONA_CONFIGS[persona] ? persona : 'angry';
   let cleanMessage = (message || '').trim();
 
   // Agar foydalanuvchi jim turgan bo'lsa yoki mikrofon so'z olmagan bo'lsa
-  if (!cleanMessage || cleanMessage.length < 2) {
+  if (!cleanMessage && !audioBase64Input) {
     cleanMessage = "Ustoz, men jim turibman!";
   }
 
   // 1. Javob matnini generatsiya qilish
-  const { replyText, config } = await generateTutorReply(cleanMessage, history, personaKey);
+  const { replyText, config } = await generateTutorReply({
+    userMessage: cleanMessage,
+    audioBase64Input,
+    audioMimeType
+  }, history, personaKey);
 
   // 2. Javobni jonli ovozga (TTS) aylantirish
   let ttsResult = null;
@@ -236,7 +258,7 @@ async function processVoiceAgentInteraction({ message, history = [], persona = '
 
   return {
     success: true,
-    userMessage: cleanMessage,
+    userMessage: cleanMessage || "Ovozli xabar",
     replyText,
     audioBase64: ttsResult?.audioBase64 || null, // browser <audio> da to'g'ridan-to'g'ri ijro etiladi
     audioFormat: ttsResult?.format || 'audio/mp3',

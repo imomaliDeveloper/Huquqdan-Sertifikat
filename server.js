@@ -534,13 +534,15 @@ app.get('/api/voice-agent/personas', (req, res) => {
 
 app.post('/api/voice-agent/talk', async (req, res) => {
   try {
-    const { message, history, persona, voice } = req.body;
+    const { message, audioBase64Input, audioMimeType, history, persona, voice } = req.body;
     const cleanMsg = (message && typeof message === 'string' && message.trim()) 
       ? message.trim() 
-      : "Ustoz, men jim turibman yoki hech narsa demadim...";
+      : (audioBase64Input ? "" : "Ustoz, men jim turibman yoki hech narsa demadim...");
 
     const result = await processVoiceAgentInteraction({
       message: cleanMsg,
+      audioBase64Input,
+      audioMimeType,
       history: Array.isArray(history) ? history : [],
       persona: persona || 'angry',
       voice: voice || 'uz-UZ-SardorNeural'
