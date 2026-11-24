@@ -4088,16 +4088,14 @@ let embSpeechBuffer = '';
 function embSelectVoice(v) {
   currentSelectedVoice = v;
   const btnM = document.getElementById("btnVoiceMadina");
+  const btnG = document.getElementById("btnVoiceGemini");
   const btnS = document.getElementById("btnVoiceSardor");
-  if (btnM && btnS) {
-    if (v.includes("Madina")) {
-      btnM.className = "px-2.5 py-1 rounded-lg font-bold transition bg-gradient-to-r from-red-600 to-amber-600 text-white shadow";
-      btnS.className = "px-2.5 py-1 rounded-lg font-semibold text-neutral-400 hover:text-white transition";
-    } else {
-      btnS.className = "px-2.5 py-1 rounded-lg font-bold transition bg-gradient-to-r from-red-600 to-amber-600 text-white shadow";
-      btnM.className = "px-2.5 py-1 rounded-lg font-semibold text-neutral-400 hover:text-white transition";
-    }
-  }
+  const activeClass = "px-2 py-1 rounded-lg font-bold transition bg-gradient-to-r from-red-600 to-amber-600 text-white shadow whitespace-nowrap";
+  const inactiveClass = "px-2 py-1 rounded-lg font-semibold text-neutral-400 hover:text-white transition whitespace-nowrap";
+
+  if (btnM) btnM.className = (v === 'uz-UZ-MadinaNeural') ? activeClass : inactiveClass;
+  if (btnG) btnG.className = (v === 'gemini_aoede') ? activeClass : inactiveClass;
+  if (btnS) btnS.className = (v === 'uz-UZ-SardorNeural') ? activeClass : inactiveClass;
 }
 
 function switchAiMode(mode) {

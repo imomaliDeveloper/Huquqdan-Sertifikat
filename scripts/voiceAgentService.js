@@ -143,21 +143,96 @@ async function generateTutorReply(input, history = [], personaKey = 'angry') {
   return { replyText, config };
 }
 
+function pcmToWav(pcmBuffer, sampleRate = 24000, numChannels = 1, bitDepth = 16) {
+  const byteRate = sampleRate * numChannels * (bitDepth / 8);
+  const blockAlign = numChannels * (bitDepth / 8);
+  const dataSize = pcmBuffer.length;
+  const header = Buffer.alloc(44);
+
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + dataSize, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20); // PCM
+  header.writeUInt16LE(numChannels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitDepth, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(dataSize, 40);
+
+  return Buffer.concat([header, pcmBuffer]);
+}
+
 /**
- * Matnni Ovozga aylantirish (Tabiiy O'zbek Tili Neural TTS + Gemini TTS Fallback)
+ * Gemini Rasmiy Insoniy Ovozini Generatsiya Qilish (Aoede, Puck, Charon)
+ */
+async function generateGeminiNativeVoice(text, voiceName = 'Aoede') {
+  if (!ai) return null;
+  try {
+    const resp = await Promise.race([
+      ai.models.generateContent({
+        model: 'gemini-2.5-flash-preview-tts',
+        contents: text,
+        config: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName: voiceName
+              }
+            }
+          }
+        }
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('GEMINI_VOICE_TIMEOUT')), 3500))
+    ]);
+
+    const base64Pcm = resp.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (base64Pcm && base64Pcm.length > 500) {
+      const pcmBuf = Buffer.from(base64Pcm, 'base64');
+      const wavBuf = pcmToWav(pcmBuf, 24000);
+      return {
+        audioBase64: wavBuf.toString('base64'),
+        format: 'audio/wav'
+      };
+    }
+  } catch (err) {
+    console.warn("Gemini Voice kvota/tezlik xabari:", err.message);
+  }
+  return null;
+}
+
+/**
+ * Matnni Ovozga aylantirish (Gemini Insoniy Ovozlar + O'zbek Tili HD Neural TTS)
  */
 async function textToSpeech(text, personaKey = 'angry', customVoice = null) {
   const config = PERSONA_CONFIGS[personaKey] || PERSONA_CONFIGS.angry;
-  const voiceName = customVoice || config.voice || 'uz-UZ-SardorNeural';
+  const requestedVoice = customVoice || config.voice || 'uz-UZ-MadinaNeural';
   const cleanSpeechText = text.replace(/[*_#`~[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
   if (!cleanSpeechText) return null;
 
-  // 1. Eng tezkor va tabiiy O'zbek tili Neural TTS (msedge-tts, 96kbps HD audio)
+  // A. Agar foydalanuvchi Gemini insoniy ovozini so'ragan bo'lsa
+  if (requestedVoice.startsWith('gemini_')) {
+    const geminiVoiceMap = {
+      'gemini_aoede': 'Aoede', // Insoniy yoqimli ayol ovozi
+      'gemini_puck': 'Puck',   // Quvnoq insoniy erkak ovozi
+      'gemini_charon': 'Charon'// Jiddiy insoniy erkak ovozi
+    };
+    const targetGeminiVoice = geminiVoiceMap[requestedVoice] || 'Aoede';
+    const geminiResult = await generateGeminiNativeVoice(cleanSpeechText, targetGeminiVoice);
+    if (geminiResult) return geminiResult;
+    // Agar Gemini 3 req/min kvotasi to'lgan bo'lsa, xizmat uzilmasligi uchun Madina'ga o'tadi
+  }
+
+  // B. O'zbek tili 96kbps HD Neural TTS (msedge-tts, Madina & Sardor, cheksiz va 24/7)
   try {
+    const voiceName = requestedVoice.startsWith('gemini_') ? 'uz-UZ-MadinaNeural' : requestedVoice;
     const tts = new MsEdgeTTS();
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
     const msPromise = new Promise((resolve, reject) => {
-      // Madina ovozi juda yoqimli va tabiiy yangraydi (+0%, +0Hz). Sardor uchun biroz salobatli (-2%, -2Hz)
       const isMadina = voiceName.includes('Madina');
       const voiceOptions = isMadina
         ? { rate: '+0%', pitch: '+0Hz' }
@@ -189,47 +264,6 @@ async function textToSpeech(text, personaKey = 'angry', customVoice = null) {
     }
   } catch (msErr) {
     console.warn("msedge-tts xatosi:", msErr.message);
-  }
-
-  // 2. Fallback: Gemini 3.8 Flash TTS
-  if (ai) {
-    try {
-      const geminiVoice = customVoice || 'Kore';
-      const ttsPromise = ai.interactions.create({
-        model: 'gemini-3.8-flash-tts',
-        input: [{
-          type: 'user_input',
-          content: [{
-            type: 'text',
-            text: cleanSpeechText,
-            annotations: [{
-              type: 'speech_metadata',
-              style: config.style,
-            }],
-          }],
-        }],
-        response_format: { type: 'audio' },
-        generation_config: {
-          speech_config: [
-            { voice: geminiVoice },
-          ],
-        },
-      });
-
-      const resp = await Promise.race([
-        ttsPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('GEMINI_TTS_TIMEOUT')), 3500))
-      ]);
-
-      if (resp && resp.output_audio?.data) {
-        return {
-          audioBase64: resp.output_audio.data,
-          format: 'audio/wav'
-        };
-      }
-    } catch (gErr) {
-      // Gemini TTS ham o'tmadi
-    }
   }
 
   return null;
