@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>GoPrep Voice AI Promo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    body {
+      width: 720px;
+      height: 1280px;
+      background: radial-gradient(circle at 50% 38%, #1f080a 0%, #0d0405 45%, #050203 100%);
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 55px 36px 45px 36px;
+    }
+
+    /* Ambient Pulsing Glow */
+    .ambient-glow {
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.22);
+      filter: blur(120px);
+      top: 260px;
+      left: 120px;
+      z-index: 1;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .ambient-glow.flaming {
+      background: rgba(249, 115, 22, 0.38);
+      filter: blur(100px);
+      transform: scale(1.15);
+    }
+
+    /* Top App Header */
+    .top-header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(220, 38, 38, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fca5a5;
+      letter-spacing: 0.5px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: pulse 1s infinite;
+    }
+    .app-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #fca5a5, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .app-subtitle {
+      font-size: 14px;
+      color: #a3a3a3;
+      font-weight: 500;
+    }
+
+    /* Avatar Arena */
+    .arena {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: -20px;
+    }
+
+    /* Flame SVG Container */
+    .flame-container {
+      position: absolute;
+      top: -110px;
+      width: 200px;
+      height: 200px;
+      z-index: 25;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .flame-container.active {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    .flame-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 25px rgba(239, 68, 68, 0.9)) drop-shadow(0 0 50px rgba(245, 158, 11, 0.8));
+    }
+
+    /* Head Avatar */
+    .head {
+      position: relative;
+      width: 175px;
+      height: 205px;
+      border-radius: 80px 80px 90px 90px;
+      background: #0f0a0c;
+      border: 3.5px solid #2a1518;
+      box-shadow: inset 0 -10px 25px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    /* Eyebrows */
+    .eyebrows {
+      display: flex;
+      gap: 36px;
+      margin-bottom: 12px;
+      margin-top: 10px;
+    }
+    .eyebrow {
+      width: 32px;
+      height: 6px;
+      background: #737373;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .eyebrow.left { transform: rotate(18deg); }
+    .eyebrow.right { transform: rotate(-18deg); }
+    .head.angry .eyebrow {
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    }
+    .head.angry .eyebrow.left { transform: rotate(26deg) translateY(4px); }
+    .head.angry .eyebrow.right { transform: rotate(-26deg) translateY(4px); }
+
+    /* Eyes */
+    .eyes {
+      display: flex;
+      gap: 36px;
+      margin-bottom: 22px;
+    }
+    .eye {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #171717;
+      border: 2px solid #404040;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pupil {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .head.angry .eye {
+      border-color: #ef4444;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.7);
+    }
+    .head.angry .pupil {
+      background: #f87171;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    /* Mouth */
+    .mouth-wrapper {
+      width: 60px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mouth {
+      width: 36px;
+      height: 5px;
+      background: #404040;
+      border-radius: 8px;
+      transition: height 0.08s ease, width 0.08s ease;
+    }
+    .head.angry .mouth {
+      background: #ef4444;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+    }
+
+    /* Status Pill */
+    .status-pill {
+      margin-top: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(23, 23, 23, 0.85);
+      border: 1px solid #2e1014;
+      padding: 9px 20px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #e5e5e5;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .status-pill.angry {
+      background: rgba(69, 10, 10, 0.85);
+      border-color: #ef4444;
+      color: #fca5a5;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Visualizer Soundbars */
+    .sound-bars {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      height: 38px;
+      margin-top: 18px;
+    }
+    .bar {
+      width: 4.5px;
+      height: 8px;
+      border-radius: 4px;
+      background: #525252;
+      transition: height 0.08s ease;
+    }
+    .flaming .bar {
+      background: linear-gradient(to top, #ef4444, #f59e0b);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    }
+
+    /* Subtitles Card */
+    .subtitles-card {
+      position: relative;
+      z-index: 10;
+      background: rgba(15, 7, 9, 0.82);
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      backdrop-filter: blur(20px);
+      border-radius: 26px;
+      padding: 24px 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.08);
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+    .sub-speaker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .sub-speaker.student {
+      color: #60a5fa;
+    }
+    .sub-speaker.tutor {
+      color: #ef4444;
+    }
+    .sub-text {
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: #f5f5f5;
+    }
+    .highlight {
+      color: #fef08a;
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
+    }
+
+    /* Bottom CTA Card */
+    .cta-card {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.25), rgba(245, 158, 11, 0.18));
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      border-radius: 24px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+    .cta-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cta-headline {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fef08a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cta-links {
+      font-size: 12px;
+      color: #e5e5e5;
+      font-weight: 600;
+    }
+    .cta-btn {
+      background: linear-gradient(to right, #dc2626, #ea580c);
+      color: #fff;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5);
+      border: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background glow -->
+  <div id="ambientGlow" class="ambient-glow"></div>
+
+  <!-- Top Header -->
+  <div class="top-header">
+    <div class="top-bar">
+      <div class="badge-live">
+        <span class="live-dot"></span>
+        <span>JONLI OVOZLI AI</span>
+      </div>
+      <div style="font-size: 13px; color: #a3a3a3; font-weight: 700;">
+        <i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Milliy Sertifikat
+      </div>
+    </div>
+    <div class="app-title">HUQUQ MILLIY SERTIFIKAT</div>
+    <div class="app-subtitle">GoPrep Angry AI — Talabchan Ovozli Ustoz</div>
+  </div>
+
+  <!-- Central Avatar Arena -->
+  <div class="arena">
+    <!-- SVG Fire Flame -->
+    <div id="flameContainer" class="flame-container">
+      <svg class="flame-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="flameGrad1" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#b91c1c"/>
+            <stop offset="40%" stop-color="#ea580c"/>
+            <stop offset="75%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#fef08a"/>
+          </linearGradient>
+          <linearGradient id="flameGrad2" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#ea580c"/>
+            <stop offset="60%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+        </defs>
+        <path id="flamePathOuter" d="M50 0C50 0 32 25 35 48C30 42 28 35 28 35C28 35 15 52 22 72C28 88 42 98 52 98C72 98 84 82 84 62C84 36 62 20 50 0Z" fill="url(#flameGrad1)"/>
+        <path id="flamePathInner" d="M48 24C48 24 38 40 42 58C38 52 36 46 36 46C36 46 26 60 32 75C36 85 45 92 52 92C65 92 74 80 72 64C70 46 56 36 48 24Z" fill="url(#flameGrad2)"/>
+      </svg>
+    </div>
+
+    <!-- Head -->
+    <div id="headAvatar" class="head">
+      <div class="eyebrows">
+        <div class="eyebrow left"></div>
+        <div class="eyebrow right"></div>
+      </div>
+      <div class="eyes">
+        <div class="eye"><div class="pupil"></div></div>
+        <div class="eye"><div class="pupil"></div></div>
+      </div>
+      <div class="mouth-wrapper">
+        <div id="mouth" class="mouth"></div>
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div id="statusBadge" class="status-pill">
+      <i class="fa-solid fa-microphone text-blue-400"></i>
+      <span id="statusText">Talaba savol bermoqda...</span>
+    </div>
+
+    <!-- Sound Bars Visualizer -->
+    <div id="soundBars" class="sound-bars">
+      <!-- 24 dynamic bars -->
+    </div>
+  </div>
+
+  <!-- Dynamic Subtitles Card -->
+  <div class="subtitles-card">
+    <div id="subSpeaker" class="sub-speaker student">
+      <i class="fa-solid fa-user"></i>
+      <span>Talaba:</span>
+    </div>
+    <div id="subText" class="sub-text">
+      "Ustoz, Konstitutsiyaning birinchi moddasida nima deyilgan o'zi?"
+    </div>
+  </div>
+
+  <!-- Bottom CTA Card -->
+  <div class="cta-card">
+    <div class="cta-left">
+      <div class="cta-headline">
+        <i class="fa-solid fa-fire text-orange-400"></i> Hoziroq Bepul Sinab Ko'ring!
+      </div>
+      <div class="cta-links">
+        🤖 Bot: <b>@Huquq_study_bot</b> | 📱 Mini App
+      </div>
+    </div>
+    <button class="cta-btn">BOSHLASH 🔥</button>
+  </div>
+
+  <script>
+    // Initialize 24 sound bars
+    const barsContainer = document.getElementById('soundBars');
+    for (let i = 0; i < 24; i++) {
+      const b = document.createElement('div');
+      b.className = 'bar';
+      b.id = 'bar_' + i;
+      barsContainer.appendChild(b);
+    }
+
+    const tutorFullText = "Quloq sol va yaxshilab eslab qol! O'zbekiston Respublikasi Konstitutsiyasining birinchi moddasiga ko'ra: O'zbekiston — suveren, demokratik, huquqiy, ijtimoiy va dunyoviy davlat! Buni bilmasdan sertifikat olaman deb xomxayol qilma! Tezroq kitobni och!";
+    const tutorWords = tutorFullText.split(" ");
+
+    // Frame rendering function called per frame from Node
+    window.renderFrame = function(t) {
+      const head = document.getElementById('headAvatar');
+      const flame = document.getElementById('flameContainer');
+      const glow = document.getElementById('ambientGlow');
+      const mouth = document.getElementById('mouth');
+      const statusBadge = document.getElementById('statusBadge');
+      const statusText = document.getElementById('statusText');
+      const subSpeaker = document.getElementById('subSpeaker');
+      const subText = document.getElementById('subText');
+      const soundBars = document.getElementById('soundBars');
+
+      // 1. Student speaks (0s - 4.4s)
+      if (t < 4.4) {
+        head.className = 'head';
+        flame.className = 'flame-container';
+        glow.className = 'ambient-glow';
+        soundBars.className = 'sound-bars';
+        statusBadge.className = 'status-pill';
+        statusBadge.innerHTML = '<i class="fa-solid fa-microphone text-blue-400"></i> <span>Talaba savol bermoqda...</span>';
+        subSpeaker.className = 'sub-speaker student';
+        subSpeaker.innerHTML = '<i class="fa-solid fa-user"></i> <span>Talaba:</span>';
+        subText.innerHTML = '"Ustoz, Konstitutsiyaning birinchi moddasida nima deyilgan o\'zi?"';
+
+        // Gentle mouth & blue bars
+        mouth.style.height = '4px';
+        mouth.style.width = '32px';
+        for (let i = 0; i < 24; i++) {
+          const bar = document.getElementById('bar_' + i);
+          const h = 6 + Math.abs(Math.sin(t * 10 + i * 0.4)) * 14;
+          bar.style.height = h + 'px';
+        }
+      }
+      // 2. Tutor thinking / flame starts erupting (4.4s - 4.9s)
+      else if (t >= 4.4 && t < 4.9) {
+        head.className = 'head angry';
+        flame.className = 'flame-container active';
+        glow.className = 'ambient-glow flaming';
+        statusBadge.className = 'status-pill angry';
+        statusBadge.innerHTML = '<i class="fa-solid fa-fire text-amber-400"></i> <span>Ustoz g\'azablanmoqda... 🔥</span>';
+        mouth.style.height = '6px';
+        mouth.style.width = '36px';
+      }
+      // 3. Tutor blazing & furiously speaking (4.9s - 22.7s)
+      else {
+        head.className = 'head angry';
+        flame.className = 'flame-container active';
+        glow.className = 'ambient-glow flaming';
+        soundBars.className = 'sound-bars flaming';
+        statusBadge.className = 'status-pill angry';
+        statusBadge.innerHTML = '<i class="fa-solid fa-fire text-red-500 animate-pulse"></i> <span>QATTIQQO\'L USTOZ GAPIRMOQDA 🔥</span>';
+
+        // Flame jitter
+        const flameJitter = 1.05 + Math.sin(t * 22) * 0.08;
+        flame.style.transform = `scale(${flameJitter}) rotate(${Math.sin(t * 14) * 2}deg)`;
+
+        // Mouth talk animation in sync with speech
+        const mHeight = 5 + Math.abs(Math.sin(t * 20)) * 26;
+        const mWidth = 36 + Math.abs(Math.cos(t * 12)) * 12;
+        mouth.style.height = mHeight + 'px';
+        mouth.style.width = mWidth + 'px';
+
+        // Soundbars high energy dancing
+        for (let i = 0; i < 24; i++) {
+          const bar = document.getElementById('bar_' + i);
+          const h = 6 + Math.abs(Math.sin(t * 18 + i * 0.5)) * 30;
+          bar.style.height = h + 'px';
+        }
+
+        // Subtitles highlight progression
+        subSpeaker.className = 'sub-speaker tutor';
+        subSpeaker.innerHTML = '<i class="fa-solid fa-fire"></i> <span>Qattiqqo\'l Ustoz AI:</span>';
+
+        const tutorProgress = Math.min(1, Math.max(0, (t - 4.9) / 17.5));
+        const highlightedIndex = Math.floor(tutorProgress * tutorWords.length);
+
+        let formatted = tutorWords.map((w, idx) => {
+          if (idx <= highlightedIndex) {
+            return `<span class="highlight">${w}</span>`;
+          }
+          return `<span style="opacity: 0.7;">${w}</span>`;
+        }).join(" ");
+
+        subText.innerHTML = `"${formatted}"`;
+      }
+    };
+  </script>
+</body>
+</html>
