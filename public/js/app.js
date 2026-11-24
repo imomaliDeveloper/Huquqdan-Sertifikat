@@ -4075,6 +4075,7 @@ function escapeHtml(str) {
 
 // ==================== EMBEDDED GOPREP VOICE AGENT (MINI APP ICHIDA) ====================
 let currentAiMode = 'chat'; // 'chat' | 'voice'
+let currentSelectedVoice = 'uz-UZ-MadinaNeural'; // Tabiiy, ravon va yoqimli o'zbek ayol ustoz ovozi
 let embIsHandsFree = false;
 let embIsSubtitlesOn = true;
 let embIsRecording = false;
@@ -4083,6 +4084,21 @@ let embIsSpeaking = false;
 let embVoiceHistory = [];
 let embRecognition = null;
 let embSpeechBuffer = '';
+
+function embSelectVoice(v) {
+  currentSelectedVoice = v;
+  const btnM = document.getElementById("btnVoiceMadina");
+  const btnS = document.getElementById("btnVoiceSardor");
+  if (btnM && btnS) {
+    if (v.includes("Madina")) {
+      btnM.className = "px-2.5 py-1 rounded-lg font-bold transition bg-gradient-to-r from-red-600 to-amber-600 text-white shadow";
+      btnS.className = "px-2.5 py-1 rounded-lg font-semibold text-neutral-400 hover:text-white transition";
+    } else {
+      btnS.className = "px-2.5 py-1 rounded-lg font-bold transition bg-gradient-to-r from-red-600 to-amber-600 text-white shadow";
+      btnM.className = "px-2.5 py-1 rounded-lg font-semibold text-neutral-400 hover:text-white transition";
+    }
+  }
+}
 
 function switchAiMode(mode) {
   currentAiMode = mode;
@@ -4434,7 +4450,7 @@ async function embSendAudioBlobToGemini(audioBlob) {
           audioMimeType: audioBlob.type || 'audio/webm',
           history: embVoiceHistory.slice(-8),
           persona: 'angry',
-          voice: 'uz-UZ-SardorNeural'
+          voice: currentSelectedVoice
         })
       });
       const data = await resp.json();
@@ -4476,7 +4492,7 @@ async function embSendVoiceToGemini(text) {
         message: cleanInput,
         history: embVoiceHistory.slice(-8),
         persona: 'angry',
-        voice: 'uz-UZ-SardorNeural'
+        voice: currentSelectedVoice
       })
     });
     const data = await resp.json();

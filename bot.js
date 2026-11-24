@@ -1793,7 +1793,7 @@ class SimpleTelegramBot {
           const result = await processVoiceAgentInteraction({
             message: userSpeechText,
             persona: persona,
-            voice: 'uz-UZ-SardorNeural'
+            voice: 'uz-UZ-MadinaNeural'
           });
 
           if (result && result.audioBase64) {

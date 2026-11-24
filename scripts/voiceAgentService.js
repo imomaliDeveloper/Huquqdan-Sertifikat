@@ -18,7 +18,7 @@ if (geminiApiKey) {
 const PERSONA_CONFIGS = {
   angry: {
     name: "G'azablangan Ustoz 🔥",
-    voice: "uz-UZ-SardorNeural",
+    voice: "uz-UZ-MadinaNeural",
     style: "furious, strict, yelling, demanding, fast-paced teacher, angry tone, uzbek language",
     systemInstruction: `Sen — O'quvchilarni temir intizom bilan tayyorlaydigan, o'ta talabchan, g'azablangan va kesatuvchi "Qattiqqo'l Ustoz"san (xuddi GoPrep Angry AI rejimidek).
 Foydalanuvchi bilan real-vaqtda og'zaki ovozli muloqot qilasan.
@@ -152,12 +152,18 @@ async function textToSpeech(text, personaKey = 'angry', customVoice = null) {
   const cleanSpeechText = text.replace(/[*_#`~[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
   if (!cleanSpeechText) return null;
 
-  // 1. Eng tezkor va tabiiy O'zbek tili Neural TTS (msedge-tts, mutlaqo bepul va chegarasiz)
+  // 1. Eng tezkor va tabiiy O'zbek tili Neural TTS (msedge-tts, 96kbps HD audio)
   try {
     const tts = new MsEdgeTTS();
-    await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
     const msPromise = new Promise((resolve, reject) => {
-      const { audioStream } = tts.toStream(cleanSpeechText, { rate: '+12%' });
+      // Madina ovozi juda yoqimli va tabiiy yangraydi (+0%, +0Hz). Sardor uchun biroz salobatli (-2%, -2Hz)
+      const isMadina = voiceName.includes('Madina');
+      const voiceOptions = isMadina
+        ? { rate: '+0%', pitch: '+0Hz' }
+        : { rate: '-2%', pitch: '-2Hz' };
+
+      const { audioStream } = tts.toStream(cleanSpeechText, voiceOptions);
       const chunks = [];
       audioStream.on('data', d => chunks.push(d));
       audioStream.on('end', () => {

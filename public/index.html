@@ -1186,12 +1186,16 @@
           <div id="embVoiceGlow" class="absolute w-64 h-64 rounded-full bg-red-600/15 blur-[80px] pointer-events-none"></div>
 
           <!-- Persona Pill Badge & Quick Selector -->
-          <div class="w-full flex items-center justify-between z-10 text-xs">
-            <div class="inline-flex items-center gap-2 bg-neutral-900 border border-neutral-700 px-3 py-1 rounded-full font-bold text-neutral-300">
-              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-              <span id="embPersonaTitle">Ustoz AI: Angry 🔥</span>
+          <div class="w-full flex items-center justify-between z-10 text-xs gap-2">
+            <div class="inline-flex items-center gap-1 bg-neutral-900 border border-neutral-800 p-0.5 rounded-xl text-[11px]">
+              <button type="button" id="btnVoiceMadina" onclick="embSelectVoice('uz-UZ-MadinaNeural')" class="px-2.5 py-1 rounded-lg font-bold transition bg-gradient-to-r from-red-600 to-amber-600 text-white shadow">
+                👩‍🏫 Madina (Yoqimli)
+              </button>
+              <button type="button" id="btnVoiceSardor" onclick="embSelectVoice('uz-UZ-SardorNeural')" class="px-2.5 py-1 rounded-lg font-semibold text-neutral-400 hover:text-white transition">
+                👨‍🏫 Sardor (Erkak)
+              </button>
             </div>
-            <button onclick="embClearSession()" class="text-neutral-400 hover:text-red-400 text-[11px] px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800">
+            <button onclick="embClearSession()" class="text-neutral-400 hover:text-red-400 text-[11px] px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 shrink-0">
               <i class="fa-solid fa-rotate-left mr-1"></i> Qayta
             </button>
           </div>
@@ -2251,6 +2255,6 @@
   <!-- Scripts -->
   <script src="js/exam_data.js?v=42"></script>
   <script src="js/flashcards.js?v=42"></script>
-  <script src="js/app.js?v=45_syntax_fixed"></script>
+  <script src="js/app.js?v=46_beautiful_hd_voices"></script>
 </body>
 </html>

@@ -545,7 +545,7 @@ app.post('/api/voice-agent/talk', async (req, res) => {
       audioMimeType,
       history: Array.isArray(history) ? history : [],
       persona: persona || 'angry',
-      voice: voice || 'uz-UZ-SardorNeural'
+      voice: voice || 'uz-UZ-MadinaNeural'
     });
 
     return res.json(result);
