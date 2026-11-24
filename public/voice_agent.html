@@ -418,47 +418,118 @@
       }
     }
 
-    // Mikrofonni ishga tushirish
+    function primeAudio() {
+      if (audioPlayer && audioPlayer.paused) {
+        try {
+          const p = audioPlayer.play();
+          if (p !== undefined) {
+            p.then(() => {
+              audioPlayer.pause();
+              audioPlayer.currentTime = 0;
+            }).catch(() => {});
+          }
+        } catch (e) {}
+      }
+    }
+
+    // Mikrofonni ishga tushirish (Har doim toza va yangi instansiya bilan)
     function startListening() {
+      primeAudio();
       if (isSpeaking || isThinking) {
-        audioPlayer.pause();
+        try { audioPlayer.pause(); } catch(e){}
         isSpeaking = false;
       }
+
+      stopListening();
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        toggleTextInput(true);
+        return;
+      }
+
       try {
-        if (recognition) {
-          recognition.start();
-        } else {
-          toggleTextInput(true);
-        }
+        recognition = new SpeechRecognition();
+        recognition.lang = 'uz-UZ';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          isRecording = true;
+          speechBuffer = '';
+          setVisualState('listening');
+        };
+
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              speechBuffer += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+          const textToShow = speechBuffer || interimTranscript;
+          if (textToShow && isSubtitlesOn) {
+            speakerLabel.innerHTML = '<i class="fa-solid fa-microphone text-blue-400 mr-1"></i> Siz:';
+            subtitlesText.innerText = `"${textToShow}"`;
+          }
+        };
+
+        recognition.onerror = (e) => {
+          console.warn('Speech recognition warning:', e.error);
+          isRecording = false;
+          if (e.error === 'no-speech' && isHandsFree) {
+            setTimeout(startListening, 1000);
+          } else {
+            setVisualState('idle');
+          }
+        };
+
+        recognition.onend = () => {
+          isRecording = false;
+          recognition = null;
+          if (speechBuffer && speechBuffer.trim()) {
+            sendToGemini(speechBuffer.trim());
+          } else {
+            setVisualState('idle');
+          }
+        };
+
+        recognition.start();
       } catch (err) {
         console.warn("Mic start err:", err);
+        isRecording = false;
+        recognition = null;
+        setVisualState('idle');
       }
     }
 
     // Mikrofonni to'xtatish
     function stopListening() {
-      if (recognition && isRecording) {
-        recognition.stop();
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+        recognition = null;
       }
+      isRecording = false;
     }
 
     // Gemini Voice Agent Backendiga so'rov yuborish
     async function sendToGemini(text) {
-      if (!text || !text.trim()) return;
-
+      const cleanText = (text && text.trim()) ? text.trim() : "Ustoz, men jim turibman!";
       setVisualState('thinking');
       liveTimestamp.innerText = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
 
-      // Tarixga qo'shish
-      conversationHistory.push({ role: 'user', text });
+      conversationHistory.push({ role: 'user', text: cleanText });
 
       try {
         const resp = await fetch('/api/voice-agent/talk', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: text,
-            history: conversationHistory,
+            message: cleanText,
+            history: conversationHistory.slice(-8),
             persona: currentPersona,
             voice: 'Kore'
           })
@@ -466,51 +537,64 @@
 
         const data = await resp.json();
 
-        if (data.success && data.replyText) {
-          // AI javobini tarixga qo'shish
+        if (data && data.replyText) {
           conversationHistory.push({ role: 'model', text: data.replyText });
 
-          // Subtitrlarni yangilash
-          speakerLabel.innerHTML = `<i class="fa-solid fa-fire text-red-500 mr-1"></i> ${data.persona.name}:`;
+          speakerLabel.innerHTML = `<i class="fa-solid fa-fire text-red-500 mr-1"></i> ${data.persona?.name || "Ustoz"}:`;
           subtitlesText.innerText = `"${data.replyText}"`;
 
-          // Agar ovoz (TTS) mavjud bo'lsa ijro etish
           if (data.audioBase64) {
-            playTtsAudio(data.audioBase64);
+            playTtsAudio(data.audioBase64, data.replyText);
           } else {
-            // Audio yo'q bo'lsa ham vizual gapirish
-            simulateSpeakingVisual(data.replyText.length * 80);
+            fallbackSpeak(data.replyText);
           }
         } else {
-          speakerLabel.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i> Xatolik:`;
-          subtitlesText.innerText = data.error || "Bog'lanishda xatolik yuz berdi.";
-          setVisualState('idle');
+          fallbackSpeak("Sen ahmoq! Nega gapirmay vaqtimni o'g'irlayapsan?! Tezroq gapir, yaramas!");
         }
       } catch (err) {
         console.error("Agent error:", err);
-        speakerLabel.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500 mr-1"></i> Server xatosi:`;
-        subtitlesText.innerText = "Server bilan aloqa uzildi. Iltimos qaytadan urinib ko'ring.";
-        setVisualState('idle');
+        fallbackSpeak("Menga qara! Bosh chayqab o'tirmasdan, og'zingni ochib aniq gapir! Dars o'tyaptimi bu yerda?!");
       }
     }
 
     // Gemini 3.8 Flash TTS Audiosini ijro etish
-    function playTtsAudio(base64Wav) {
+    function playTtsAudio(base64Wav, textFallback) {
       setVisualState('speaking');
       audioPlayer.src = "data:audio/wav;base64," + base64Wav;
       
-      audioPlayer.play().catch(e => {
-        console.warn("Audio autoplay blocked by browser policy:", e);
-        simulateSpeakingVisual(4000);
-      });
+      const p = audioPlayer.play();
+      if (p !== undefined) {
+        p.catch(e => {
+          console.warn("Autoplay blocked, using fallback speech synthesis:", e.message);
+          fallbackSpeak(textFallback);
+        });
+      }
 
       audioPlayer.onended = () => {
         setVisualState('idle');
       };
 
       audioPlayer.onerror = () => {
-        setVisualState('idle');
+        fallbackSpeak(textFallback);
       };
+    }
+
+    function fallbackSpeak(text) {
+      setVisualState('speaking');
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'uz-UZ';
+          utter.rate = 1.15;
+          utter.pitch = 1.1;
+          utter.onend = () => setVisualState('idle');
+          utter.onerror = () => setVisualState('idle');
+          window.speechSynthesis.speak(utter);
+          return;
+        } catch (e) {}
+      }
+      simulateSpeakingVisual(3500);
     }
 
     function simulateSpeakingVisual(durationMs) {

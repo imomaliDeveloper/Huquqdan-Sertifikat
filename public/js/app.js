@@ -4123,17 +4123,112 @@ function openVoiceAgentInsideMiniApp() {
   switchAiMode('voice');
 }
 
-function initEmbSpeech() {
-  if (embRecognition) return;
+function primeVoiceAudio() {
+  const audio = document.getElementById("embVoiceAudio");
+  if (audio && audio.paused) {
+    try {
+      const p = audio.play();
+      if (p !== undefined) {
+        p.then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+}
+
+function embSetVisualState(state) {
+  const dot = document.getElementById("embStatusDot");
+  const txt = document.getElementById("embStatusText");
+  const badge = document.getElementById("embStatusBadge");
+  const flame = document.getElementById("embFlameContainer");
+  const glow = document.getElementById("embVoiceGlow");
+  const mouth = document.getElementById("embMouth");
+
+  if (!dot || !txt || !badge) return;
+
+  if (state === 'listening') {
+    embIsRecording = true;
+    dot.className = "w-2 h-2 rounded-full bg-blue-500 animate-ping";
+    txt.innerText = "Eshitilmoqda... Gapiring!";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-950/80 border border-blue-500 text-[11px] font-semibold text-blue-300 shadow-md";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-blue-600/25 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.remove("flame-active");
+    if (mouth) {
+      mouth.classList.remove("talking-mouth");
+      mouth.style.height = "3px";
+    }
+  } else if (state === 'thinking') {
+    embIsThinking = true;
+    embIsRecording = false;
+    dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-spin";
+    txt.innerText = "Ustoz o'ylamoqda...";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-950/80 border border-amber-500 text-[11px] font-semibold text-amber-300 shadow-md";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-amber-600/25 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.remove("flame-active");
+  } else if (state === 'speaking') {
+    embIsSpeaking = true;
+    embIsThinking = false;
+    embIsRecording = false;
+    dot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
+    txt.innerText = "Ustoz gapirmoqda... 🔥";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/90 border border-red-500 text-[11px] font-bold text-red-300 shadow-lg shadow-red-600/40";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-red-600/40 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.add("flame-active");
+    if (mouth) mouth.classList.add("talking-mouth");
+  } else { // idle
+    embIsSpeaking = false;
+    embIsThinking = false;
+    embIsRecording = false;
+    dot.className = "w-2 h-2 rounded-full bg-neutral-500";
+    txt.innerText = embIsHandsFree ? "Hands-free: Gapiring..." : "Gapirish uchun tugmani bosing";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-semibold text-neutral-300";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-red-600/15 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.remove("flame-active");
+    if (mouth) {
+      mouth.classList.remove("talking-mouth");
+      mouth.style.height = "5px";
+    }
+
+    // Hands-free rejimida avtomatik navbatdagi gapni eshitish
+    if (embIsHandsFree && !embIsRecording && !embIsSpeaking && !embIsThinking) {
+      setTimeout(() => {
+        if (embIsHandsFree && !embIsSpeaking && !embIsThinking) {
+          embStartListening();
+        }
+      }, 700);
+    }
+  }
+}
+
+function embStartListening() {
+  primeVoiceAudio();
+
+  // Eski tinglovchi bo'lsa to'xtatamiz
+  if (embRecognition) {
+    try { embRecognition.abort(); } catch (e) {}
+    embRecognition = null;
+  }
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
+  if (!SpeechRecognition) {
+    const input = document.getElementById("embQuickInput");
+    if (input) {
+      input.focus();
+      input.placeholder = "Brauzer ovozni qo'llab-quvvatlamadi, bu yerga yozing:";
+    }
+    return;
+  }
+
+  try {
     embRecognition = new SpeechRecognition();
     embRecognition.lang = 'uz-UZ';
     embRecognition.continuous = false;
     embRecognition.interimResults = true;
+    embRecognition.maxAlternatives = 1;
 
     embRecognition.onstart = () => {
-      embIsRecording = true;
       embSpeechBuffer = '';
       embSetVisualState('listening');
     };
@@ -4157,167 +4252,168 @@ function initEmbSpeech() {
     };
 
     embRecognition.onerror = (e) => {
-      console.warn("Emb speech error:", e.error);
-      embStopListening();
+      console.warn("Speech recognition warning:", e.error);
+      embIsRecording = false;
+      if (e.error === 'no-speech' && embIsHandsFree) {
+        setTimeout(embStartListening, 1000);
+      } else {
+        embSetVisualState('idle');
+      }
     };
 
     embRecognition.onend = () => {
       embIsRecording = false;
-      if (embSpeechBuffer.trim()) {
+      embRecognition = null;
+      if (embSpeechBuffer && embSpeechBuffer.trim()) {
         embSendVoiceToGemini(embSpeechBuffer.trim());
       } else {
         embSetVisualState('idle');
       }
     };
-  }
-}
 
-function embSetVisualState(state) {
-  const dot = document.getElementById("embStatusDot");
-  const txt = document.getElementById("embStatusText");
-  const badge = document.getElementById("embStatusBadge");
-  const flame = document.getElementById("embFlameContainer");
-  const glow = document.getElementById("embVoiceGlow");
-  const mouth = document.getElementById("embMouth");
-
-  if (!dot || !txt || !badge) return;
-
-  if (state === 'listening') {
-    dot.className = "w-2 h-2 rounded-full bg-blue-500 animate-ping";
-    txt.innerText = "Eshitilmoqda... Gapiring!";
-    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-950/70 border border-blue-500 text-[11px] font-semibold text-blue-300";
-    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-blue-600/25 blur-[80px] pointer-events-none transition-all duration-300";
-    if (flame) flame.classList.remove("flame-active");
-    if (mouth) {
-      mouth.classList.remove("talking-mouth");
-      mouth.style.height = "3px";
-    }
-  } else if (state === 'thinking') {
-    embIsThinking = true;
-    dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-spin";
-    txt.innerText = "Ustoz o'ylamoqda...";
-    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-950/70 border border-amber-500 text-[11px] font-semibold text-amber-300";
-    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-amber-600/25 blur-[80px] pointer-events-none transition-all duration-300";
-    if (flame) flame.classList.remove("flame-active");
-  } else if (state === 'speaking') {
-    embIsSpeaking = true;
-    embIsThinking = false;
-    dot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
-    txt.innerText = "Ustoz gapirmoqda... 🔥";
-    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/80 border border-red-500 text-[11px] font-bold text-red-300 shadow-lg shadow-red-600/30";
-    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-red-600/35 blur-[80px] pointer-events-none transition-all duration-300";
-    if (flame) flame.classList.add("flame-active");
-    if (mouth) mouth.classList.add("talking-mouth");
-  } else { // idle
-    embIsSpeaking = false;
-    embIsThinking = false;
-    dot.className = "w-2 h-2 rounded-full bg-neutral-500";
-    txt.innerText = embIsHandsFree ? "Hands-free: Gapiring..." : "Gapirish uchun tugmani bosing";
-    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-semibold text-neutral-300";
-    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-red-600/15 blur-[80px] pointer-events-none transition-all duration-300";
-    if (flame) flame.classList.remove("flame-active");
-    if (mouth) {
-      mouth.classList.remove("talking-mouth");
-      mouth.style.height = "5px";
-    }
-
-    if (embIsHandsFree && !embIsRecording && !embIsSpeaking) {
-      setTimeout(embStartListening, 600);
-    }
-  }
-}
-
-function embStartListening() {
-  const audio = document.getElementById("embVoiceAudio");
-  if (audio) audio.pause();
-  embIsSpeaking = false;
-  try {
-    if (embRecognition) {
-      embRecognition.start();
-    } else {
-      const q = prompt("Ustozga gapingizni yozing:");
-      if (q) embSendVoiceToGemini(q);
-    }
+    embRecognition.start();
   } catch (err) {
-    console.warn("embStartListening error:", err);
+    console.warn("Speech recognition start xatosi:", err.message);
+    embIsRecording = false;
+    embRecognition = null;
+    embSetVisualState('idle');
   }
 }
 
 function embStopListening() {
-  if (embRecognition && embIsRecording) {
-    embRecognition.stop();
+  if (embRecognition) {
+    try {
+      embRecognition.stop();
+    } catch (e) {}
+    embRecognition = null;
   }
+  embIsRecording = false;
 }
 
+let embLastReply = "";
+
 async function embSendVoiceToGemini(text) {
-  if (!text || !text.trim()) return;
+  const cleanInput = (text && text.trim()) ? text.trim() : "Ustoz, men jim turibman!";
   embSetVisualState('thinking');
 
-  embVoiceHistory.push({ role: 'user', text });
+  embVoiceHistory.push({ role: 'user', text: cleanInput });
 
   try {
     const resp = await fetch('/api/voice-agent/talk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: text,
-        history: embVoiceHistory,
+        message: cleanInput,
+        history: embVoiceHistory.slice(-8),
         persona: 'angry',
         voice: 'Kore'
       })
     });
     const data = await resp.json();
 
-    if (data.success && data.replyText) {
+    if (data && data.replyText) {
+      embLastReply = data.replyText;
       embVoiceHistory.push({ role: 'model', text: data.replyText });
 
       const lbl = document.getElementById("embSpeakerLabel");
       const sub = document.getElementById("embSubtitlesText");
-      if (lbl) lbl.innerHTML = `<i class="fa-solid fa-fire text-red-500 mr-1"></i> ${data.persona.name}:`;
+      if (lbl) lbl.innerHTML = `<i class="fa-solid fa-fire text-red-500 mr-1"></i> ${data.persona?.name || "Ustoz"}:`;
       if (sub) sub.innerText = `"${data.replyText}"`;
 
       if (data.audioBase64) {
-        embPlayTtsAudio(data.audioBase64);
+        embPlayTtsAudio(data.audioBase64, data.replyText);
       } else {
-        embSimulateSpeakingVisual(3500);
+        embFallbackSpeak(data.replyText);
       }
     } else {
-      const sub = document.getElementById("embSubtitlesText");
-      if (sub) sub.innerText = data.error || "Xatolik yuz berdi.";
-      embSetVisualState('idle');
+      embFallbackSpeak("Sen ahmoq! Nega gapirmay vaqtimni o'g'irlayapsan?! Tezroq gapir, yaramas!");
     }
   } catch (err) {
-    const sub = document.getElementById("embSubtitlesText");
-    if (sub) sub.innerText = "Bog'lanishda xatolik yuz berdi.";
-    embSetVisualState('idle');
+    console.error("Agent aloqa xatosi:", err);
+    embFallbackSpeak("Menga qara! Bosh chayqab o'tirmasdan, og'zingni ochib aniq gapir! Dars o'tyaptimi bu yerda?!");
   }
 }
 
-function embPlayTtsAudio(base64Wav) {
+function embPlayTtsAudio(base64Wav, textFallback) {
   embSetVisualState('speaking');
   const audio = document.getElementById("embVoiceAudio");
-  if (!audio) return;
+  if (!audio) {
+    embFallbackSpeak(textFallback);
+    return;
+  }
+
   audio.src = "data:audio/wav;base64," + base64Wav;
-  audio.play().catch(e => {
-    console.warn("Audio autoplay policy:", e);
-    embSimulateSpeakingVisual(4000);
-  });
-  audio.onended = () => embSetVisualState('idle');
-  audio.onerror = () => embSetVisualState('idle');
+  
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(e => {
+      console.warn("Audio play blocked by mobile policy, fallback to speech synthesis:", e.message);
+      embFallbackSpeak(textFallback);
+    });
+  }
+
+  audio.onended = () => {
+    embSetVisualState('idle');
+  };
+
+  audio.onerror = () => {
+    console.warn("Audio element error, using fallback voice");
+    embFallbackSpeak(textFallback);
+  };
 }
 
-function embSimulateSpeakingVisual(ms) {
+function embFallbackSpeak(text) {
   embSetVisualState('speaking');
-  setTimeout(() => embSetVisualState('idle'), ms);
+  if ('speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'uz-UZ';
+      utter.rate = 1.15; // shiddatli tezlik
+      utter.pitch = 1.1;
+      utter.onend = () => embSetVisualState('idle');
+      utter.onerror = () => embSetVisualState('idle');
+      window.speechSynthesis.speak(utter);
+      return;
+    } catch (e) {}
+  }
+  // Agar audio mutlaqo bo'lmasa 3 soniyada qaytish
+  setTimeout(() => embSetVisualState('idle'), 3500);
 }
 
 function embSendQuickPrompt(promptText) {
+  primeVoiceAudio();
   const lbl = document.getElementById("embSpeakerLabel");
   const sub = document.getElementById("embSubtitlesText");
   if (lbl) lbl.innerHTML = '<i class="fa-solid fa-microphone text-blue-400 mr-1"></i> Siz:';
   if (sub) sub.innerText = `"${promptText}"`;
   embSendVoiceToGemini(promptText);
 }
+
+function embSubmitQuickInput() {
+  primeVoiceAudio();
+  const input = document.getElementById("embQuickInput");
+  if (!input) return;
+  const val = input.value.trim();
+  if (val) {
+    const lbl = document.getElementById("embSpeakerLabel");
+    const sub = document.getElementById("embSubtitlesText");
+    if (lbl) lbl.innerHTML = '<i class="fa-solid fa-keyboard text-blue-400 mr-1"></i> Siz:';
+    if (sub) sub.innerText = `"${val}"`;
+    embSendVoiceToGemini(val);
+    input.value = "";
+  }
+}
+
+// Inputda Enter bosilganda
+document.addEventListener("DOMContentLoaded", () => {
+  const inp = document.getElementById("embQuickInput");
+  if (inp) {
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") embSubmitQuickInput();
+    });
+  }
+});
 
 function embToggleHandsFree() {
   embIsHandsFree = !embIsHandsFree;
@@ -4329,10 +4425,11 @@ function embToggleHandsFree() {
   }
   if (btn) {
     btn.className = embIsHandsFree
-      ? "flex-1 flex flex-col items-center justify-center py-2 px-1.5 rounded-xl border border-green-500/50 bg-green-950/40 text-green-300 text-[10px] font-semibold transition"
+      ? "flex-1 flex flex-col items-center justify-center py-2 px-1.5 rounded-xl border border-green-500/60 bg-green-950/50 text-green-300 text-[10px] font-semibold transition"
       : "flex-1 flex flex-col items-center justify-center py-2 px-1.5 rounded-xl border border-neutral-800 bg-neutral-950/60 text-neutral-400 text-[10px] font-semibold transition";
   }
   if (embIsHandsFree) {
+    primeVoiceAudio();
     embStartListening();
   } else {
     embStopListening();
@@ -4354,7 +4451,9 @@ function embToggleSubtitles() {
 function embClearSession() {
   embVoiceHistory = [];
   const audio = document.getElementById("embVoiceAudio");
-  if (audio) audio.pause();
+  if (audio) {
+    try { audio.pause(); } catch (e) {}
+  }
   embSetVisualState('idle');
   const sub = document.getElementById("embSubtitlesText");
   if (sub) sub.innerText = '"Sessiya yangilandi. Gapiring, savolingiz nima?!"';
@@ -4369,6 +4468,7 @@ function initEmbTouchEvents() {
 
   function onStart(e) {
     e.preventDefault();
+    primeVoiceAudio();
     btn.classList.add("scale-95", "brightness-125");
     if (lbl) lbl.innerText = "Eshitilmoqda...";
     embStartListening();

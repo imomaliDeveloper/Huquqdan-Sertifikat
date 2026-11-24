@@ -16,7 +16,7 @@
   <meta http-equiv="Expires" content="0">
   <script>
     (function() {
-      var APP_BUILD = "v16_goprep_voice_agent";
+      var APP_BUILD = "v17_24_7_continuous_voice";
       if (localStorage.getItem("app_build_version") !== APP_BUILD) {
         localStorage.setItem("app_build_version", APP_BUILD);
         if ('caches' in window) {
@@ -1290,6 +1290,14 @@
               <i class="fa-solid fa-closed-captioning mb-0.5 text-red-400"></i>
               <span>Subtitr</span>
               <span id="embSubtitlesStatus" class="text-[8px] text-red-400">Yoqiq</span>
+            </button>
+          </div>
+
+          <!-- Instant Text Input Bar (24/7 doimiy gaplashish uchun) -->
+          <div class="w-full mt-2.5 flex items-center gap-1.5 z-10">
+            <input type="text" id="embQuickInput" placeholder="Yozing yoki yuqoridagi mikrofondan gapiring..." class="flex-1 bg-neutral-900 border border-neutral-800 focus:border-red-500 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition">
+            <button onclick="embSubmitQuickInput()" class="bg-gradient-to-r from-red-600 to-amber-600 hover:brightness-110 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0">
+              <i class="fa-solid fa-paper-plane text-[10px]"></i>
             </button>
           </div>
 
