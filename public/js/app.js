@@ -4072,3 +4072,317 @@ function copyAiAnswer(btn) {
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
+// ==================== EMBEDDED GOPREP VOICE AGENT (MINI APP ICHIDA) ====================
+let currentAiMode = 'chat'; // 'chat' | 'voice'
+let embIsHandsFree = false;
+let embIsSubtitlesOn = true;
+let embIsRecording = false;
+let embIsThinking = false;
+let embIsSpeaking = false;
+let embVoiceHistory = [];
+let embRecognition = null;
+let embSpeechBuffer = '';
+
+function switchAiMode(mode) {
+  currentAiMode = mode;
+  const btnChat = document.getElementById("btnAiModeChat");
+  const btnVoice = document.getElementById("btnAiModeVoice");
+  const chatContent = document.getElementById("aiModeChatContent");
+  const voiceContent = document.getElementById("aiModeVoiceContent");
+
+  if (mode === 'voice') {
+    if (chatContent) chatContent.classList.add("hidden");
+    if (voiceContent) voiceContent.classList.remove("hidden");
+    if (btnChat) {
+      btnChat.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 text-slate-500 dark:text-slate-300 hover:text-indigo-600";
+    }
+    if (btnVoice) {
+      btnVoice.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white shadow-md";
+    }
+    initEmbSpeech();
+    initEmbTouchEvents();
+  } else {
+    if (chatContent) chatContent.classList.remove("hidden");
+    if (voiceContent) voiceContent.classList.add("hidden");
+    if (btnChat) {
+      btnChat.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-sm";
+    }
+    if (btnVoice) {
+      btnVoice.className = "py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 text-slate-500 dark:text-slate-300 hover:text-rose-500";
+    }
+    const audio = document.getElementById("embVoiceAudio");
+    if (audio) audio.pause();
+    embSetVisualState('idle');
+  }
+}
+
+function openVoiceAgentInsideMiniApp() {
+  if (typeof checkAuthRequired === 'function' && !checkAuthRequired("Ovozli Ustoz AI")) return;
+  openAiTutorView();
+  switchAiMode('voice');
+}
+
+function initEmbSpeech() {
+  if (embRecognition) return;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    embRecognition = new SpeechRecognition();
+    embRecognition.lang = 'uz-UZ';
+    embRecognition.continuous = false;
+    embRecognition.interimResults = true;
+
+    embRecognition.onstart = () => {
+      embIsRecording = true;
+      embSpeechBuffer = '';
+      embSetVisualState('listening');
+    };
+
+    embRecognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          embSpeechBuffer += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      const textToShow = embSpeechBuffer || interim;
+      if (textToShow && embIsSubtitlesOn) {
+        const lbl = document.getElementById("embSpeakerLabel");
+        const sub = document.getElementById("embSubtitlesText");
+        if (lbl) lbl.innerHTML = '<i class="fa-solid fa-microphone text-blue-400 mr-1"></i> Siz:';
+        if (sub) sub.innerText = `"${textToShow}"`;
+      }
+    };
+
+    embRecognition.onerror = (e) => {
+      console.warn("Emb speech error:", e.error);
+      embStopListening();
+    };
+
+    embRecognition.onend = () => {
+      embIsRecording = false;
+      if (embSpeechBuffer.trim()) {
+        embSendVoiceToGemini(embSpeechBuffer.trim());
+      } else {
+        embSetVisualState('idle');
+      }
+    };
+  }
+}
+
+function embSetVisualState(state) {
+  const dot = document.getElementById("embStatusDot");
+  const txt = document.getElementById("embStatusText");
+  const badge = document.getElementById("embStatusBadge");
+  const flame = document.getElementById("embFlameContainer");
+  const glow = document.getElementById("embVoiceGlow");
+  const mouth = document.getElementById("embMouth");
+
+  if (!dot || !txt || !badge) return;
+
+  if (state === 'listening') {
+    dot.className = "w-2 h-2 rounded-full bg-blue-500 animate-ping";
+    txt.innerText = "Eshitilmoqda... Gapiring!";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-950/70 border border-blue-500 text-[11px] font-semibold text-blue-300";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-blue-600/25 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.remove("flame-active");
+    if (mouth) {
+      mouth.classList.remove("talking-mouth");
+      mouth.style.height = "3px";
+    }
+  } else if (state === 'thinking') {
+    embIsThinking = true;
+    dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-spin";
+    txt.innerText = "Ustoz o'ylamoqda...";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-950/70 border border-amber-500 text-[11px] font-semibold text-amber-300";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-amber-600/25 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.remove("flame-active");
+  } else if (state === 'speaking') {
+    embIsSpeaking = true;
+    embIsThinking = false;
+    dot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
+    txt.innerText = "Ustoz gapirmoqda... 🔥";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/80 border border-red-500 text-[11px] font-bold text-red-300 shadow-lg shadow-red-600/30";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-red-600/35 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.add("flame-active");
+    if (mouth) mouth.classList.add("talking-mouth");
+  } else { // idle
+    embIsSpeaking = false;
+    embIsThinking = false;
+    dot.className = "w-2 h-2 rounded-full bg-neutral-500";
+    txt.innerText = embIsHandsFree ? "Hands-free: Gapiring..." : "Gapirish uchun tugmani bosing";
+    badge.className = "inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-semibold text-neutral-300";
+    if (glow) glow.className = "absolute w-64 h-64 rounded-full bg-red-600/15 blur-[80px] pointer-events-none transition-all duration-300";
+    if (flame) flame.classList.remove("flame-active");
+    if (mouth) {
+      mouth.classList.remove("talking-mouth");
+      mouth.style.height = "5px";
+    }
+
+    if (embIsHandsFree && !embIsRecording && !embIsSpeaking) {
+      setTimeout(embStartListening, 600);
+    }
+  }
+}
+
+function embStartListening() {
+  const audio = document.getElementById("embVoiceAudio");
+  if (audio) audio.pause();
+  embIsSpeaking = false;
+  try {
+    if (embRecognition) {
+      embRecognition.start();
+    } else {
+      const q = prompt("Ustozga gapingizni yozing:");
+      if (q) embSendVoiceToGemini(q);
+    }
+  } catch (err) {
+    console.warn("embStartListening error:", err);
+  }
+}
+
+function embStopListening() {
+  if (embRecognition && embIsRecording) {
+    embRecognition.stop();
+  }
+}
+
+async function embSendVoiceToGemini(text) {
+  if (!text || !text.trim()) return;
+  embSetVisualState('thinking');
+
+  embVoiceHistory.push({ role: 'user', text });
+
+  try {
+    const resp = await fetch('/api/voice-agent/talk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        history: embVoiceHistory,
+        persona: 'angry',
+        voice: 'Kore'
+      })
+    });
+    const data = await resp.json();
+
+    if (data.success && data.replyText) {
+      embVoiceHistory.push({ role: 'model', text: data.replyText });
+
+      const lbl = document.getElementById("embSpeakerLabel");
+      const sub = document.getElementById("embSubtitlesText");
+      if (lbl) lbl.innerHTML = `<i class="fa-solid fa-fire text-red-500 mr-1"></i> ${data.persona.name}:`;
+      if (sub) sub.innerText = `"${data.replyText}"`;
+
+      if (data.audioBase64) {
+        embPlayTtsAudio(data.audioBase64);
+      } else {
+        embSimulateSpeakingVisual(3500);
+      }
+    } else {
+      const sub = document.getElementById("embSubtitlesText");
+      if (sub) sub.innerText = data.error || "Xatolik yuz berdi.";
+      embSetVisualState('idle');
+    }
+  } catch (err) {
+    const sub = document.getElementById("embSubtitlesText");
+    if (sub) sub.innerText = "Bog'lanishda xatolik yuz berdi.";
+    embSetVisualState('idle');
+  }
+}
+
+function embPlayTtsAudio(base64Wav) {
+  embSetVisualState('speaking');
+  const audio = document.getElementById("embVoiceAudio");
+  if (!audio) return;
+  audio.src = "data:audio/wav;base64," + base64Wav;
+  audio.play().catch(e => {
+    console.warn("Audio autoplay policy:", e);
+    embSimulateSpeakingVisual(4000);
+  });
+  audio.onended = () => embSetVisualState('idle');
+  audio.onerror = () => embSetVisualState('idle');
+}
+
+function embSimulateSpeakingVisual(ms) {
+  embSetVisualState('speaking');
+  setTimeout(() => embSetVisualState('idle'), ms);
+}
+
+function embSendQuickPrompt(promptText) {
+  const lbl = document.getElementById("embSpeakerLabel");
+  const sub = document.getElementById("embSubtitlesText");
+  if (lbl) lbl.innerHTML = '<i class="fa-solid fa-microphone text-blue-400 mr-1"></i> Siz:';
+  if (sub) sub.innerText = `"${promptText}"`;
+  embSendVoiceToGemini(promptText);
+}
+
+function embToggleHandsFree() {
+  embIsHandsFree = !embIsHandsFree;
+  const status = document.getElementById("embHandsFreeStatus");
+  const btn = document.getElementById("embHandsFreeBtn");
+  if (status) {
+    status.innerText = embIsHandsFree ? "Yoqiq" : "O'chiq";
+    status.className = embIsHandsFree ? "text-[8px] text-green-400 font-bold" : "text-[8px] text-neutral-500";
+  }
+  if (btn) {
+    btn.className = embIsHandsFree
+      ? "flex-1 flex flex-col items-center justify-center py-2 px-1.5 rounded-xl border border-green-500/50 bg-green-950/40 text-green-300 text-[10px] font-semibold transition"
+      : "flex-1 flex flex-col items-center justify-center py-2 px-1.5 rounded-xl border border-neutral-800 bg-neutral-950/60 text-neutral-400 text-[10px] font-semibold transition";
+  }
+  if (embIsHandsFree) {
+    embStartListening();
+  } else {
+    embStopListening();
+    embSetVisualState('idle');
+  }
+}
+
+function embToggleSubtitles() {
+  embIsSubtitlesOn = !embIsSubtitlesOn;
+  const box = document.getElementById("embSubtitlesBox");
+  const status = document.getElementById("embSubtitlesStatus");
+  if (box) box.style.display = embIsSubtitlesOn ? "flex" : "none";
+  if (status) {
+    status.innerText = embIsSubtitlesOn ? "Yoqiq" : "O'chiq";
+    status.className = embIsSubtitlesOn ? "text-[8px] text-red-400" : "text-[8px] text-neutral-500";
+  }
+}
+
+function embClearSession() {
+  embVoiceHistory = [];
+  const audio = document.getElementById("embVoiceAudio");
+  if (audio) audio.pause();
+  embSetVisualState('idle');
+  const sub = document.getElementById("embSubtitlesText");
+  if (sub) sub.innerText = '"Sessiya yangilandi. Gapiring, savolingiz nima?!"';
+}
+
+let embTouchInitialized = false;
+function initEmbTouchEvents() {
+  if (embTouchInitialized) return;
+  const btn = document.getElementById("embTalkBtn");
+  const lbl = document.getElementById("embTalkBtnLabel");
+  if (!btn) return;
+
+  function onStart(e) {
+    e.preventDefault();
+    btn.classList.add("scale-95", "brightness-125");
+    if (lbl) lbl.innerText = "Eshitilmoqda...";
+    embStartListening();
+  }
+  function onEnd(e) {
+    e.preventDefault();
+    btn.classList.remove("scale-95", "brightness-125");
+    if (lbl) lbl.innerText = "Hold to talk";
+    embStopListening();
+  }
+
+  btn.addEventListener("mousedown", onStart);
+  btn.addEventListener("mouseup", onEnd);
+  btn.addEventListener("touchstart", onStart, { passive: false });
+  btn.addEventListener("touchend", onEnd, { passive: false });
+  embTouchInitialized = true;
+}

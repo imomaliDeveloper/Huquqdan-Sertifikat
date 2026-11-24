@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { askAiTutor } = require('./scripts/aiService');
+const { processVoiceAgentInteraction } = require('./scripts/voiceAgentService');
 
 const MANDATORY_CHANNELS = [
   { username: '@Huquq_study', name: "Huquq Study | Milliy Sertifikat", url: "https://t.me/Huquq_study" },
@@ -321,6 +322,27 @@ class SimpleTelegramBot {
     }
   }
 
+  async sendVoiceBuffer(chatId, buffer, caption = '', options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      formData.append('voice', new Blob([buffer], { type: 'audio/wav' }), 'voice.wav');
+      if (caption) formData.append('caption', caption);
+      formData.append('parse_mode', options.parse_mode || 'HTML');
+      if (options.reply_markup) {
+        formData.append('reply_markup', typeof options.reply_markup === 'string' ? options.reply_markup : JSON.stringify(options.reply_markup));
+      }
+      const response = await fetch(`${this.baseUrl}/sendVoice`, {
+        method: 'POST',
+        body: formData
+      });
+      return await response.json();
+    } catch (e) {
+      console.error('sendVoiceBuffer xatosi:', e.message);
+      return { ok: false, error: e.message };
+    }
+  }
+
   async editMessageCaption(chatId, messageId, caption, options = {}) {
     return await this.callApi('editMessageCaption', {
       chat_id: chatId,
@@ -404,6 +426,7 @@ class SimpleTelegramBot {
   getMainReplyKeyboard(isAdmin = false) {
     const rows = [
       [{ text: "🚀 Platformani ochish (Mini App)", web_app: { url: this.appUrl } }],
+      [{ text: "🎙️ Ovozli AI Ustoz (GoPrep) 🔥", web_app: { url: `${this.appUrl}/voice_agent.html` } }],
       [{ text: "📜 40 ta Qonun Testi" }, { text: "🎯 50 ta Variant" }],
       [{ text: "🥊 Huquqiy Duel" }, { text: "🏆 Reyting (Top)" }],
       [{ text: "🎁 10 ta Do'st = VIP Bepul 👑" }, { text: "👑 VIP Tariflar" }],
@@ -447,6 +470,9 @@ class SimpleTelegramBot {
       [
         { text: "🎯 50 ta Variant", web_app: { url: `${this.appUrl}#variants` } },
         { text: "🏆 Reyting", callback_data: "cmd_leaderboard" }
+      ],
+      [
+        { text: "🎙️ G'azablangan Ovozli Ustoz (Voice AI) 🔥", web_app: { url: `${this.appUrl}/voice_agent.html` } }
       ],
       [
         { text: "🎁 10 ta Do'st = VIP Bepul 👑", callback_data: "cmd_referral" },
@@ -1721,6 +1747,72 @@ class SimpleTelegramBot {
         }
       }
 
+      // 0.1. TELEGRAM OVOZLI XABARI (VOICE NOTE) -> GOPREP ANGRY AI JAVOBI
+      if (msg.voice) {
+        try {
+          await this.callApi('sendChatAction', { chat_id: chatId, action: 'record_voice' });
+
+          const fileId = msg.voice.file_id;
+          const fileInfoRes = await this.callApi('getFile', { file_id: fileId });
+
+          let userSpeechText = "";
+          if (fileInfoRes && fileInfoRes.ok && fileInfoRes.result?.file_path) {
+            const filePath = fileInfoRes.result.file_path;
+            const fileUrl = `https://api.telegram.org/file/bot${this.token}/${filePath}`;
+            const audioStreamResp = await fetch(fileUrl);
+            const arrayBuf = await audioStreamResp.arrayBuffer();
+            const audioBase64 = Buffer.from(arrayBuf).toString('base64');
+
+            // Gemini yordamida audiodagi gapni tushunish
+            if (process.env.GEMINI_API_KEY) {
+              const { GoogleGenAI } = require('@google/genai');
+              const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+              const transResp = await genAI.models.generateContent({
+                model: 'gemini-3.5-flash',
+                contents: [
+                  {
+                    inlineData: {
+                      mimeType: 'audio/ogg',
+                      data: audioBase64
+                    }
+                  },
+                  "Ushbu audio yozuvdagi inson aytgan gapni o'zbek tilida aynan o'zini qisqa matn qilib yozib ber (faqat uning gapi, izohlarsiz):"
+                ]
+              });
+              userSpeechText = transResp && transResp.text ? transResp.text.trim() : "";
+            }
+          }
+
+          if (!userSpeechText) {
+            userSpeechText = "Ustoz, men ovozli savol berdim!";
+          }
+
+          const persona = botUserPersona[userId] || 'angry';
+          const result = await processVoiceAgentInteraction({
+            message: userSpeechText,
+            persona: persona,
+            voice: 'Kore'
+          });
+
+          if (result && result.audioBase64) {
+            const wavBuffer = Buffer.from(result.audioBase64, 'base64');
+            const caption = `🔥 <b>Ustoz (GoPrep Angry) javobi:</b>\n\n<i>"${result.replyText}"</i>`;
+            return await this.sendVoiceBuffer(chatId, wavBuffer, caption, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "🎙️ Mini Appda Jonli Gaplashish 🔥", web_app: { url: `${this.appUrl}/voice_agent.html` } }]
+                ]
+              }
+            });
+          } else {
+            return await this.sendMessage(chatId, `🔥 <b>Ustoz javobi:</b>\n\n"${result.replyText}"`);
+          }
+        } catch (err) {
+          console.error("Telegram voice note xatosi:", err.message);
+          return await this.sendMessage(chatId, "⚠️ Ovozni tahlil qilishda xatolik yuz berdi. Iltimos matn shaklida yoki Mini App orqali urinib ko'ring.");
+        }
+      }
+
       // ADMIN INTERFAOL E'LON TARQATISH REJIMI (Broadcast)
       if (isUserAdmin(userId) && adminBroadcastState[userId]?.step === 'awaiting_content') {
         if (text === '/cancel' || text === '❌ Bekor qilish') {
@@ -1943,6 +2035,22 @@ class SimpleTelegramBot {
             inline_keyboard: [
               [{ text: "🔥 Qattiq Qo'l rejimga o'tish", callback_data: "set_persona_strict" }],
               [{ text: "📲 Mini Appni ochish", web_app: { url: this.appUrl } }]
+            ]
+          }
+        });
+      }
+
+      // Ovozli AI Ustoz (GoPrep Angry)
+      if (text.includes("Ovozli") || text === "/voice" || text === "/angry" || text === "/ustoz") {
+        return await this.sendMessage(chatId,
+          `🔥 <b>G'azablangan Ovozli Ustoz AI (GoPrep Angry)</b>\n\n` +
+          `Xuddi o'sha videodagidek o'ta qattiqqo'l, talabchan va xatolaringizni ayamay yuzingizga soluvchi Ovozli Ustoz!\n\n` +
+          `🎙 <b>2 xil usulda bot ichida foydalanishingiz mumkin:</b>\n` +
+          `1️⃣ <b>Telegram Mini App orqali (Tavsiya etiladi):</b> Pastdagi tugmani bosing — Telegram ichida to'liq ekranda olovli animatsion Avatar ochiladi!\n` +
+          `2️⃣ <b>To'g'ridan-to'g'ri chatda:</b> Botga shunchaki ovozli xabar (voice note) yuboring, Ustoz sizga darhol ovozli xabar qilib javob qaytaradi!`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "🎙️ Ovozli Ustozni ochish (Mini App) 🔥", web_app: { url: `${this.appUrl}/voice_agent.html` } }]
             ]
           }
         });

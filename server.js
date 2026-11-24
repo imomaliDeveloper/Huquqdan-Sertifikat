@@ -7,6 +7,7 @@ const { GoogleGenAI } = require('@google/genai');
 const { generateVariant } = require('./scripts/generator');
 const { initBot, getBotInstance, getAdminIds } = require('./bot');
 const { askAiTutor, checkOpenAnswer, explainQuestion } = require('./scripts/aiService');
+const { processVoiceAgentInteraction, PERSONA_CONFIGS } = require('./scripts/voiceAgentService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -518,6 +519,40 @@ app.post('/api/ai/tutor-chat', async (req, res) => {
   const selectedPersona = persona || mode || 'friendly';
   const result = await askAiTutor(message, history, selectedPersona);
   return res.json(result);
+});
+
+// ==================== GEMINI REAL-TIME VOICE AGENT API (GOPREP USLUBIDA) ====================
+
+app.get('/api/voice-agent/personas', (req, res) => {
+  const personas = Object.entries(PERSONA_CONFIGS).map(([key, cfg]) => ({
+    key,
+    name: cfg.name,
+    voice: cfg.voice
+  }));
+  res.json({ personas });
+});
+
+app.post('/api/voice-agent/talk', async (req, res) => {
+  try {
+    const { message, history, persona, voice } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: "Gap yoki ovoz matni kiritilmadi." });
+    }
+
+    const result = await processVoiceAgentInteraction({
+      message,
+      history,
+      persona: persona || 'angry',
+      voice: voice || 'Kore'
+    });
+
+    return res.json(result);
+  } catch (err) {
+    console.error("Voice agent API xatosi:", err);
+    return res.status(500).json({
+      error: "Ovozli agent bilan bog'lanishda xatolik yuz berdi: " + err.message
+    });
+  }
 });
 
 // ==================== 2. REYTING & LEADERBOARD API ====================
