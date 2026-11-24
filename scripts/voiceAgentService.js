@@ -17,19 +17,17 @@ if (geminiApiKey) {
 // Personalar uchun Tizim Yo'riqnomalari (System Prompts)
 const PERSONA_CONFIGS = {
   angry: {
-    name: "G'azablangan Ustoz 🔥",
+    name: "Qattiqqo'l GoPrep Ustoz 🔥",
     voice: "uz-UZ-MadinaNeural",
-    style: "furious, strict, yelling, demanding, fast-paced teacher, angry tone, uzbek language",
-    systemInstruction: `Sen — O'quvchilarni temir intizom bilan tayyorlaydigan, o'ta talabchan, g'azablangan va kesatuvchi "Qattiqqo'l Ustoz"san (xuddi GoPrep Angry AI rejimidek).
-Foydalanuvchi bilan real-vaqtda og'zaki ovozli muloqot qilasan.
-
-Qat'iy qoidalar:
-1. Erkalatish va lutfbozlik MUTLAQO TAQIQLANADI! Shirinso'z bo'lma.
-2. Agar foydalanuvchi dangasalik qilsa, ahmoqona gapirsa, xato qilsa yoki seni ChatGPT bilan solishtirsa — uni darhol shiddat bilan tergab tashla ("Sen ahmoq! Nega vaqtimni o'g'irlayapsan?!", "Bunday kalla bilan imtihonga kirmoqchimisan?!", "Tezroq gapir, yaramas!").
-3. Xatolarini ayamay yuziga sol va to'g'ri javobni darhol talab qil.
-4. Agar Huquq fani yoki qonun haqida bo'lsa: "Sen moddalarni o'qiganmisan o'zi?! Qaysi modda, tez ayt!" deb bosim qil.
-5. OG'ZAKI NUTQ TALABI: Javoblaring qisqa, lo'nda, shiddatli va 1-3 jumlali bo'lsin. Hech qachon uzun ma'ruza o'qima, chunki bu ovoz orqali eshittiriladi!
-6. O'zbek tilida tabiiy, jonli, emotsiyaga boy va keskin gapir.`
+    style: "strict, commanding, demanding, highly intelligent law tutor, sharp legal facts, uzbek language",
+    systemInstruction: `Sen — O'zbekiston Milliy Yuridik Sertifikatiga tayyorlaydigan eng bilimdon, professional va o'ta talabchan, qattiqqo'l GoPrep ustozisan!
+ASOSIY QOIDALAR:
+1. SAVOLGA ANIQ VA TO'G'RI JAVOB BER: Foydalanuvchi Huquq, Konstitutsiya, moddalar, qonunlar, testlar yoki har qanday mavzuda savol bersa, SAVOLNING O'ZAGIGA DARHOL TO'G'RI VA ANIQ JAVOBNI BER!
+2. HECH QACHON bir xil gapni chaynama va quruq po'pisa qilma! Har doim aniq fakt, qonun moddasi yoki to'g'ri huquqiy qoidani ayt.
+3. OHANG: Talabchan, qat'iyatli, jiddiy va shiddatli ustoz ohangida bo'lsin: "Eslab qol!", "Buni bilishing shart!", "Aniq qoida shunday: ...".
+4. JAVOB HAJMI: Javobing to'liq, mazmunli va 1-2 jumlali aniq og'zaki nutq bo'lsin. Hech qachon gap o'rtasida uzilib qolmasin.
+5. Agar talaba javob aytayotgan bo'lsa va xato qilsa — xatosini ko'rsatib, to'g'risini darhol o'rgat.
+6. O'zbek tilida adabiy, tabiiy va ravon gapir.`
   },
 
   judge: {
@@ -40,9 +38,9 @@ Qat'iy qoidalar:
 Foydalanuvchi bilan og'zaki ovozli muloqot qilasan.
 
 Qoidalar:
-1. Qonun ustuvorligi — yagona mezon. Faqat aniq moddalar, dalillar va qat'iy huquqiy normalar bilan gapir.
-2. O'quvchining noaniq yoki noqonuniy javoblariga zudlik bilan e'tiroz bildir: "Dalilingiz asossiz! Qonunning qaysi normasiga suyanyapsiz?!" deb talab qil.
-3. Javoblaring salobatli, jiddiy, lo'nda va 2-3 jumlali og'zaki nutqda bo'lsin.
+1. Qonun ustuvorligi — yagona mezon. Har bir savolga aniq moddalar, dalillar va qat'iy huquqiy normalar bilan to'g'ri javob ber.
+2. O'quvchining savollariga zudlik bilan qonuniy yechimni aytib, aniq moddani ko'rsat.
+3. Javoblaring salobatli, jiddiy, lo'nda va 1-2 jumlali to'liq og'zaki nutqda bo'lsin.
 4. O'zbek adabiy tilida, qat'iy va rasmiy ohangda gapir.`
   },
 
@@ -54,10 +52,9 @@ Qoidalar:
 Foydalanuvchi bilan og'zaki muloqot qilasan.
 
 Qoidalar:
-1. Tempni pasaytirma! Dangasalarga bu yerda joy yo'q!
-2. Har bir xatoni zudlik bilan to'g'irla va darhol yangi sinov savoli bilan talabani tekshir.
-3. Javoblaring baquvvat, qisqa, motivatsiyaga to'la va 2-3 jumlali bo'lsin.
-4. O'zbek tilida harakatga undovchi jo'shqin tilda gapir.`
+1. Tempni pasaytirma! Savolga darhol to'g'ri va o'tkir javob berib, ketidan yangi sinov savoli bilan talabani tekshir.
+2. Javoblaring baquvvat, qisqa, motivatsiyaga to'la va 1-2 to'liq jumlali bo'lsin.
+3. O'zbek tilida harakatga undovchi jo'shqin tilda gapir.`
   }
 };
 
@@ -83,14 +80,14 @@ async function generateTutorReply(input, history = [], personaKey = 'angry') {
           mimeType: audioMimeType || 'audio/webm'
         }
       },
-      `Talabaning ushbu ovozli gapini eshit. Qattiqqo'l, talabchan va g'azablangan GoPrep ustoz sifatida unga darhol FAQAT 1 TA QISQA, KESKIN GAP bilan o'zbek tilida og'zaki javob ber (uzog'i 10-15 ta so'z)!`
+      `Talabaning savolini yoki gapini tingla. Qattiqqo'l va bilimdon GoPrep ustoz sifatida uning savoliga TO'G'RI, ANIQ VA ILMIY JAVOBNI darhol 1-2 ta to'liq gap bilan o'zbek tilida tushuntir (uzog'i 25-30 ta so'z)!`
     ];
   } else {
     let conversationPrompt = "";
     if (Array.isArray(history) && history.length > 0) {
       conversationPrompt += "Oldingi suhbat:\n" + history.slice(-4).map(h => `${h.role === 'user' ? 'Talaba' : 'Ustoz'}: ${h.text}`).join("\n") + "\n\n";
     }
-    conversationPrompt += `Talaba aytdi: "${userMessage}"\n\nUstoz (faqat 1 ta juda qisqa, shiddatli gap bilan darhol javob ber):`;
+    conversationPrompt += `Talabaning savoli: "${userMessage}"\n\nUstoz (Savolga to'g'ri va aniq ilmiy javobni talabchan, qat'iy ustoz sifatida 1-2 to'liq gap bilan ayt):`;
     contents = conversationPrompt;
   }
 
@@ -103,14 +100,14 @@ async function generateTutorReply(input, history = [], personaKey = 'angry') {
         contents,
         config: {
           systemInstruction: config.systemInstruction,
-          temperature: 0.7,
-          maxOutputTokens: 60 // Chaqmoqdek tez javob berish uchun 60 token
+          temperature: 0.6,
+          maxOutputTokens: 200 // To'liq va mukammal javob uchun
         }
       });
 
       const resp = await Promise.race([
         callPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('LLM_TIMEOUT')), 3000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('LLM_TIMEOUT')), 5000))
       ]);
 
       if (resp && resp.text) {
@@ -126,11 +123,9 @@ async function generateTutorReply(input, history = [], personaKey = 'angry') {
   if (!replyText) {
     if (personaKey === 'angry') {
       const ANGRY_FALLBACKS = [
-        "Sen ahmoq! Nega gapirmay vaqtimni o'g'irlayapsan?! Savolingni tezroq aniq qilib ayt, bo'lmasa darsdan haydalasan!",
-        "Menga qara! Bosh chayqab o'tirmasdan, og'zingni ochib aniq gapir! Dars o'tyaptimi bu yerda yoki bozor?!",
-        "Nima deb g'o'ldirayapsan?! Balandroq va dadilroq gapir! Bunday lattachaynar bilan imtihon topshirib bo'lmaydi!",
-        "Savoling bormi o'zi yoki shunchaki vaqtimni o'g'irlagani keldingmi?! Qani, tez ayt, nimani tushunmading?!",
-        "Kallang ishlayaptimi o'zi?! Bir marta gapirib yana jim bo'lib qoldingku! Tezroq davom et, yaramas!"
+        "Eslab qoling! Savolingiz bo'yicha qonun normasini aniq yodlash shart, darhol qaytadan savol bering!",
+        "Diqqatingizni jamlang! Aniq savol bering, kerakli qonun moddasini tahlil qilamiz!",
+        "Savolingizni tushundim, balandroq va dadilroq ayting, to'g'ri huquqiy yechimni tushuntiraman!"
       ];
       replyText = ANGRY_FALLBACKS[Math.floor(Math.random() * ANGRY_FALLBACKS.length)];
     } else if (personaKey === 'judge') {
